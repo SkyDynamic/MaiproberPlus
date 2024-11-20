@@ -7,37 +7,17 @@ import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.utils.ParseScorePageUtil
 import io.github.skydynamic.maiproberplus.core.utils.WechatRequestUtil.WX_WINDOWS_UA
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
-import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 interface IProberUtil {
-    val client: HttpClient
-        get() = HttpClient(CIO) {
-            install(ContentNegotiation) {
-                json()
-            }
-            install(HttpTimeout) {
-                requestTimeoutMillis = 30000
-                connectTimeoutMillis = 30000
-            }
-            install(HttpCookies) {
-                storage = AcceptAllCookiesStorage()
-            }
-        }
-
     suspend fun updateAccountInfo(importToken: String) {}
     suspend fun uploadMaimaiProberData(importToken: String, authUrl: String) {}
     suspend fun uploadChunithmProberData(importToken: String, authUrl: String) {}

@@ -26,6 +26,7 @@ object InterceptHandler {
         if (!token.isEmpty()) {
             if (target.contains("maimai-dx")) {
                 GlobalScope.launch(Dispatchers.IO) {
+                    GlobalViewModel.maimaiHooking = true
                     proberUtil.uploadMaimaiProberData(token, target)
                 }
             }

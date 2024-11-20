@@ -28,6 +28,8 @@ object GlobalViewModel : ViewModel() {
     var showMessageDialog by mutableStateOf(false)
     var platformIndex by mutableIntStateOf(0)
     var gametypeIndex by mutableIntStateOf(0)
+    var maimaiHooking by mutableStateOf(false)
+    var chuniHooking by mutableStateOf(false)
 
     private val _localMessage = MutableLiveData<String>()
     val localMessage: LiveData<String> get() = _localMessage

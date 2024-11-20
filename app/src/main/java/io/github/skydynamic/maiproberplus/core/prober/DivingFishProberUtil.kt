@@ -59,5 +59,6 @@ class DivingFishProberUtil : IProberUtil {
             sendMessageToUi("成绩上传到水鱼查分器失败, 请检查token是否正确")
             Log.d("DivingFishProberUtil", "上传失败")
         }
+        GlobalViewModel.maimaiHooking = false
     }
 }

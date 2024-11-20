@@ -4,6 +4,7 @@ import android.util.Log
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.ktor.client.call.body
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.HttpHeaders
@@ -14,6 +15,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class LxnsProberUtil : IProberUtil {
+
     private val baseApiUrl = "https://maimai.lxns.net"
 
     @Serializable
@@ -41,6 +43,9 @@ class LxnsProberUtil : IProberUtil {
         @SerialName("upload_time") val uploadTime: String = ""
     )
 
+    @Serializable
+    data class LxnsRequestBody(val scores: List<LxnsScoreBody>)
+
     override suspend fun uploadMaimaiProberData(
         importToken: String,
         authUrl: String
@@ -60,10 +65,12 @@ class LxnsProberUtil : IProberUtil {
             )
         }
 
+        val body = Json.encodeToString(LxnsRequestBody(postScores))
+
         val postResponse = client.post("$baseApiUrl/api/v0/user/maimai/player/scores") {
-            setBody(Json.encodeToString(postScores))
+            setBody(body)
+            header("X-User-Token", importToken)
             headers {
-                append("X-User-Token", importToken)
                 append(HttpHeaders.ContentType, "application/json")
             }
         }
@@ -72,10 +79,10 @@ class LxnsProberUtil : IProberUtil {
         if (postScoreResponseBody.success) {
             sendMessageToUi("落雪查分器上传完毕")
             Log.d("LxnsProberUtil", "上传完毕")
-            return
         } else {
-            sendMessageToUi("成绩上传到水鱼查分器失败: ${postScoreResponseBody.message}")
+            sendMessageToUi("成绩上传到落雪查分器失败: ${postScoreResponseBody.message}")
             Log.e("LxnsProberUtil", "上传失败: ${postScoreResponseBody.message}")
         }
+        GlobalViewModel.maimaiHooking = false
     }
 }

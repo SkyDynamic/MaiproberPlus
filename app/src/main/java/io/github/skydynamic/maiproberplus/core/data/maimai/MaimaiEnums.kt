@@ -33,9 +33,9 @@ class MaimaiEnums {
     }
 
     @Serializable
-    enum class ClearType(
-        val clearName: String,
-        private val closedFloatingPointRange: ClosedFloatingPointRange<Double>,
+    enum class RankType(
+        val rank: String,
+        private val scoreRange: ClosedFloatingPointRange<Double>,
     ) {
         D("d", 0.0000..49.9999),
         C("c", 50.0000..59.9999),
@@ -54,11 +54,11 @@ class MaimaiEnums {
 
         companion object {
             @JvmStatic
-            fun getClearTypeByScore(score: Float): ClearType {
+            fun getRankTypeByScore(score: Float): RankType {
                 var returnValue = D
-                for (clearType in entries) {
-                    if (score in clearType.closedFloatingPointRange) {
-                        returnValue = clearType
+                for (rank in entries) {
+                    if (score in rank.scoreRange) {
+                        returnValue = rank
                     }
                 }
                 return returnValue
@@ -67,25 +67,13 @@ class MaimaiEnums {
     }
 
     @Serializable
-    enum class SpecialClearType(val sepcialClearName: String) {
+    enum class FullComboType(val typeName: String) {
         @SerialName("")
         NULL(""),
         FC("fc"),
         FCP("fcp"),
         AP("ap"),
         APP("app");
-
-        companion object {
-            @JvmStatic
-            fun getSpecialClearType(specialClearName: String): SpecialClearType {
-                for (specialClearType in entries) {
-                    if (specialClearType.sepcialClearName == specialClearName.lowercase()) {
-                        return specialClearType
-                    }
-                }
-                throw IllegalArgumentException("No such special clear type")
-            }
-        }
     }
 
     @Serializable
@@ -97,17 +85,5 @@ class MaimaiEnums {
         FSP("fsp"),
         FDX("fsd"),
         FDXP("fsdp");
-
-        companion object {
-            @JvmStatic
-            fun getSyncType(syncName: String): SyncType {
-                for (syncType in entries) {
-                    if (syncType.syncName == syncName.lowercase()) {
-                        return syncType
-                    }
-                }
-                return NULL
-            }
-        }
     }
 }

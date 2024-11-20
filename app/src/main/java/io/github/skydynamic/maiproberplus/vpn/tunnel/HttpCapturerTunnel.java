@@ -40,7 +40,7 @@ public class HttpCapturerTunnel extends Tunnel {
         Log.d(TAG, "HTTP url: " + url);
 
         // If it's a auth redirect request, catch it
-        if (url.startsWith("http://tgk-wcaime.wahlap.com/wc_auth/oauth/callback/maimai-dx")) {
+        if (url.contains("tgk-wcaime.wahlap.com")) {
             Log.d(TAG, "Auth request caught!");
             InterceptHandler.onAuthHook(url, Application.application.configManager.getConfig());
         }

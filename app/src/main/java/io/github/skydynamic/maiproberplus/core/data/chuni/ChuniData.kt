@@ -1,4 +1,4 @@
-package io.github.skydynamic.maiproberplus.core.data.maimai
+package io.github.skydynamic.maiproberplus.core.data.chuni
 
 import android.content.Context
 import io.github.skydynamic.maiproberplus.Application
@@ -19,82 +19,68 @@ val JSON = Json {
     encodeDefaults = true
 }
 
-class MaimaiData {
+class ChuniData {
     @Serializable
-    data class Notes(
-        val total: Int,
-        val tap: Int,
-        val hold: Int,
-        val slide: Int,
-        val touch: Int,
-        @SerialName("break") val breakTotal: Int
-    )
-
-    @Serializable
-    data class SongDiffculty(
-        val type: MaimaiEnums.SongType,
+    data class SongDifficulty(
         val difficulty: Int,
         val level: String,
         @SerialName("level_value") val levelValue: Float,
         @SerialName("note_designer") val noteDesigner: String,
         val version: Int,
-        val notes: Notes
+        val kanji: String = "",
+        val star: Int = 0,
     )
-
-    @Serializable
-    data class SongDifficulties(val standard: List<SongDiffculty>, val dx: List<SongDiffculty>)
 
     @Serializable
     data class SongInfo(
         val id: Int, val title: String, val artist: String, val genre: String,
-        val bpm: Int, val version: Int, val difficulties: SongDifficulties,
+        val bpm: Int, val version: Int, val difficulties: List<SongDifficulty>
     )
 
     @Serializable
     data class MusicDetail(
         val name: String, val level: Float,
-        val score: Float, val dxScore: Int,
-        val rating: Int, val version: Int,
-        val type: MaimaiEnums.SongType, val diff: MaimaiEnums.Difficulty,
-        val rankType: MaimaiEnums.RankType, val syncType: MaimaiEnums.SyncType,
-        val fullComboType: MaimaiEnums.FullComboType
+        val score: Int, val rating: Float,
+        val version: Int, val rankType: ChuniEnums.RankType,
+        val diff: ChuniEnums.Difficulty, val fullComboType: ChuniEnums.FullComboType,
+        val clearType: ChuniEnums.ClearType, val fullChainType: ChuniEnums.FullChainType
     )
 
     @Serializable
     data class LxnsSongListResponse(val songs: List<SongInfo>)
 
     companion object {
-        var MAIMAI_SONG_LIST = readMaimaiSongList()
+        var CHUNI_SONG_LIST = readChuniSongList()
 
         @OptIn(DelicateCoroutinesApi::class)
         fun syncMaimaiSongList() {
             val context = Application.application
-            var listFile = File(context.filesDir, "maimai_song_list.json")
+            var listFile = File(context.filesDir, "chuni_song_list.json")
 
             GlobalScope.launch(Dispatchers.IO) {
                 val result =
-                    client.get("https://maimai.lxns.net/api/v0/maimai/song/list?notes=true")
+                    client.get("https://maimai.lxns.net/api/v0/chunithm/song/list?notes=true")
                 listFile.deleteOnExit()
                 listFile.createNewFile()
                 val bufferedWriter =
-                    context.openFileOutput("maimai_song_list.json", Context.MODE_PRIVATE)
+                    context.openFileOutput("chuni_song_list.json", Context.MODE_PRIVATE)
                         .bufferedWriter()
                 bufferedWriter.write(result.bodyAsText())
                 bufferedWriter.close()
             }
 
-            MAIMAI_SONG_LIST = readMaimaiSongList()
+            CHUNI_SONG_LIST = readChuniSongList()
         }
 
-        private fun readMaimaiSongList(): List<SongInfo> {
+        private fun readChuniSongList(): List<SongInfo> {
             return JSON.decodeFromString<LxnsSongListResponse>(
-                Application.application.getFilesDirInputStream("maimai_song_list.json")
+                Application.application.getFilesDirInputStream("chuni_song_list.json")
                     .bufferedReader().use { it.readText() }
             ).songs
         }
 
         fun getSongIdFromTitle(title: String): Int {
-            return MAIMAI_SONG_LIST.find { it.title == title }?.id ?: -1
+            return CHUNI_SONG_LIST.find { it.title == title }?.id ?: -1
         }
     }
 }

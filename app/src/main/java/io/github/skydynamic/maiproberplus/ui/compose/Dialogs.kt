@@ -94,11 +94,11 @@ fun DownloadDialog(
             val job = scope.async(Dispatchers.IO) {
                 val response = httpClient.get(meta.fileDownloadUrl)
                 if (response.status.value == 200) {
+                    File(application.filesDir, meta.fileName).deleteOnExit()
                     val outputStream = application.getFilesDirOutputStream(meta.fileName)
                     outputStream.bufferedWriter().use {
                         it.write(response.bodyAsText())
                     }
-
                     completedFiles++
                     finish = completedFiles.toFloat() / totalFiles
                 }
@@ -122,7 +122,8 @@ fun DownloadDialog(
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 LinearProgressIndicator(
                     progress = { finish },

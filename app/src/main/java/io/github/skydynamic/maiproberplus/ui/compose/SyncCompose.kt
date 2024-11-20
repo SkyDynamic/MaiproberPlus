@@ -79,6 +79,10 @@ fun SyncCompose() {
                     FileDownloadMeta(
                         "maimai_song_list.json",
                         "https://maimai.lxns.net/api/v0/maimai/song/list?notes=true"
+                    ),
+                    FileDownloadMeta(
+                        "chuni_song_list.json",
+                        "https://maimai.lxns.net/api/v0/chunithm/song/list"
                     )
                 )
             ) {
@@ -103,7 +107,8 @@ fun SyncCompose() {
                     .padding(15.dp)
                     .height(50.dp),
                 onClick = {
-                    if (!context.filesDir.resolve("maimai_song_list.json").exists()) {
+                    if (!context.filesDir.resolve("maimai_song_list.json").exists() ||
+                        !context.filesDir.resolve("chuni_song_list.json").exists()) {
                         viewModel.openInitDialog = true
                     }
                     if (!globalViewModel.isVpnServiceRunning) {

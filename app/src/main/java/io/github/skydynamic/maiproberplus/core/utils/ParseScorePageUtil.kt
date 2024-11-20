@@ -1,10 +1,13 @@
 package io.github.skydynamic.maiproberplus.core.utils
 
+import android.annotation.SuppressLint
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import org.jsoup.Jsoup
 
-fun calcScore(score: String, songLevel: Float): Int {
+fun calcMaimaiScore(score: String, songLevel: Float): Int {
     var formatScore = score.replace("%", "").toFloat()
     val multiplierFactor = when (formatScore) {
         in 10.0000..19.9999 -> 0.016 // D
@@ -34,6 +37,23 @@ fun calcScore(score: String, songLevel: Float): Int {
     return (songLevel * multiplierFactor * formatScore).toInt()
 }
 
+@SuppressLint("DefaultLocale")
+fun calcChuniScore(score: Int, songLevel: Float): Float {
+        return when {
+            score >= 1009000 -> songLevel + 2.15f
+            score >= 1007500 -> songLevel + 2.0f + (score - 1007500) / 100.0 * 0.01
+            score >= 1005000 -> songLevel + 1.5f + (score - 1005000) / 500.0 * 0.1
+            score >= 1000000 -> songLevel + 1.0f + (score - 1000000) / 1000.0 * 0.1
+            score >= 990000 -> songLevel + (score - 990000) / 2500.0 * 0.1
+            score >= 975000 -> songLevel + (score - 975000) / 2500.0 * 0.1
+            score >= 925000 -> songLevel - 3.0f
+            score >= 900000 -> songLevel - 5.0f
+            score >= 800000 -> (songLevel - 5.0f) / 2
+            score >= 500000 -> 0.0f
+            else -> 0.0f
+        }.let { String.format("%.2f", it).toFloat() }
+}
+
 fun extractDxScoreNum(input: String): Int? {
     val regex = Regex("""\d{1,3}(,\d{3})*""")
     val matchResult = regex.find(input)
@@ -50,7 +70,6 @@ object ParseScorePageUtil {
         if (html.isEmpty()) {
             return emptyList()
         }
-
         val musicList = ArrayList<MaimaiData.MusicDetail>()
 
         val document = Jsoup.parse(html)
@@ -73,10 +92,10 @@ object ParseScorePageUtil {
 
             val musicClearTypes = musicCard.getElementsByClass("h_30 f_r")
 
-            val musicClearType = MaimaiEnums.ClearType
-                .getClearTypeByScore(musicScore.replace("%", "").toFloat())
+            val musicRankType = MaimaiEnums.RankType
+                .getRankTypeByScore(musicScore.replace("%", "").toFloat())
             var musicSyncType = MaimaiEnums.SyncType.NULL
-            var musicSpecialClearType = MaimaiEnums.SpecialClearType.NULL
+            var musicFullComboType = MaimaiEnums.FullComboType.NULL
 
             val isDeluxe = musicCard.getElementsByClass("music_kind_icon")
                 .attr("src")
@@ -90,7 +109,7 @@ object ParseScorePageUtil {
                 if (res != null) res.difficulties.standard[difficulty.diffIndex].levelValue else -1f
             }
 
-            val musicRating = calcScore(musicScore, musicLevel)
+            val musicRating = calcMaimaiScore(musicScore, musicLevel)
             val musicVersion = res?.version ?: 10000
 
             for (musicClearTypeElement in musicClearTypes) {
@@ -103,10 +122,10 @@ object ParseScorePageUtil {
                         "fsp" -> musicSyncType = MaimaiEnums.SyncType.FSP
                         "fdx" -> musicSyncType = MaimaiEnums.SyncType.FDX
                         "fdxp" -> musicSyncType = MaimaiEnums.SyncType.FDXP
-                        "fc" -> musicSpecialClearType = MaimaiEnums.SpecialClearType.FC
-                        "fcp" -> musicSpecialClearType = MaimaiEnums.SpecialClearType.FCP
-                        "ap" -> musicSpecialClearType = MaimaiEnums.SpecialClearType.AP
-                        "app" -> musicSpecialClearType = MaimaiEnums.SpecialClearType.APP
+                        "fc" -> musicFullComboType = MaimaiEnums.FullComboType.FC
+                        "fcp" -> musicFullComboType = MaimaiEnums.FullComboType.FCP
+                        "ap" -> musicFullComboType = MaimaiEnums.FullComboType.AP
+                        "app" -> musicFullComboType = MaimaiEnums.FullComboType.APP
                     }
                 }
             }
@@ -116,10 +135,83 @@ object ParseScorePageUtil {
                     musicScoreNum, musicDxScoreNum ?: 0,
                     musicRating, musicVersion,
                     musicType, difficulty,
-                    musicClearType, musicSyncType,
-                    musicSpecialClearType
+                    musicRankType, musicSyncType,
+                    musicFullComboType
                 )
             )
+        }
+        return musicList
+    }
+
+    fun parseChuni(
+        html: String,
+        difficulty: ChuniEnums.Difficulty
+    ): List<ChuniData.MusicDetail> {
+        if (html.isEmpty()) {
+            return emptyList()
+        }
+        val musicList = ArrayList<ChuniData.MusicDetail>()
+
+        val document = Jsoup.parse(html)
+
+        val musicListBox = document.getElementsByClass("musiclist_box")
+        for (musicListBoxElement in musicListBox) {
+            val highScore = musicListBoxElement.getElementsByClass("play_musicdata_highscore")
+            if (highScore.text().isEmpty()) {
+                continue
+            }
+
+            val musicName = musicListBoxElement.getElementsByClass("music_title").text()
+            val musicScore = highScore[0].tagName("span").text()
+            val musicScoreNum = musicScore.replace("分数：", "").replace(",", "").toInt()
+
+            var musicDifficulty = ChuniEnums.Difficulty.BASIC
+            if (difficulty == ChuniEnums.Difficulty.RECENT) {
+                val cl = musicListBoxElement.attr("class")
+                val regex = Regex("bg_(\\w+)")
+                val matchResult = regex.find(cl)?.groups?.get(1)?.value ?: ""
+                musicDifficulty = ChuniEnums.Difficulty.getDifficultyWithName(matchResult)
+            }
+
+            val res = ChuniData.CHUNI_SONG_LIST.find { it.title == musicName }
+            var musicLevel = 0F
+            val musicRating = calcChuniScore(musicScoreNum, musicLevel)
+            if (res != null) {
+                musicLevel = res.difficulties[musicDifficulty.diffIndex].levelValue
+            }
+
+            val musicVersion = res?.version ?: 10000
+
+            var clearType = ChuniEnums.ClearType.FAILED
+            var fullComboType = ChuniEnums.FullComboType.NULL
+            var fullChainType = ChuniEnums.FullChainType.NULL
+
+            val icons = musicListBoxElement.getElementsByClass("play_musicdata_icon")
+            if (icons.isNotEmpty()) {
+                for (icon in icons) {
+                    val regex = Regex(".*icon_(.*?)?.png?.*")
+                    val value = regex.find(icon.attr("src"))?.groupValues?.get(1)
+                    if (value != null) {
+                        when(value) {
+                            "fullcombo" -> fullComboType = ChuniEnums.FullComboType.FC
+                            "alljustice" -> fullComboType = ChuniEnums.FullComboType.AJ
+                            "alljusticecritical" -> fullComboType = ChuniEnums.FullComboType.AJC
+                            "fullchain" -> fullChainType = ChuniEnums.FullChainType.FC
+                            "fullchain2" -> fullChainType = ChuniEnums.FullChainType.GFC
+                            "clear" -> clearType = ChuniEnums.ClearType.CLEAR
+                            "hard" -> clearType = ChuniEnums.ClearType.HARD
+                            "absolute" -> clearType = ChuniEnums.ClearType.ABSOLUTE
+                            "absolutep" -> clearType = ChuniEnums.ClearType.ABSOLUTEP
+                            "catastrophy" -> clearType = ChuniEnums.ClearType.CATASTROPHY
+                        }
+                    }
+                }
+                musicList.add(ChuniData.MusicDetail(
+                    musicName, musicLevel, musicScoreNum, musicRating,
+                    musicVersion, ChuniEnums.RankType.getRankTypeByScore(musicScoreNum),
+                    difficulty, fullComboType, clearType, fullChainType
+                ))
+            }
         }
         return musicList
     }

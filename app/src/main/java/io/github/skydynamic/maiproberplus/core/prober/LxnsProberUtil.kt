@@ -143,8 +143,8 @@ class LxnsProberUtil : IProberUtil {
 
         val postResponse = client.post("$baseApiUrl/api/v0/user/chunithm/player/scores") {
             setBody(body)
-            header("X-User-Token", importToken)
             headers {
+                append("X-User-Token", importToken)
                 append(HttpHeaders.ContentType, "application/json")
             }
         }

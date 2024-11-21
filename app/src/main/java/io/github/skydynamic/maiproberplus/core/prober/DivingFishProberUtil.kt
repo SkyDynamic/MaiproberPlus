@@ -46,7 +46,7 @@ class DivingFishProberUtil : IProberUtil {
                 fs = it.syncType.syncName,
                 levelIndex = it.diff.diffIndex,
                 title = it.name,
-                type = it.type.type
+                type = it.type.type2
             )
         }
 

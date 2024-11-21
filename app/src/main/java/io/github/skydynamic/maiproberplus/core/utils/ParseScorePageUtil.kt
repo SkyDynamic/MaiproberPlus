@@ -6,6 +6,8 @@ import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import org.jsoup.Jsoup
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 fun calcMaimaiScore(score: String, songLevel: Float): Int {
     var formatScore = score.replace("%", "").toFloat()
@@ -103,6 +105,7 @@ object ParseScorePageUtil {
             val musicType = if (isDeluxe) MaimaiEnums.SongType.DX else MaimaiEnums.SongType.STANDARD
 
             val res = MaimaiData.MAIMAI_SONG_LIST.find { it.title == musicName }
+            if (res?.disable == true) { continue }
             val musicLevel = if (isDeluxe) {
                 if (res != null) res.difficulties.dx[difficulty.diffIndex].levelValue else -1f
             } else {
@@ -166,14 +169,18 @@ object ParseScorePageUtil {
             val musicScoreNum = musicScore.replace("分数：", "").replace(",", "").toInt()
 
             var musicDifficulty = ChuniEnums.Difficulty.BASIC
+            var musicPlayTime = ""
             if (difficulty == ChuniEnums.Difficulty.RECENT) {
                 val cl = musicListBoxElement.attr("class")
                 val regex = Regex("bg_(\\w+)")
                 val matchResult = regex.find(cl)?.groups?.get(1)?.value ?: ""
+                musicPlayTime = getCurrentUTCTimeFormatted()
                 musicDifficulty = ChuniEnums.Difficulty.getDifficultyWithName(matchResult)
             }
 
             val res = ChuniData.CHUNI_SONG_LIST.find { it.title == musicName }
+            if (res?.disable == true) { continue }
+
             var musicLevel = 0F
             val musicRating = calcChuniScore(musicScoreNum, musicLevel)
             if (res != null) {
@@ -207,12 +214,26 @@ object ParseScorePageUtil {
                     }
                 }
                 musicList.add(ChuniData.MusicDetail(
-                    musicName, musicLevel, musicScoreNum, musicRating,
-                    musicVersion, ChuniEnums.RankType.getRankTypeByScore(musicScoreNum),
-                    difficulty, fullComboType, clearType, fullChainType
+                    name = musicName,
+                    level = musicLevel,
+                    score = musicScoreNum,
+                    rating = musicRating,
+                    version = musicVersion,
+                    rankType = ChuniEnums.RankType.getRankTypeByScore(musicScoreNum),
+                    diff = difficulty,
+                    fullComboType = fullComboType,
+                    clearType = clearType,
+                    fullChainType = fullChainType,
+                    playTime = musicPlayTime
                 ))
             }
         }
         return musicList
     }
+}
+
+fun getCurrentUTCTimeFormatted(): String {
+    val now = ZonedDateTime.now(java.time.ZoneOffset.UTC)
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    return now.format(formatter)
 }

@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 
 class MaimaiEnums {
     @Serializable
-    enum class SongType(val type: String) {
-        @SerialName("standard") STANDARD("standard"),
-        @SerialName("dx") DX("dx"),
-        @SerialName("utage") UTAGE("utage");
+    enum class SongType(val type: String, val type2: String) {
+        @SerialName("standard") STANDARD("standard", "SD"),
+        @SerialName("dx") DX("dx", "DX"),
+        @SerialName("utage") UTAGE("utage", "UTAGE");
     }
 
     @Serializable

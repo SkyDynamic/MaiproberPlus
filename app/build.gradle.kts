@@ -14,7 +14,7 @@ android {
         minSdk = 31
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -28,13 +28,24 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    applicationVariants.all {
+        outputs.all {
+            if (this is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+                outputFileName = "MaiProberPlus-${versionName}-universal.apk"
+            }
+        }
+    }
+
     buildFeatures {
         compose = true
     }

@@ -48,6 +48,7 @@ class MaimaiData {
     data class SongInfo(
         val id: Int, val title: String, val artist: String, val genre: String,
         val bpm: Int, val version: Int, val difficulties: SongDifficulties,
+        val disable: Boolean = false
     )
 
     @Serializable

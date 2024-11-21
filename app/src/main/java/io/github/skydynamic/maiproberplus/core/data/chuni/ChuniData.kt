@@ -34,16 +34,18 @@ class ChuniData {
     @Serializable
     data class SongInfo(
         val id: Int, val title: String, val artist: String, val genre: String,
-        val bpm: Int, val version: Int, val difficulties: List<SongDifficulty>
+        val bpm: Int, val version: Int, val difficulties: List<SongDifficulty>,
+        val disable: Boolean = false
     )
 
     @Serializable
     data class MusicDetail(
         val name: String, val level: Float,
         val score: Int, val rating: Float,
-        val version: Int, val rankType: ChuniEnums.RankType,
-        val diff: ChuniEnums.Difficulty, val fullComboType: ChuniEnums.FullComboType,
-        val clearType: ChuniEnums.ClearType, val fullChainType: ChuniEnums.FullChainType
+        val version: Int, val playTime: String = "",
+        val rankType: ChuniEnums.RankType, val diff: ChuniEnums.Difficulty,
+        val fullComboType: ChuniEnums.FullComboType, val clearType: ChuniEnums.ClearType,
+        val fullChainType: ChuniEnums.FullChainType
     )
 
     @Serializable

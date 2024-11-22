@@ -6,6 +6,7 @@ import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Entities
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -75,11 +76,12 @@ object ParseScorePageUtil {
         val musicList = ArrayList<MaimaiData.MusicDetail>()
 
         val document = Jsoup.parse(html)
+        document.outputSettings().prettyPrint(false)
         val musicCards = document.getElementsByClass("w_450 m_15 p_r f_0")
 
         for (musicCard in musicCards) {
-            val musicName = musicCard
-                .getElementsByClass("music_name_block t_l f_13 break").text()
+            val musicName = Entities.unescape(musicCard
+                .getElementsByClass("music_name_block t_l f_13 break").html())
             val musicScore = musicCard
                 .getElementsByClass("music_score_block w_112 t_r f_l f_12").text()
             val musicDxScore = musicCard
@@ -105,15 +107,16 @@ object ParseScorePageUtil {
             val musicType = if (isDeluxe) MaimaiEnums.SongType.DX else MaimaiEnums.SongType.STANDARD
 
             val res = MaimaiData.MAIMAI_SONG_LIST.find { it.title == musicName }
-            if (res?.disable == true) { continue }
+            if (res == null) continue
+            if (res.disabled == true) { continue }
             val musicLevel = if (isDeluxe) {
-                if (res != null) res.difficulties.dx[difficulty.diffIndex].levelValue else -1f
+                res.difficulties.dx[difficulty.diffIndex].levelValue
             } else {
-                if (res != null) res.difficulties.standard[difficulty.diffIndex].levelValue else -1f
+                res.difficulties.standard[difficulty.diffIndex].levelValue
             }
 
             val musicRating = calcMaimaiScore(musicScore, musicLevel)
-            val musicVersion = res?.version ?: 10000
+            val musicVersion = res.version
 
             for (musicClearTypeElement in musicClearTypes) {
                 val regex = Regex(".*music_icon_(.*?)?.png?.*")
@@ -156,6 +159,7 @@ object ParseScorePageUtil {
         val musicList = ArrayList<ChuniData.MusicDetail>()
 
         val document = Jsoup.parse(html)
+        document.outputSettings().prettyPrint(false)
 
         val musicListBox = document.getElementsByClass("musiclist_box")
         for (musicListBoxElement in musicListBox) {
@@ -164,30 +168,44 @@ object ParseScorePageUtil {
                 continue
             }
 
-            val musicName = musicListBoxElement.getElementsByClass("music_title").text()
+            val musicName = Entities.unescape(
+                musicListBoxElement.getElementsByClass("music_title").html().takeIf { it.isNotBlank() }
+                    ?: musicListBoxElement.getElementsByClass("musiclist_worldsend_title").html()
+            )
+
             val musicScore = highScore[0].tagName("span").text()
             val musicScoreNum = musicScore.replace("分数：", "").replace(",", "").toInt()
 
-            var musicDifficulty = ChuniEnums.Difficulty.BASIC
             var musicPlayTime = ""
-            if (difficulty == ChuniEnums.Difficulty.RECENT) {
+            val musicDifficulty = if (difficulty == ChuniEnums.Difficulty.RECENT) {
                 val cl = musicListBoxElement.attr("class")
                 val regex = Regex("bg_(\\w+)")
                 val matchResult = regex.find(cl)?.groups?.get(1)?.value ?: ""
                 musicPlayTime = getCurrentUTCTimeFormatted()
-                musicDifficulty = ChuniEnums.Difficulty.getDifficultyWithName(matchResult)
+                ChuniEnums.Difficulty.getDifficultyWithName(matchResult)
+            } else {
+                difficulty
             }
 
-            val res = ChuniData.CHUNI_SONG_LIST.find { it.title == musicName }
-            if (res?.disable == true) { continue }
+            val res = if (musicDifficulty != ChuniEnums.Difficulty.WORLDSEND) {
+                ChuniData.CHUNI_SONG_LIST.find { it.title == musicName }
+            } else {
+                ChuniData.CHUNI_SONG_LIST.findLast { it.title == musicName && it.difficulties[0].kanji != ""}
+            }
 
-            var musicLevel = 0F
+            if (res == null) { continue }
+
+            if (res.disabled == true) { continue }
+
+            val musicLevel = if (musicDifficulty != ChuniEnums.Difficulty.WORLDSEND) {
+                res.difficulties[musicDifficulty.diffIndex].levelValue
+            } else {
+                res.difficulties[0].levelValue
+            }
+
             val musicRating = calcChuniScore(musicScoreNum, musicLevel)
-            if (res != null) {
-                musicLevel = res.difficulties[musicDifficulty.diffIndex].levelValue
-            }
 
-            val musicVersion = res?.version ?: 10000
+            val musicVersion = res.version
 
             var clearType = ChuniEnums.ClearType.FAILED
             var fullComboType = ChuniEnums.FullComboType.NULL
@@ -195,32 +213,36 @@ object ParseScorePageUtil {
 
             val icons = musicListBoxElement.getElementsByClass("play_musicdata_icon")
             if (icons.isNotEmpty()) {
-                for (icon in icons) {
-                    val regex = Regex(".*icon_(.*?)?.png?.*")
-                    val value = regex.find(icon.attr("src"))?.groupValues?.get(1)
-                    if (value != null) {
-                        when(value) {
-                            "fullcombo" -> fullComboType = ChuniEnums.FullComboType.FC
-                            "alljustice" -> fullComboType = ChuniEnums.FullComboType.AJ
-                            "alljusticecritical" -> fullComboType = ChuniEnums.FullComboType.AJC
-                            "fullchain" -> fullChainType = ChuniEnums.FullChainType.FC
-                            "fullchain2" -> fullChainType = ChuniEnums.FullChainType.GFC
-                            "clear" -> clearType = ChuniEnums.ClearType.CLEAR
-                            "hard" -> clearType = ChuniEnums.ClearType.HARD
-                            "absolute" -> clearType = ChuniEnums.ClearType.ABSOLUTE
-                            "absolutep" -> clearType = ChuniEnums.ClearType.ABSOLUTEP
-                            "catastrophy" -> clearType = ChuniEnums.ClearType.CATASTROPHY
+                for (iconContainer in icons) {
+                    val imgs = iconContainer.select("img")
+                    for (icon in imgs) {
+                        val regex = Regex(".*icon_(.*?)?.png?.*")
+                        val value = regex.find(icon.attr("src"))?.groupValues?.get(1)
+                        if (value != null) {
+                            when(value) {
+                                "fullcombo" -> fullComboType = ChuniEnums.FullComboType.FC
+                                "alljustice" -> fullComboType = ChuniEnums.FullComboType.AJ
+                                "alljusticecritical" -> fullComboType = ChuniEnums.FullComboType.AJC
+                                "fullchain" -> fullChainType = ChuniEnums.FullChainType.FC
+                                "fullchain2" -> fullChainType = ChuniEnums.FullChainType.GFC
+                                "clear" -> clearType = ChuniEnums.ClearType.CLEAR
+                                "hard" -> clearType = ChuniEnums.ClearType.HARD
+                                "absolute" -> clearType = ChuniEnums.ClearType.ABSOLUTE
+                                "absolutep" -> clearType = ChuniEnums.ClearType.ABSOLUTEP
+                                "catastrophy" -> clearType = ChuniEnums.ClearType.CATASTROPHY
+                            }
                         }
                     }
                 }
                 musicList.add(ChuniData.MusicDetail(
+                    id = res.id,
                     name = musicName,
                     level = musicLevel,
                     score = musicScoreNum,
                     rating = musicRating,
                     version = musicVersion,
                     rankType = ChuniEnums.RankType.getRankTypeByScore(musicScoreNum),
-                    diff = difficulty,
+                    diff = musicDifficulty,
                     fullComboType = fullComboType,
                     clearType = clearType,
                     fullChainType = fullChainType,

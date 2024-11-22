@@ -10,7 +10,7 @@ class ChuniEnums {
         EXPERT("Expert", 2),
         MASTER("Master", 3),
         ULTIMA("Ultima", 4),
-        WORLDSEND("World's End", 5),
+        WORLDSEND("World's End", 0),
         RECENT("Recent", 6);
 
         companion object {
@@ -27,7 +27,7 @@ class ChuniEnums {
             @JvmStatic
             fun getDifficultyWithIndex(diffIndex: Int): Difficulty {
                 for (difficulty in entries) {
-                    if (difficulty.diffIndex == diffIndex) {
+                    if (difficulty.ordinal == diffIndex) {
                         return difficulty
                     }
                 }

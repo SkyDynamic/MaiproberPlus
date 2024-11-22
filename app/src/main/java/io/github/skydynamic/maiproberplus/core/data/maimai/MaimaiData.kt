@@ -48,7 +48,7 @@ class MaimaiData {
     data class SongInfo(
         val id: Int, val title: String, val artist: String, val genre: String,
         val bpm: Int, val version: Int, val difficulties: SongDifficulties,
-        val disable: Boolean = false
+        val disabled: Boolean = false
     )
 
     @Serializable
@@ -95,7 +95,8 @@ class MaimaiData {
         }
 
         fun getSongIdFromTitle(title: String): Int {
-            return MAIMAI_SONG_LIST.find { it.title == title }?.id ?: -1
+            val id = MAIMAI_SONG_LIST.find { it.title == title }?.id ?: -1
+            return id
         }
     }
 }

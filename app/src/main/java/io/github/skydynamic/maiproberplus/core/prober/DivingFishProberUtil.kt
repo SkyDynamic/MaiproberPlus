@@ -50,12 +50,18 @@ class DivingFishProberUtil : IProberUtil {
             )
         }
 
-        val postResponse = client.post("$baseApiUrl/maimaidxprober/player/update_records") {
-            setBody(Json.encodeToString(postScores))
-            headers {
-                append("Import-Token", importToken)
-                append(HttpHeaders.ContentType, "application/json")
+        val postResponse = try {
+            client.post("$baseApiUrl/maimaidxprober/player/update_records") {
+                setBody(Json.encodeToString(postScores))
+                headers {
+                    append("Import-Token", importToken)
+                    append(HttpHeaders.ContentType, "application/json")
+                }
             }
+        } catch (e: Exception) {
+            Log.e("DivingFishProberUtil", "上传失败: $e")
+            sendMessageToUi("上传失败: $e")
+            return
         }
 
         if (postResponse.status.value == 200) {

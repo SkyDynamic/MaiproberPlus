@@ -164,7 +164,7 @@ fun DiffChooseDialog(
             colors = CardDefaults.cardColors(containerColor = getCardColor())
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.padding(8.dp).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

@@ -28,7 +28,7 @@ private val lightScheme = lightColorScheme(
     onError = onErrorLight,
     errorContainer = errorContainerLight,
     onErrorContainer = onErrorContainerLight,
-    background = backgroundLight,
+    background = surfaceContainerHighLight,
     onBackground = onBackgroundLight,
     surface = surfaceLight,
     onSurface = onSurfaceLight,
@@ -280,7 +280,7 @@ fun getCardColor() : Color {
     val darkTheme = isSystemInDarkTheme()
     return when {
         darkTheme -> darkScheme.surfaceContainerHigh
-        else -> lightScheme.surfaceContainerHigh
+        else -> backgroundLight
     }
 }
 

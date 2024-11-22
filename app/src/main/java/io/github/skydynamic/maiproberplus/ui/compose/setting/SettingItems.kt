@@ -25,6 +25,14 @@ import io.github.skydynamic.maiproberplus.R
 import io.github.skydynamic.maiproberplus.ui.theme.getDescFontColor
 import io.github.skydynamic.maiproberplus.ui.theme.getTitleFontColor
 
+val horizontalDivider = @Composable {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        color = Color.LightGray,
+        thickness = 1.dp
+    )
+}
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun PasswordTextFiled(
@@ -61,11 +69,8 @@ fun PasswordTextFiled(
         label = label,
         leadingIcon = icon
     )
-    HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            color = Color.LightGray,
-            thickness = 1.dp
-        )
+
+    horizontalDivider()
 }
 
 @Composable
@@ -84,9 +89,5 @@ fun TextButtonItem(
         }
     }
 
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        color = Color.LightGray,
-        thickness = 1.dp
-    )
+    horizontalDivider()
 }

@@ -1,20 +1,29 @@
 package io.github.skydynamic.maiproberplus.ui.compose.setting
 
+import androidx.compose.foundation.content.MediaType.Companion.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.skydynamic.maiproberplus.R
+import io.github.skydynamic.maiproberplus.ui.theme.getDescFontColor
+import io.github.skydynamic.maiproberplus.ui.theme.getTitleFontColor
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,5 +60,33 @@ fun PasswordTextFiled(
         },
         label = label,
         leadingIcon = icon
+    )
+    HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            color = Color.LightGray,
+            thickness = 1.dp
+        )
+}
+
+@Composable
+fun TextButtonItem(
+    title: String,
+    description: String = "",
+    onClick: () -> Unit
+) {
+    TextButton(
+        modifier = Modifier.padding(8.dp).fillMaxWidth(),
+        onClick = onClick
+    ) {
+        Column {
+            Text(text = title, fontSize = 18.sp, color = getTitleFontColor())
+            Text(text = description, fontSize = 12.sp, color = getDescFontColor())
+        }
+    }
+
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        color = Color.LightGray,
+        thickness = 1.dp
     )
 }

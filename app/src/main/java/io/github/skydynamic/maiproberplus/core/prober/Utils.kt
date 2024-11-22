@@ -11,6 +11,7 @@ import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.utils.ParseScorePageUtil
 import io.github.skydynamic.maiproberplus.core.utils.WechatRequestUtil.WX_WINDOWS_UA
+import io.github.skydynamic.maiproberplus.ui.compose.application
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
@@ -75,19 +76,21 @@ suspend fun getMaimaiPageData(authUrl: String) : List<MaimaiData.MusicDetail> {
         return emptyList()
     }
 
-    for (diff in MaimaiEnums.Difficulty.entries) {
-        Log.i("ProberUtil", "开始抓取${diff.diffName}成绩")
+    for (diff in application.configManager.config.syncConfig.maimaiSyncDifficulty) {
+        val difficulty = MaimaiEnums.Difficulty.getDifficultyWithIndex(diff)
+
+        Log.i("ProberUtil", "开始抓取${difficulty.diffName}成绩")
         with(client) {
             val scoreResp = get(
                 "https://maimai.wahlap.com/maimai-mobile/record/" +
-                        "musicGenre/search/?genre=99&diff=${diff.diffIndex}"
+                        "musicGenre/search/?genre=99&diff=${diff}"
             )
             val body = scoreResp.bodyAsText()
 
             val data = Regex("<html.*>([\\s\\S]*)</html>")
                 .find(body)?.groupValues?.get(1)?.replace("\\s+/g", " ")
 
-            scores.addAll(ParseScorePageUtil.parseMaimai(data ?: "", diff))
+            scores.addAll(ParseScorePageUtil.parseMaimai(data ?: "", difficulty))
         }
     }
     return scores
@@ -117,10 +120,11 @@ suspend fun fetchChuniScores(
 
     val token = result.setCookie()["_t"]?.value
 
-    for (diff in ChuniEnums.Difficulty.entries) {
-        val url = chuniUrls[diff.diffIndex]
+    for (diff in application.configManager.config.syncConfig.chuniSyncDifficulty) {
+        val difficulty = ChuniEnums.Difficulty.getDifficultyWithIndex(diff)
+        val url = chuniUrls[diff]
 
-        Log.i("ProberUtil", "开始抓取${diff.diffName}成绩")
+        Log.i("ProberUtil", "开始抓取${difficulty.diffName}成绩")
 
         with(client) {
             if (url[0] != null) {
@@ -136,7 +140,7 @@ suspend fun fetchChuniScores(
             val resp: HttpResponse = get("https://chunithm.wahlap.com/mobile/${url[1]}")
             val body = resp.bodyAsText()
 
-            processBody(diff, body)
+            processBody(difficulty, body)
         }
     }
 }

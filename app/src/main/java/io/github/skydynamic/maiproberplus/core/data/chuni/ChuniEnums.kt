@@ -23,6 +23,16 @@ class ChuniEnums {
                 }
                 throw IllegalArgumentException("No such difficulty")
             }
+
+            @JvmStatic
+            fun getDifficultyWithIndex(diffIndex: Int): Difficulty {
+                for (difficulty in entries) {
+                    if (difficulty.diffIndex == diffIndex) {
+                        return difficulty
+                    }
+                }
+                throw IllegalArgumentException("No such difficulty")
+            }
         }
     }
 

@@ -1,6 +1,5 @@
 package io.github.skydynamic.maiproberplus.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -260,7 +259,7 @@ fun MaiProberplusTheme(
     content: @Composable() () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
@@ -276,3 +275,29 @@ fun MaiProberplusTheme(
     )
 }
 
+@Composable
+fun getCardColor() : Color {
+    val darkTheme = isSystemInDarkTheme()
+    return when {
+        darkTheme -> darkScheme.surfaceContainerHigh
+        else -> lightScheme.surfaceContainerHigh
+    }
+}
+
+@Composable
+fun getTitleFontColor() : Color {
+    val darkTheme = isSystemInDarkTheme()
+    return when {
+        darkTheme -> darkScheme.onSurface
+        else -> lightScheme.onSurface
+    }
+}
+
+@Composable
+fun getDescFontColor() : Color {
+    val darkTheme = isSystemInDarkTheme()
+    return when {
+        darkTheme -> darkScheme.outline
+        else -> lightScheme.outline
+    }
+}

@@ -1,6 +1,8 @@
 package io.github.skydynamic.maiproberplus.core.config
 
 import android.content.Context
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.ui.compose.application
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -48,6 +50,7 @@ data class ConfigStorage(
     var divingfishToken: String = "",
     var lxnsToken: String = "",
     var maimaiPresonalInfo: MaimaiProberUserInfo = MaimaiProberUserInfo(),
+    var syncConfig: SyncConfig = SyncConfig()
 )
 
 @Serializable
@@ -57,4 +60,10 @@ data class MaimaiProberUserInfo(
     var maimaiIcon: Int = 1,
     var maimaiPlate: Int = 1,
     var maimaiTitle: String = ""
+)
+
+@Serializable
+data class SyncConfig(
+    var maimaiSyncDifficulty: List<Int> = MaimaiEnums.Difficulty.entries.map { it.diffIndex },
+    var chuniSyncDifficulty: List<Int> = ChuniEnums.Difficulty.entries.map { it.diffIndex }
 )

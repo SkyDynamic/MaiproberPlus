@@ -40,7 +40,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaiProberplusTheme {
+            MaiProberplusTheme(
+                dynamicColor = false
+            ) {
                 AppContent()
             }
         }

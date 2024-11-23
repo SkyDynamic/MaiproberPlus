@@ -101,10 +101,14 @@ object ParseScorePageUtil {
             var musicSyncType = MaimaiEnums.SyncType.NULL
             var musicFullComboType = MaimaiEnums.FullComboType.NULL
 
-            // TODO 这里的检测有问题要改
-            val isDeluxe = musicCard.getElementsByClass("music_kind_icon")
-                .attr("src")
-                .contains("music_dx")
+            val isHasDeluxeAndStandard = musicCard.getElementsByClass("music_master_btn_off pointer")
+            var isDeluxe = if (isHasDeluxeAndStandard.isNotEmpty()) {
+                isHasDeluxeAndStandard.attr("src").contains("music_dx")
+            } else {
+                musicCard.getElementsByClass("music_kind_icon")
+                    .attr("src")
+                    .contains("music_dx")
+            }
             val musicType = if (isDeluxe) MaimaiEnums.SongType.DX else MaimaiEnums.SongType.STANDARD
 
             val res = MaimaiData.MAIMAI_SONG_LIST.find { it.title == musicName }

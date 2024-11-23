@@ -105,7 +105,6 @@ suspend fun fetchMaimaiScorePage(
             }
         } catch (e: Exception) {
             Log.e("ProberUtil", "抓取${difficulty.diffName}成绩失败: ${e.message}")
-            sendMessageToUi("抓取${difficulty.diffName}成绩失败: ${e.message}")
         }
     }
 }
@@ -159,7 +158,6 @@ suspend fun fetchChuniScores(
             }
         } catch (e: Exception) {
             Log.e("ProberUtil", "抓取${difficulty.diffName}成绩失败: ${e.message}")
-            sendMessageToUi("抓取${difficulty.diffName}成绩失败: ${e.message}")
         }
     }
 }

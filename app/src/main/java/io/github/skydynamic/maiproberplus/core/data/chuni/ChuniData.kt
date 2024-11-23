@@ -35,11 +35,12 @@ class ChuniData {
     data class SongInfo(
         val id: Int, val title: String, val artist: String, val genre: String,
         val bpm: Int, val version: Int, val difficulties: List<SongDifficulty>,
-        val disable: Boolean = false
+        val disabled: Boolean = false
     )
 
     @Serializable
     data class MusicDetail(
+        val id: Int,
         val name: String, val level: Float,
         val score: Int, val rating: Float,
         val version: Int, val playTime: String = "",
@@ -79,10 +80,6 @@ class ChuniData {
                 Application.application.getFilesDirInputStream("chuni_song_list.json")
                     .bufferedReader().use { it.readText() }
             ).songs
-        }
-
-        fun getSongIdFromTitle(title: String): Int {
-            return CHUNI_SONG_LIST.find { it.title == title }?.id ?: -1
         }
     }
 }

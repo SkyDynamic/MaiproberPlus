@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SegmentedButton
@@ -108,7 +109,8 @@ fun SyncCompose() {
                     .height(50.dp),
                 onClick = {
                     if (!context.filesDir.resolve("maimai_song_list.json").exists() ||
-                        !context.filesDir.resolve("chuni_song_list.json").exists()) {
+                        !context.filesDir.resolve("chuni_song_list.json").exists()
+                    ) {
                         viewModel.openInitDialog = true
                     }
                     if (!globalViewModel.isVpnServiceRunning) {
@@ -145,7 +147,8 @@ fun SyncCompose() {
             proberPlatformList.forEachIndexed { index, name ->
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(
-                        index = index, count = proberPlatformList.size),
+                        index = index, count = proberPlatformList.size
+                    ),
                     onClick = { globalViewModel.platformIndex = index },
                     selected = index == globalViewModel.platformIndex
                 ) {
@@ -163,7 +166,8 @@ fun SyncCompose() {
             gameTypeList.forEachIndexed { index, name ->
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(
-                        index = index, count = gameTypeList.size),
+                        index = index, count = gameTypeList.size
+                    ),
                     onClick = { globalViewModel.gametypeIndex = index },
                     selected = index == globalViewModel.gametypeIndex
                 ) {

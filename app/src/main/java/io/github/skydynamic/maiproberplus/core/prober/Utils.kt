@@ -63,6 +63,7 @@ fun sendMessageToUi(message: String) {
 
 suspend fun getMaimaiScoreData(authUrl: String) : List<MaimaiData.MusicDetail> {
     val scores = mutableListOf<MaimaiData.MusicDetail>()
+    var processing = 0
     fetchMaimaiScorePage(authUrl) { diff, body ->
         scores.addAll(ParseScorePageUtil.parseMaimai(body, diff))
     }
@@ -89,17 +90,22 @@ suspend fun fetchMaimaiScorePage(
         val difficulty = MaimaiEnums.Difficulty.getDifficultyWithIndex(diff)
 
         Log.i("ProberUtil", "开始抓取${difficulty.diffName}成绩")
-        with(client) {
-            val scoreResp = get(
-                "https://maimai.wahlap.com/maimai-mobile/record/" +
-                        "musicGenre/search/?genre=99&diff=${diff}"
-            )
-            val body = scoreResp.bodyAsText()
+        try {
+            with(client) {
+                val scoreResp = get(
+                    "https://maimai.wahlap.com/maimai-mobile/record/" +
+                            "musicGenre/search/?genre=99&diff=${diff}"
+                )
+                val body = scoreResp.bodyAsText()
 
-            val data = Regex("<html.*>([\\s\\S]*)</html>")
-                .find(body)?.groupValues?.get(1)?.replace("\\s+/g", " ")
+                val data = Regex("<html.*>([\\s\\S]*)</html>")
+                    .find(body)?.groupValues?.get(1)?.replace("\\s+/g", " ")
 
-            processBody(difficulty, data ?: "")
+                processBody(difficulty, data ?: "")
+            }
+        } catch (e: Exception) {
+            Log.e("ProberUtil", "抓取${difficulty.diffName}成绩失败: ${e.message}")
+            sendMessageToUi("抓取${difficulty.diffName}成绩失败: ${e.message}")
         }
     }
 }
@@ -134,21 +140,26 @@ suspend fun fetchChuniScores(
 
         Log.i("ProberUtil", "开始抓取${difficulty.diffName}成绩")
 
-        with(client) {
-            if (url[0] != null) {
-                post("https://chunithm.wahlap.com/mobile/${url[0]}") {
-                    headers {
-                        append(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
+        try {
+            with(client) {
+                if (url[0] != null) {
+                    post("https://chunithm.wahlap.com/mobile/${url[0]}") {
+                        headers {
+                            append(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
+                        }
+                        contentType(ContentType.Application.FormUrlEncoded)
+                        setBody("genre=99&token=$token")
                     }
-                    contentType(ContentType.Application.FormUrlEncoded)
-                    setBody("genre=99&token=$token")
                 }
+
+                val resp: HttpResponse = get("https://chunithm.wahlap.com/mobile/${url[1]}")
+                val body = resp.bodyAsText()
+
+                processBody(difficulty, body)
             }
-
-            val resp: HttpResponse = get("https://chunithm.wahlap.com/mobile/${url[1]}")
-            val body = resp.bodyAsText()
-
-            processBody(difficulty, body)
+        } catch (e: Exception) {
+            Log.e("ProberUtil", "抓取${difficulty.diffName}成绩失败: ${e.message}")
+            sendMessageToUi("抓取${difficulty.diffName}成绩失败: ${e.message}")
         }
     }
 }

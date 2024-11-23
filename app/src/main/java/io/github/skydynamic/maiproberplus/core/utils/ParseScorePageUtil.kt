@@ -101,6 +101,7 @@ object ParseScorePageUtil {
             var musicSyncType = MaimaiEnums.SyncType.NULL
             var musicFullComboType = MaimaiEnums.FullComboType.NULL
 
+            // TODO 这里的检测有问题要改
             val isDeluxe = musicCard.getElementsByClass("music_kind_icon")
                 .attr("src")
                 .contains("music_dx")

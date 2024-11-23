@@ -1,9 +1,6 @@
 package io.github.skydynamic.maiproberplus
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,6 +31,9 @@ import io.github.skydynamic.maiproberplus.ui.compose.InfoDialog
 import io.github.skydynamic.maiproberplus.ui.compose.SettingCompose
 import io.github.skydynamic.maiproberplus.ui.compose.SyncCompose
 import io.github.skydynamic.maiproberplus.ui.theme.MaiProberplusTheme
+
+val NOTIFICATION_CHANNEL_ID = "io.github.skydynamic.maiproberplus.notification.channel.default"
+val PROCESS_NOTIFICATION_CHANNEL_ID = "io.github.skydynamic.maiproberplus.notification.channel.process"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,9 +103,12 @@ fun AppContent() {
         }
     }
 
-    if (GlobalViewModel.showMessageDialog) {
-        InfoDialog(GlobalViewModel.localMessage.value!!) {
-            GlobalViewModel.showMessageDialog = false
+
+    when {
+        GlobalViewModel.showMessageDialog -> {
+            InfoDialog(GlobalViewModel.localMessage.value!!) {
+                GlobalViewModel.showMessageDialog = false
+            }
         }
     }
 }

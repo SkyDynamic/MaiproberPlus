@@ -2,9 +2,11 @@ package io.github.skydynamic.maiproberplus.core.prober
 
 import android.util.Log
 import io.github.skydynamic.maiproberplus.GlobalViewModel
+import io.github.skydynamic.maiproberplus.ui.compose.application
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
@@ -16,32 +18,44 @@ class DivingFishProberUtil : IProberUtil {
         importToken: String,
         authUrl: String
     ) {
+        super.uploadMaimaiProberData(importToken, authUrl)
+        application.sendNotifaction("水鱼查分器", "正在进行查分")
         sendMessageToUi("开始获取舞萌DX数据并上传到水鱼查分器")
         fetchMaimaiScorePage(authUrl) { diff, body ->
             Log.i("DivingFishProberUtil", "正在上传${diff.diffName}成绩到水鱼查分器")
             try {
-                client.post("$baseApiUrl/maimaidxprober/player/update_records_html") {
+                val result = client.post("$baseApiUrl/pageparser/page") {
                     headers {
-                        append("Import-Token", importToken)
                         append(HttpHeaders.ContentType, "text/plain")
                     }
                     contentType(ContentType.Text.Plain)
                     setBody(body)
                 }
+                val postResult = client.post("$baseApiUrl/maimaidxprober/player/update_records") {
+                    headers {
+                        append("Import-Token", importToken)
+                        append(HttpHeaders.ContentType, "application/json")
+                    }
+                    contentType(ContentType.Application.Json)
+                    setBody(result.bodyAsText())
+                }
+                Log.i("DivingFishProberUtil", "已上传${diff.diffName}成绩到水鱼查分器, 接口信息: ${postResult.bodyAsText()}")
             } catch (e: Exception) {
                 Log.e("DivingFishProberUtil", "上传${diff.diffName}成绩到水鱼查分器失败", e)
             }
-            Log.i("DivingFishProberUtil", "已上传${diff.diffName}成绩到水鱼查分器")
         }
         sendMessageToUi("上传舞萌DX成绩到水鱼查分器完成")
         Log.d("DivingFishProberUtil", "上传完毕")
         GlobalViewModel.maimaiHooking = false
+        application.sendNotifaction("水鱼查分器", "查分完毕")
     }
 
     override suspend fun uploadChunithmProberData(
         importToken: String,
         authUrl: String
     ) {
+        super.uploadChunithmProberData(importToken, authUrl)
+        application.sendNotifaction("水鱼查分器", "正在进行查分")
         sendMessageToUi("开始获取中二节奏数据并上传到水鱼查分器")
         fetchChuniScores(authUrl) { diff, body ->
             Log.i("DivingFishProberUtil", "正在上传${diff.diffName}成绩到水鱼查分器")
@@ -63,5 +77,6 @@ class DivingFishProberUtil : IProberUtil {
         sendMessageToUi("上传中二节奏成绩到水鱼查分器完成")
         Log.d("DivingFishProberUtil", "上传完毕")
         GlobalViewModel.chuniHooking = false
+        application.sendNotifaction("水鱼查分器", "查分完毕")
     }
 }

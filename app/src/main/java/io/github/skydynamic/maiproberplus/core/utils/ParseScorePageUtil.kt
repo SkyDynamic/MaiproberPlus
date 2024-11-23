@@ -101,9 +101,8 @@ object ParseScorePageUtil {
             var musicSyncType = MaimaiEnums.SyncType.NULL
             var musicFullComboType = MaimaiEnums.FullComboType.NULL
 
-            val isHasDeluxeAndStandard = musicCard.getElementsByClass("music_master_btn_off pointer")
-            var isDeluxe = if (isHasDeluxeAndStandard.isNotEmpty()) {
-                isHasDeluxeAndStandard.attr("src").contains("music_dx")
+            val isDeluxe= if (musicCard.attr("id").isNotEmpty()) {
+                musicCard.attr("id").contains("dx")
             } else {
                 musicCard.getElementsByClass("music_kind_icon")
                     .attr("src")

@@ -193,7 +193,7 @@ fun DiffChooseDialog(
                 Spacer(modifier = Modifier.weight(1f))
                 TextButton(
                     onClick = {
-                        onRequest(currentChoiceDifficulties)
+                        onRequest(currentChoiceDifficulties.sorted())
                         onDismissRequest()
                     }
                 ) {

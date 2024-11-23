@@ -121,7 +121,7 @@ class LxnsProberUtil : IProberUtil {
         authUrl: String
     ) {
         sendMessageToUi("开始获取舞萌数据并上传到落雪查分器")
-        val scores = getMaimaiPageData(authUrl)
+        val scores = getMaimaiScoreData(authUrl)
 
         if (scores.isEmpty()) {
             return
@@ -168,7 +168,7 @@ class LxnsProberUtil : IProberUtil {
 
     override suspend fun uploadChunithmProberData(importToken: String, authUrl: String) {
         sendMessageToUi("开始获取中二节奏数据并上传到落雪查分器")
-        val scores = getChuniPageData(authUrl)
+        val scores = getChuniScoreData(authUrl)
 
         if (scores.isEmpty()) {
             return

@@ -61,9 +61,18 @@ fun sendMessageToUi(message: String) {
      }
 }
 
-suspend fun getMaimaiPageData(authUrl: String) : List<MaimaiData.MusicDetail> {
+suspend fun getMaimaiScoreData(authUrl: String) : List<MaimaiData.MusicDetail> {
     val scores = mutableListOf<MaimaiData.MusicDetail>()
+    fetchMaimaiScorePage(authUrl) { diff, body ->
+        scores.addAll(ParseScorePageUtil.parseMaimai(body, diff))
+    }
+    return scores
+}
 
+suspend fun fetchMaimaiScorePage(
+    authUrl: String,
+    processBody: suspend (MaimaiEnums.Difficulty, String) -> Unit
+) {
     client.get(authUrl) {
         getDefaultWahlapRequestBuilder()
     }
@@ -73,7 +82,7 @@ suspend fun getMaimaiPageData(authUrl: String) : List<MaimaiData.MusicDetail> {
     if (result.bodyAsText().contains("错误")) {
         sendMessageToUi("获取舞萌成绩失败: 登录失败")
         Log.e("ProberUtil", "登录失败, 抓取成绩停止")
-        return emptyList()
+        return
     }
 
     for (diff in application.configManager.config.syncConfig.maimaiSyncDifficulty) {
@@ -90,13 +99,12 @@ suspend fun getMaimaiPageData(authUrl: String) : List<MaimaiData.MusicDetail> {
             val data = Regex("<html.*>([\\s\\S]*)</html>")
                 .find(body)?.groupValues?.get(1)?.replace("\\s+/g", " ")
 
-            scores.addAll(ParseScorePageUtil.parseMaimai(data ?: "", difficulty))
+            processBody(difficulty, data ?: "")
         }
     }
-    return scores
 }
 
-suspend fun getChuniPageData(authUrl: String) : List<ChuniData.MusicDetail> {
+suspend fun getChuniScoreData(authUrl: String) : List<ChuniData.MusicDetail> {
     val scores = mutableListOf<ChuniData.MusicDetail>()
     fetchChuniScores(authUrl) { diff, body ->
         scores.addAll(ParseScorePageUtil.parseChuni(body, diff))

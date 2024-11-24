@@ -121,7 +121,8 @@ class LxnsProberUtil : IProberUtil {
         importToken: String,
         authUrl: String
     ) {
-        super.uploadMaimaiProberData(importToken, authUrl)
+        val isCache = application.configManager.config.localConfig.cacheScore
+
         application.sendNotifaction("落雪查分器", "舞萌数据上传中")
         sendMessageToUi("开始获取舞萌数据并上传到落雪查分器")
         val scores = getMaimaiScoreData(authUrl)
@@ -168,10 +169,14 @@ class LxnsProberUtil : IProberUtil {
         }
         GlobalViewModel.maimaiHooking = false
         application.sendNotifaction("落雪查分器", "舞萌数据上传完毕")
+        if (isCache) {
+            writeMaimaiScoreCache(scores)
+        }
     }
 
     override suspend fun uploadChunithmProberData(importToken: String, authUrl: String) {
-        super.uploadChunithmProberData(importToken, authUrl)
+        val isCache = application.configManager.config.localConfig.cacheScore
+
         application.sendNotifaction("落雪查分器", "中二节奏数据上传中")
         sendMessageToUi("开始获取中二节奏数据并上传到落雪查分器")
         val scores = getChuniScoreData(authUrl)
@@ -217,5 +222,8 @@ class LxnsProberUtil : IProberUtil {
         }
         GlobalViewModel.chuniHooking = false
         application.sendNotifaction("落雪查分器", "中二数据上传完毕")
+        if (isCache) {
+            writeChuniScoreCache(scores)
+        }
     }
 }

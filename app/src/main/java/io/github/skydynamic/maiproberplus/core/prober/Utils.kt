@@ -31,6 +31,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.setCookie
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.json.encodeToStream
 
 val client = HttpClient(CIO) {
     install(ContentNegotiation) {
@@ -63,9 +67,11 @@ fun sendMessageToUi(message: String) {
 
 suspend fun getMaimaiScoreData(authUrl: String) : List<MaimaiData.MusicDetail> {
     val scores = mutableListOf<MaimaiData.MusicDetail>()
-    var processing = 0
     fetchMaimaiScorePage(authUrl) { diff, body ->
         scores.addAll(ParseScorePageUtil.parseMaimai(body, diff))
+    }
+    if (application.configManager.config.localConfig.cacheScore) {
+        writeMaimaiScoreCache(scores)
     }
     return scores
 }
@@ -114,6 +120,9 @@ suspend fun getChuniScoreData(authUrl: String) : List<ChuniData.MusicDetail> {
     fetchChuniScores(authUrl) { diff, body ->
         scores.addAll(ParseScorePageUtil.parseChuni(body, diff))
     }
+    if (application.configManager.config.localConfig.cacheScore) {
+        writeChuniScoreCache(scores)
+    }
     return scores
 }
 
@@ -160,6 +169,30 @@ suspend fun fetchChuniScores(
             Log.e("ProberUtil", "抓取${difficulty.diffName}成绩失败: ${e.message}")
         }
     }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+fun writeMaimaiScoreCache(data: List<MaimaiData.MusicDetail>) {
+    val outputStream = application.getFilesDirOutputStream("maimai_score_cache.json")
+    Json.encodeToStream(data, outputStream)
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+fun writeChuniScoreCache(data: List<ChuniData.MusicDetail>) {
+    val outputStream = application.getFilesDirOutputStream("chuni_score_cache.json")
+    Json.encodeToStream(data, outputStream)
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+fun getMaimaiScoreCache(): List<MaimaiData.MusicDetail> {
+    val inputStream = application.getFilesDirInputStream("maimai_score_cache.json")
+    return Json.decodeFromStream<List<MaimaiData.MusicDetail>>(inputStream)
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+fun getChuniScoreCache(): List<ChuniData.MusicDetail> {
+    val inputStream = application.getFilesDirInputStream("chuni_score_cache.json")
+    return Json.decodeFromStream<List<ChuniData.MusicDetail>>(inputStream)
 }
 
 private fun HttpRequestBuilder.getDefaultWahlapRequestBuilder() {

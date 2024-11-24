@@ -2,7 +2,12 @@ package io.github.skydynamic.maiproberplus.core.prober
 
 import android.util.Log
 import io.github.skydynamic.maiproberplus.GlobalViewModel
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
+import io.github.skydynamic.maiproberplus.core.utils.ParseScorePageUtil
 import io.github.skydynamic.maiproberplus.ui.compose.application
+import io.ktor.client.call.body
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -10,15 +15,35 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 class DivingFishProberUtil : IProberUtil {
     private val baseApiUrl = "https://www.diving-fish.com/api"
+
+    @Serializable
+    data class DivingFishParserResult(
+        val title: String,
+        val level: String,
+        @SerialName("level_index") val levelIndex: Int,
+        val type: String,
+        val achievements: Float,
+        val dxScore: Int,
+        val rate: String,
+        val fc: String,
+        val fs: String,
+        val ds: Float = 0F,
+        @SerialName("level_label")val levelLabel: String,
+        val ra: Int,
+    )
 
     override suspend fun uploadMaimaiProberData(
         importToken: String,
         authUrl: String
     ) {
-        super.uploadMaimaiProberData(importToken, authUrl)
+        val isCache = application.configManager.config.localConfig.cacheScore
+        val scores = mutableListOf<MaimaiData.MusicDetail>()
+
         application.sendNotifaction("水鱼查分器", "正在进行查分")
         sendMessageToUi("开始获取舞萌DX数据并上传到水鱼查分器")
         fetchMaimaiScorePage(authUrl) { diff, body ->
@@ -31,6 +56,40 @@ class DivingFishProberUtil : IProberUtil {
                     contentType(ContentType.Text.Plain)
                     setBody(body)
                 }
+
+                if (isCache) {
+                    val scoreBody = result.body<List<DivingFishParserResult>>()
+                    scoreBody.forEach { score ->
+                        val res = MaimaiData.MAIMAI_SONG_LIST.find { it.title == score.title }
+                        if (res != null) {
+                            var version =0
+                            var songType = MaimaiEnums.SongType.STANDARD
+                            var level = 0F
+                            if (score.type == "DX") {
+                                res.difficulties.dx[score.levelIndex].version
+                                songType = MaimaiEnums.SongType.DX
+                                level = res.difficulties.dx[score.levelIndex].levelValue
+                            } else {
+                                res.difficulties.standard[score.levelIndex].version
+                                level = res.difficulties.standard[score.levelIndex].levelValue
+                            }
+                            scores.add(MaimaiData.MusicDetail(
+                                name = score.title,
+                                level = score.ds,
+                                score = score.achievements,
+                                dxScore = score.dxScore,
+                                rating = score.ra,
+                                version = version,
+                                type = songType,
+                                diff = MaimaiEnums.Difficulty.getDifficultyWithIndex(score.levelIndex),
+                                rankType = MaimaiEnums.RankType.getRankTypeByScore(score.achievements),
+                                syncType = MaimaiEnums.SyncType.getSyncTypeByName(score.fs),
+                                fullComboType = MaimaiEnums.FullComboType.getFullComboTypeByName(score.fc),
+                            ))
+                        }
+                    }
+                }
+
                 val postResult = client.post("$baseApiUrl/maimaidxprober/player/update_records") {
                     headers {
                         append("Import-Token", importToken)
@@ -48,13 +107,18 @@ class DivingFishProberUtil : IProberUtil {
         Log.d("DivingFishProberUtil", "上传完毕")
         GlobalViewModel.maimaiHooking = false
         application.sendNotifaction("水鱼查分器", "查分完毕")
+        if (isCache) {
+            writeMaimaiScoreCache(scores)
+        }
     }
 
     override suspend fun uploadChunithmProberData(
         importToken: String,
         authUrl: String
     ) {
-        super.uploadChunithmProberData(importToken, authUrl)
+        val isCache = application.configManager.config.localConfig.cacheScore
+        val scores = mutableListOf<ChuniData.MusicDetail>()
+
         application.sendNotifaction("水鱼查分器", "正在进行查分")
         sendMessageToUi("开始获取中二节奏数据并上传到水鱼查分器")
         fetchChuniScores(authUrl) { diff, body ->
@@ -69,14 +133,22 @@ class DivingFishProberUtil : IProberUtil {
                     contentType(ContentType.Text.Plain)
                     setBody(body)
                 }
+
+                if (isCache) {
+                    scores.addAll(ParseScorePageUtil.parseChuni(body, diff))
+                }
+
+                Log.i("DivingFishProberUtil", "已上传${diff.diffName}成绩到水鱼查分器")
             } catch (e: Exception) {
                 Log.e("DivingFishProberUtil", "上传${diff.diffName}成绩到水鱼查分器失败", e)
             }
-            Log.i("DivingFishProberUtil", "已上传${diff.diffName}成绩到水鱼查分器")
         }
         sendMessageToUi("上传中二节奏成绩到水鱼查分器完成")
         Log.d("DivingFishProberUtil", "上传完毕")
         GlobalViewModel.chuniHooking = false
         application.sendNotifaction("水鱼查分器", "查分完毕")
+        if (isCache) {
+            writeChuniScoreCache(scores)
+        }
     }
 }

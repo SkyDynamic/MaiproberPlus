@@ -113,14 +113,17 @@ object ParseScorePageUtil {
             val res = MaimaiData.MAIMAI_SONG_LIST.find { it.title == musicName }
             if (res == null) continue
             if (res.disabled == true) { continue }
-            val musicLevel = if (isDeluxe) {
-                res.difficulties.dx[difficulty.diffIndex].levelValue
+            var musicLevel = 0f
+            var musicVersion = 0
+            if (isDeluxe) {
+                musicLevel = res.difficulties.dx[difficulty.diffIndex].levelValue
+                musicVersion = res.difficulties.dx[difficulty.diffIndex].version
             } else {
-                res.difficulties.standard[difficulty.diffIndex].levelValue
+                musicLevel = res.difficulties.standard[difficulty.diffIndex].levelValue
+                musicVersion = res.difficulties.standard[difficulty.diffIndex].version
             }
 
             val musicRating = calcMaimaiScore(musicScore, musicLevel)
-            val musicVersion = res.version
 
             for (musicClearTypeElement in musicClearTypes) {
                 val regex = Regex(".*music_icon_(.*?)?.png?.*")

@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -15,6 +17,19 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.1.0"
+
+        val gitCommitId: String = try {
+            val stdout = ByteArrayOutputStream()
+            exec {
+                commandLine("git", "rev-parse", "--short", "HEAD")
+                standardOutput = stdout
+            }
+            stdout.toString().trim()
+        } catch (_: Exception) {
+            "0"
+        }
+
+        versionNameSuffix = "-$gitCommitId"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +63,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

@@ -1,24 +1,41 @@
 package io.github.skydynamic.maiproberplus.ui.compose
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.skydynamic.maiproberplus.Application
+import io.github.skydynamic.maiproberplus.BuildConfig
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.ui.compose.setting.PasswordTextFiled
 import io.github.skydynamic.maiproberplus.ui.compose.setting.SettingItemGroup
+import io.github.skydynamic.maiproberplus.ui.compose.setting.SwitchSettingItem
 import io.github.skydynamic.maiproberplus.ui.compose.setting.TextButtonItem
+
+val horizontalDivider = @Composable {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        color = Color.LightGray,
+        thickness = 1.dp
+    )
+}
 
 @Composable
 fun SettingCompose() {
@@ -61,10 +78,10 @@ fun SettingCompose() {
     }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
     ) {
         SettingItemGroup(
-            modifier = Modifier.wrapContentSize().padding(top = 15.dp),
+            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
             title = "查分Token设置"
         ) {
             PasswordTextFiled(
@@ -99,7 +116,7 @@ fun SettingCompose() {
         }
 
         SettingItemGroup(
-            modifier = Modifier.wrapContentSize().padding(top = 15.dp),
+            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
             title = "成绩抓取设置"
         ) {
             TextButtonItem(
@@ -115,6 +132,50 @@ fun SettingCompose() {
             ) {
                 showChooseChuniDiffDialog = true
             }
+        }
+
+        SettingItemGroup(
+            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            title = "本地设置"
+        ) {
+            SwitchSettingItem(
+                title = "成绩缓存本地",
+                description = "开启后, 抓取成绩并上传到查分器时会缓存此次查分成绩到本地",
+                checked = application.configManager.config.localConfig.cacheScore,
+                onCheckedChange = {
+                    application.configManager.config.localConfig.cacheScore = it
+                    application.configManager.save()
+                }
+            )
+        }
+
+        SettingItemGroup(
+            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            title = "关于"
+        ) {
+            Text(
+                "App版本: ${BuildConfig.VERSION_NAME}",
+                fontSize = 12.sp,
+                modifier = Modifier.padding(8.dp)
+            )
+
+            horizontalDivider()
+
+            TextButtonItem(
+                title = "项目仓库",
+                description = "项目的GitHub仓库"
+            ) {
+                val uri = Uri.parse("https://github.com/SkyDynamic/MaiproberPlus")
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                application.startActivity(intent)
+            }
+
+            Text(
+                "本项目遵循Apache LICENSE 2.0协议",
+                fontSize = 12.sp,
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 }

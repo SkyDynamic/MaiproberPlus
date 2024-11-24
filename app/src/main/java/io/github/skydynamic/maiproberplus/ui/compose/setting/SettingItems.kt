@@ -1,20 +1,29 @@
 package io.github.skydynamic.maiproberplus.ui.compose.setting
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -29,6 +38,25 @@ val horizontalDivider = @Composable {
         color = Color.LightGray,
         thickness = 1.dp
     )
+}
+
+@Composable
+fun BaseTextItem(
+    modifier: Modifier = Modifier,
+    title: String,
+    description: String = "",
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Text(text = title, fontSize = 18.sp, color = getTitleFontColor())
+        Text(
+            text = description,
+            fontSize = 12.sp,
+            color = getDescFontColor(),
+            style = TextStyle.Default
+        )
+    }
 }
 
 @Composable
@@ -78,13 +106,55 @@ fun TextButtonItem(
     onClick: () -> Unit
 ) {
     TextButton(
-        modifier = Modifier.padding(8.dp).fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         onClick = onClick
     ) {
-        Column {
-            Text(text = title, fontSize = 18.sp, color = getTitleFontColor())
-            Text(text = description, fontSize = 12.sp, color = getDescFontColor())
-        }
+        BaseTextItem(title = title, description = description)
+    }
+
+    horizontalDivider()
+}
+
+@Composable
+fun SwitchSettingItem(
+    title: String,
+    description: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    var checked by remember { mutableStateOf(checked) }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
+    ) {
+        BaseTextItem(
+            modifier = Modifier.weight(3f),
+            title = title,
+            description = description
+        )
+
+        Spacer(modifier = Modifier.weight(1.0f))
+
+        Switch(
+            checked = checked,
+            onCheckedChange = {
+                checked = !checked
+                onCheckedChange(checked)
+            },
+            thumbContent = if (checked) {
+                {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                    )
+                }
+            } else {
+                null
+            }
+        )
     }
 
     horizontalDivider()

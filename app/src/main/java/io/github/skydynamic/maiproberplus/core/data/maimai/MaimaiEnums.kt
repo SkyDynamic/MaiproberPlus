@@ -74,6 +74,18 @@ class MaimaiEnums {
         FCP("fcp"),
         AP("ap"),
         APP("app");
+
+        companion object {
+            @JvmStatic
+            fun getFullComboTypeByName(typeName: String): FullComboType {
+                for (fullComboType in FullComboType.entries) {
+                    if (typeName == fullComboType.typeName) {
+                        return fullComboType
+                    }
+                }
+                return NULL
+            }
+        }
     }
 
     @Serializable
@@ -85,5 +97,17 @@ class MaimaiEnums {
         FSP("fsp"),
         FDX("fsd"),
         FDXP("fsdp");
+
+        companion object {
+            @JvmStatic
+            fun getSyncTypeByName(syncName: String): SyncType {
+                for (syncType in SyncType.entries) {
+                    if (syncName == syncType.syncName) {
+                        return syncType
+                    }
+                }
+                return NULL
+            }
+        }
     }
 }

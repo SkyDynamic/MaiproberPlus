@@ -50,7 +50,8 @@ data class ConfigStorage(
     var divingfishToken: String = "",
     var lxnsToken: String = "",
     var maimaiPresonalInfo: MaimaiProberUserInfo = MaimaiProberUserInfo(),
-    var syncConfig: SyncConfig = SyncConfig()
+    var syncConfig: SyncConfig = SyncConfig(),
+    var localConfig: LocalConfig = LocalConfig()
 )
 
 @Serializable
@@ -66,4 +67,9 @@ data class MaimaiProberUserInfo(
 data class SyncConfig(
     var maimaiSyncDifficulty: List<Int> = MaimaiEnums.Difficulty.entries.map { it.diffIndex },
     var chuniSyncDifficulty: List<Int> = ChuniEnums.Difficulty.entries.map { it.diffIndex }
+)
+
+@Serializable
+data class LocalConfig(
+    var cacheScore: Boolean = false
 )

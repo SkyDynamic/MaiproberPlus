@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SegmentedButton
@@ -36,7 +35,11 @@ import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServer
 import io.github.skydynamic.maiproberplus.ui.compose.setting.PasswordTextFiled
 
-data class FileDownloadMeta(val fileName: String, val fileDownloadUrl: String)
+data class FileDownloadMeta(
+    val fileName: String,
+    val fileSavePath: String,
+    val fileDownloadUrl: String
+)
 
 val application: Application = Application.application
 
@@ -79,10 +82,12 @@ fun SyncCompose() {
                 listOf(
                     FileDownloadMeta(
                         "maimai_song_list.json",
+                        ".",
                         "https://maimai.lxns.net/api/v0/maimai/song/list?notes=true"
                     ),
                     FileDownloadMeta(
                         "chuni_song_list.json",
+                        ".",
                         "https://maimai.lxns.net/api/v0/chunithm/song/list"
                     )
                 )

@@ -154,7 +154,7 @@ fun SettingCompose() {
             title = "关于"
         ) {
             Text(
-                "App版本: ${BuildConfig.VERSION_NAME}",
+                "App版本: ${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}",
                 fontSize = 12.sp,
                 modifier = Modifier.padding(8.dp)
             )

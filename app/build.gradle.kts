@@ -15,7 +15,7 @@ android {
         applicationId = "io.github.skydynamic.maiproberplus"
         minSdk = 31
         targetSdk = 34
-        versionCode = 1
+        versionCode = 2
         versionName = "1.1.0"
 
         val gitCommitId: String = try {
@@ -54,9 +54,10 @@ android {
     }
 
     applicationVariants.all {
-        outputs.all {
+        val variant = this
+        variant.outputs.all {
             if (this is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
-                outputFileName = "MaiProberPlus-${versionName}-universal.apk"
+                outputFileName = "MaiProberPlus-${versionName}-universal-${variant.buildType.name}.apk"
             }
         }
     }
@@ -100,4 +101,7 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.ktor3)
 }

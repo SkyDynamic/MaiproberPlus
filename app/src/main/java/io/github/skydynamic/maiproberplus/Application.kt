@@ -11,6 +11,7 @@ import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -21,12 +22,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.github.skydynamic.maiproberplus.core.ProberContext
 import io.github.skydynamic.maiproberplus.core.config.ConfigManager
 import io.github.skydynamic.maiproberplus.core.config.ConfigStorage
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServerService
 import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService
 import java.io.FileOutputStream
@@ -126,6 +129,14 @@ class Application : Application() {
 
     fun getFilesDirOutputStream(fileName: String): FileOutputStream {
         return this.openFileOutput(fileName, MODE_PRIVATE)
+    }
+
+    fun getJacketUri(songId: Int): Uri {
+        return filesDir.resolve("jacket").resolve("${songId}.png").toUri()
+    }
+
+    fun checkFilesDirPathExist(path: String): Boolean {
+        return filesDir.resolve(path).exists()
     }
 
     fun startWechat() {

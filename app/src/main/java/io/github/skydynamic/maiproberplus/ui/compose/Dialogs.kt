@@ -29,7 +29,9 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.readRawBytes
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import java.io.File
 
@@ -90,22 +92,34 @@ fun DownloadDialog(
     LaunchedEffect(downloadFileMetas) {
         val totalFiles = downloadFileMetas.size
         var completedFiles = 0
+        val downloadJobs = mutableListOf<Job>()
+
         for (meta in downloadFileMetas) {
             val job = scope.async(Dispatchers.IO) {
                 val response = httpClient.get(meta.fileDownloadUrl)
                 if (response.status.value == 200) {
-                    File(application.filesDir, meta.fileName).deleteOnExit()
-                    val outputStream = application.getFilesDirOutputStream(meta.fileName)
-                    outputStream.bufferedWriter().use {
-                        it.write(response.bodyAsText())
+                    val file = application.filesDir.resolve(meta.fileSavePath).resolve(meta.fileName)
+                    file.parentFile?.mkdirs()
+                    when {
+                        meta.fileName.endsWith(".png", ignoreCase = true) -> {
+                            file.outputStream().use {
+                                it.write(response.readRawBytes())
+                            }
+                        }
+                        else -> {
+                            file.bufferedWriter().use {
+                                it.write(response.bodyAsText())
+                            }
+                        }
                     }
                     completedFiles++
                     finish = completedFiles.toFloat() / totalFiles
                 }
             }
-
-            job.await()
+            downloadJobs += job
         }
+        downloadJobs.forEach { it.join() }
+
         onRequest()
     }
 
@@ -121,15 +135,21 @@ fun DownloadDialog(
             shape = RoundedCornerShape(16.dp),
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(15.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                Text("正在下载资源...")
+                Text("下载进度: ${(finish * 100).toInt()}%")
+
                 LinearProgressIndicator(
-                    progress = { finish },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    progress = { finish }
                 )
-                Text("${(finish * 100).toInt()}%")
             }
         }
     }
@@ -156,7 +176,9 @@ fun DiffChooseDialog(
             colors = CardDefaults.cardColors(containerColor = getCardColor())
         ) {
             Column(
-                modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

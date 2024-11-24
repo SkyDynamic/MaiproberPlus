@@ -1,5 +1,6 @@
 package io.github.skydynamic.maiproberplus.core.data.maimai
 
+import androidx.compose.ui.graphics.Color
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -12,12 +13,12 @@ class MaimaiEnums {
     }
 
     @Serializable
-    enum class Difficulty(val diffName: String, val diffIndex: Int) {
-        BASIC("Basic", 0),
-        ADVANCED("Advanced", 1),
-        EXPERT("Expert", 2),
-        MASTER("Master", 3),
-        REMASTER("Re:Master", 4);
+    enum class Difficulty(val diffName: String, val diffIndex: Int, val color: Color) {
+        BASIC("Basic", 0, Color(28, 133, 0)),
+        ADVANCED("Advanced", 1, Color(168, 137, 0, 255)),
+        EXPERT("Expert", 2, Color(220, 40, 40)),
+        MASTER("Master", 3, Color(165, 0, 235)),
+        REMASTER("Re:Master", 4, Color(186, 153, 255));
 
         companion object {
             @JvmStatic

@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -30,6 +32,7 @@ import androidx.lifecycle.Observer
 import io.github.skydynamic.maiproberplus.ui.compose.InfoDialog
 import io.github.skydynamic.maiproberplus.ui.compose.SettingCompose
 import io.github.skydynamic.maiproberplus.ui.compose.SyncCompose
+import io.github.skydynamic.maiproberplus.ui.compose.ScoreManager
 import io.github.skydynamic.maiproberplus.ui.theme.MaiProberplusTheme
 
 val NOTIFICATION_CHANNEL_ID = "io.github.skydynamic.maiproberplus.notification.channel.default"
@@ -58,13 +61,14 @@ class MainActivity : ComponentActivity() {
 fun AppContent() {
     var selectedItem by remember { mutableIntStateOf(0) }
 
-    val items = listOf("成绩同步", "设置")
-    val selectedIcons = listOf(Icons.Filled.Refresh, Icons.Filled.Settings)
+    val items = listOf("成绩同步", "成绩管理", "设置")
+    val selectedIcons = listOf(Icons.Filled.Refresh, Icons.Filled.Build, Icons.Filled.Settings)
     val unselectedIcons =
-        listOf(Icons.Outlined.Refresh, Icons.Outlined.Settings)
+        listOf(Icons.Outlined.Refresh, Icons.Outlined.Build, Icons.Outlined.Settings)
 
     val composeList: List<@Composable () -> Unit> = listOf(
         @Composable { SyncCompose() },
+        @Composable { ScoreManager() },
         @Composable { SettingCompose() }
     )
 

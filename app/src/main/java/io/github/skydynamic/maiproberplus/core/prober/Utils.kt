@@ -185,14 +185,22 @@ fun writeChuniScoreCache(data: List<ChuniData.MusicDetail>) {
 
 @OptIn(ExperimentalSerializationApi::class)
 fun getMaimaiScoreCache(): List<MaimaiData.MusicDetail> {
-    val inputStream = application.getFilesDirInputStream("maimai_score_cache.json")
-    return Json.decodeFromStream<List<MaimaiData.MusicDetail>>(inputStream)
+    if (application.checkFilesDirPathExist("maimai_score_cache.json")) {
+        val inputStream = application.getFilesDirInputStream("maimai_score_cache.json")
+        return Json.decodeFromStream<List<MaimaiData.MusicDetail>>(inputStream)
+    } else {
+        return emptyList()
+    }
 }
 
 @OptIn(ExperimentalSerializationApi::class)
 fun getChuniScoreCache(): List<ChuniData.MusicDetail> {
-    val inputStream = application.getFilesDirInputStream("chuni_score_cache.json")
-    return Json.decodeFromStream<List<ChuniData.MusicDetail>>(inputStream)
+    if (application.checkFilesDirPathExist("chuni_score_cache.json")) {
+        val inputStream = application.getFilesDirInputStream("chuni_score_cache.json")
+        return Json.decodeFromStream<List<ChuniData.MusicDetail>>(inputStream)
+    } else {
+        return emptyList()
+    }
 }
 
 private fun HttpRequestBuilder.getDefaultWahlapRequestBuilder() {

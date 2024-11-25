@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
@@ -26,12 +27,13 @@ import androidx.compose.ui.unit.sp
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 
 @Composable
-fun ChuniScoreList() {
+fun ChuniScoreList(gridState: LazyGridState) {
     LazyVerticalGrid(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 8.dp),
-        columns = GridCells.Fixed(2)
+        columns = GridCells.Fixed(2),
+        state = gridState
     ) {
         item(
             span = {

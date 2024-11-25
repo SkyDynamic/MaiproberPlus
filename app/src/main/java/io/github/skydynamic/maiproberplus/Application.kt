@@ -15,13 +15,11 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -29,8 +27,9 @@ import androidx.lifecycle.ViewModel
 import io.github.skydynamic.maiproberplus.core.ProberContext
 import io.github.skydynamic.maiproberplus.core.config.ConfigManager
 import io.github.skydynamic.maiproberplus.core.config.ConfigStorage
-import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
+import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServerService
+import io.github.skydynamic.maiproberplus.ui.compose.GameType
 import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -38,8 +37,8 @@ import java.io.InputStream
 object GlobalViewModel : ViewModel() {
     var isVpnServiceRunning by mutableStateOf(LocalVpnService.IsRunning)
     var showMessageDialog by mutableStateOf(false)
-    var platformIndex by mutableIntStateOf(0)
-    var gametypeIndex by mutableIntStateOf(0)
+    var proberPlatform by mutableStateOf(ProberPlatform.DIVING_FISH)
+    var gameType by mutableStateOf(GameType.MaimaiDX)
     var maimaiHooking by mutableStateOf(false)
     var chuniHooking by mutableStateOf(false)
 
@@ -67,7 +66,7 @@ class Application : Application() {
         val importance = NotificationManager.IMPORTANCE_HIGH
         val defaultChannel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
-            "DefaultMaiProberNotifaction",
+            "DefaultMaiProberNotification",
             importance
         )
         val notificationManager: NotificationManager =
@@ -76,7 +75,7 @@ class Application : Application() {
         notificationManager.createNotificationChannel(defaultChannel)
     }
 
-    fun sendNotifaction(
+    fun sendNotification(
         title: String,
         message: String
     ) {

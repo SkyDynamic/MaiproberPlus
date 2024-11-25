@@ -30,9 +30,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Observer
 import io.github.skydynamic.maiproberplus.ui.compose.InfoDialog
-import io.github.skydynamic.maiproberplus.ui.compose.SettingCompose
-import io.github.skydynamic.maiproberplus.ui.compose.SyncCompose
-import io.github.skydynamic.maiproberplus.ui.compose.ScoreManager
+import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManager
+import io.github.skydynamic.maiproberplus.ui.compose.setting.SettingCompose
+import io.github.skydynamic.maiproberplus.ui.compose.sync.SyncCompose
 import io.github.skydynamic.maiproberplus.ui.theme.MaiProberplusTheme
 
 val NOTIFICATION_CHANNEL_ID = "io.github.skydynamic.maiproberplus.notification.channel.default"

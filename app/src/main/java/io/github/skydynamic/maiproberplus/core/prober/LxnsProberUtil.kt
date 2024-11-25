@@ -1,12 +1,12 @@
 package io.github.skydynamic.maiproberplus.core.prober
 
 import android.util.Log
+import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
-import io.github.skydynamic.maiproberplus.ui.compose.application
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.get
@@ -138,7 +138,7 @@ class LxnsProberUtil : IProberUtil {
     ) {
         val isCache = application.configManager.config.localConfig.cacheScore
 
-        application.sendNotifaction("落雪查分器", "舞萌数据上传中")
+        application.sendNotification("落雪查分器", "舞萌数据上传中")
         sendMessageToUi("开始获取舞萌数据并上传到落雪查分器")
         val scores = getMaimaiScoreData(authUrl)
 
@@ -183,7 +183,7 @@ class LxnsProberUtil : IProberUtil {
             Log.e("LxnsProberUtil", "上传失败: ${postScoreResponseBody.message}")
         }
         GlobalViewModel.maimaiHooking = false
-        application.sendNotifaction("落雪查分器", "舞萌数据上传完毕")
+        application.sendNotification("落雪查分器", "舞萌数据上传完毕")
         if (isCache) {
             writeMaimaiScoreCache(scores)
         }
@@ -192,7 +192,7 @@ class LxnsProberUtil : IProberUtil {
     override suspend fun uploadChunithmProberData(importToken: String, authUrl: String) {
         val isCache = application.configManager.config.localConfig.cacheScore
 
-        application.sendNotifaction("落雪查分器", "中二节奏数据上传中")
+        application.sendNotification("落雪查分器", "中二节奏数据上传中")
         sendMessageToUi("开始获取中二节奏数据并上传到落雪查分器")
         val scores = getChuniScoreData(authUrl)
 
@@ -236,7 +236,7 @@ class LxnsProberUtil : IProberUtil {
             Log.e("LxnsProberUtil", "上传失败: ${postScoreResponseBody.message}")
         }
         GlobalViewModel.chuniHooking = false
-        application.sendNotifaction("落雪查分器", "中二数据上传完毕")
+        application.sendNotification("落雪查分器", "中二数据上传完毕")
         if (isCache) {
             writeChuniScoreCache(scores)
         }

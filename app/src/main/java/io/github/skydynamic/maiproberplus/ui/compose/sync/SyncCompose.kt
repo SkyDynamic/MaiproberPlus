@@ -1,4 +1,4 @@
-package io.github.skydynamic.maiproberplus.ui.compose
+package io.github.skydynamic.maiproberplus.ui.compose.sync
 
 import android.app.Activity
 import android.content.Intent
@@ -22,38 +22,33 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.skydynamic.maiproberplus.Application
+import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
 import io.github.skydynamic.maiproberplus.core.prober.writeChuniScoreCache
 import io.github.skydynamic.maiproberplus.core.prober.writeMaimaiScoreCache
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServer
+import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
+import io.github.skydynamic.maiproberplus.ui.compose.DownloadDialog
+import io.github.skydynamic.maiproberplus.ui.compose.GameType
+import io.github.skydynamic.maiproberplus.ui.compose.InfoDialog
+import io.github.skydynamic.maiproberplus.ui.compose.scores.refreshScore
+import io.github.skydynamic.maiproberplus.ui.compose.scores.resources
 import io.github.skydynamic.maiproberplus.ui.compose.setting.PasswordTextFiled
 import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-data class FileDownloadMeta(
-    val fileName: String,
-    val fileSavePath: String,
-    val fileDownloadUrl: String
-)
-
-val application: Application = Application.application
-
-object SyncViewModel : ViewModel() {
-    var openInitDialog by mutableStateOf(false)
-    var openInitDownloadDialog by mutableStateOf(false)
-    var tokenHidden by mutableStateOf(true)
-}
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,9 +61,6 @@ fun SyncCompose() {
     var lxnsToken by remember { mutableStateOf(application.configManager.config.lxnsToken) }
 
     var openAskIsOverwriteScoresDialog by remember { mutableStateOf(false) }
-
-    val proberPlatformList = ProberPlatform.entries.map { it.proberName }
-    val gameTypeList = listOf("舞萌DX", "中二节奏")
 
     val vpnRequestLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -83,10 +75,12 @@ fun SyncCompose() {
             ConfirmDialog(
                 info = "同步成绩到本地会覆盖所有的成绩缓存，你确定同步吗",
                 onRequest = {
-                    val token = if(globalViewModel.platformIndex == 0) {
-                        application.configManager.config.divingfishToken
-                    } else {
-                        application.configManager.config.lxnsToken
+                    val token = when (globalViewModel.proberPlatform) {
+                        ProberPlatform.DIVING_FISH ->
+                            application.configManager.config.divingfishToken
+
+                        else ->
+                            application.configManager.config.lxnsToken
                     }
 
                     if (token.isEmpty()) {
@@ -95,18 +89,26 @@ fun SyncCompose() {
                     }
 
                     viewModel.viewModelScope.launch(Dispatchers.IO) {
-                        val proberUtil = ProberPlatform.entries[globalViewModel.platformIndex].factory
-                        if (globalViewModel.gametypeIndex == 0) {
-                            val result = proberUtil.getMaimaiProberData(token)
-                            if (result.isNotEmpty()) {
-                                writeMaimaiScoreCache(result)
-                                sendMessageToUi("成功从${proberPlatformList[globalViewModel.platformIndex]}同步${gameTypeList[globalViewModel.gametypeIndex]}成绩")
+                        val proberUtil = globalViewModel.proberPlatform.factory
+
+                        fun sendSyncSuccessMessageToUi() {
+                            sendMessageToUi("成功从${globalViewModel.proberPlatform.proberName}同步${globalViewModel.gameType.displayName}成绩")
+                        }
+
+                        when (globalViewModel.gameType) {
+                            GameType.MaimaiDX -> {
+                                val result = proberUtil.getMaimaiProberData(token)
+                                if (result.isNotEmpty()) {
+                                    writeMaimaiScoreCache(result)
+                                    sendSyncSuccessMessageToUi()
+                                }
                             }
-                        } else {
-                            val result = proberUtil.getChuniProberData(token)
-                            if (result.isNotEmpty()) {
-                                writeChuniScoreCache(result)
-                                sendMessageToUi("成功从${proberPlatformList[globalViewModel.platformIndex]}同步${gameTypeList[globalViewModel.gametypeIndex]}成绩")
+                            GameType.Chunithm -> {
+                                val result = proberUtil.getChuniProberData(token)
+                                if (result.isNotEmpty()) {
+                                    writeChuniScoreCache(result)
+                                    sendSyncSuccessMessageToUi()
+                                }
                             }
                         }
                     }
@@ -115,17 +117,17 @@ fun SyncCompose() {
                 openAskIsOverwriteScoresDialog = false
             }
         }
-        viewModel.openInitDialog -> {
+        SyncViewModel.openInitDialog -> {
             InfoDialog("首次启动需要下载资源文件，请耐心等待") {
-                viewModel.openInitDialog = false
-                viewModel.openInitDownloadDialog = true
+                SyncViewModel.openInitDialog = false
+                SyncViewModel.openInitDownloadDialog = true
             }
         }
-        viewModel.openInitDownloadDialog -> {
+        SyncViewModel.openInitDownloadDialog -> {
             DownloadDialog(
                 resources
             ) {
-                viewModel.openInitDownloadDialog = false
+                SyncViewModel.openInitDownloadDialog = false
             }
         }
     }
@@ -133,7 +135,7 @@ fun SyncCompose() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(15.dp),
+            .padding(16.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -143,16 +145,15 @@ fun SyncCompose() {
         ) {
             Button(
                 modifier = Modifier
-                    .padding(15.dp)
-                    .height(50.dp),
+                    .padding(16.dp),
                 onClick = {
                     if (!context.filesDir.resolve("maimai_song_list.json").exists() ||
                         !context.filesDir.resolve("chuni_song_list.json").exists()
                     ) {
-                        viewModel.openInitDialog = true
+                        SyncViewModel.openInitDialog = true
                     }
                     if (!globalViewModel.isVpnServiceRunning) {
-                        var intent = VpnService.prepare(context)
+                        val intent = VpnService.prepare(context)
                         if (intent != null) {
                             vpnRequestLauncher.launch(intent)
                         } else {
@@ -163,13 +164,14 @@ fun SyncCompose() {
                     }
                 }
             ) {
-                if (!globalViewModel.isVpnServiceRunning) Text("开启劫持") else Text("结束劫持")
+                if (!globalViewModel.isVpnServiceRunning)
+                    Text("开启劫持")
+                else Text("结束劫持")
             }
 
             Button(
                 modifier = Modifier
-                    .padding(15.dp)
-                    .height(50.dp),
+                    .padding(16.dp),
                 onClick = { application.startWechat() }
             ) {
                 Text("启动微信")
@@ -178,38 +180,40 @@ fun SyncCompose() {
 
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier
-                .padding(15.dp)
+                .padding(16.dp)
                 .fillMaxWidth()
-                .height(50.dp)
         ) {
-            proberPlatformList.forEachIndexed { index, name ->
+            ProberPlatform.entries.forEach {
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(
-                        index = index, count = proberPlatformList.size
+                        index = it.ordinal,
+                        count = ProberPlatform.entries.size,
                     ),
-                    onClick = { globalViewModel.platformIndex = index },
-                    selected = index == globalViewModel.platformIndex
+                    onClick = { globalViewModel.proberPlatform = it },
+                    selected = it == globalViewModel.proberPlatform
                 ) {
-                    Text(name)
+                    Text(it.proberName)
                 }
             }
         }
 
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier
-                .padding(15.dp)
+                .padding(16.dp)
                 .fillMaxWidth()
-                .height(50.dp)
         ) {
-            gameTypeList.forEachIndexed { index, name ->
+            GameType.entries.forEach {
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(
-                        index = index, count = gameTypeList.size
+                        index = it.ordinal, count = GameType.entries.size
                     ),
-                    onClick = { globalViewModel.gametypeIndex = index },
-                    selected = index == globalViewModel.gametypeIndex
+                    selected = globalViewModel.gameType == it,
+                    onClick = {
+                        globalViewModel.gameType = it
+                        refreshScore(it)
+                    },
                 ) {
-                    Text(name)
+                    Text(it.displayName)
                 }
             }
         }
@@ -218,22 +222,27 @@ fun SyncCompose() {
             modifier = Modifier.padding(15.dp).fillMaxWidth().height(75.dp),
             label = { Text("查分器Token") },
             icon = { Icon(Icons.Filled.Lock, null) },
-            hidden = viewModel.tokenHidden,
-            value = if (globalViewModel.platformIndex == 0) divingfishToken
-                    else if (globalViewModel.platformIndex == 1) lxnsToken
-                    else "",
-            onTrailingIconClick = { viewModel.tokenHidden = !viewModel.tokenHidden },
+            hidden = SyncViewModel.tokenHidden,
+            value = when (globalViewModel.proberPlatform) {
+                ProberPlatform.DIVING_FISH -> divingfishToken
+                ProberPlatform.LXNS -> lxnsToken
+                ProberPlatform.LOCAL -> ""
+            },
+            onTrailingIconClick = { SyncViewModel.tokenHidden = !SyncViewModel.tokenHidden },
             onValueChange = {
-                if (globalViewModel.platformIndex == 0) {
-                    divingfishToken = it
-                    application.configManager.config.divingfishToken = it
-                } else {
-                    lxnsToken = it
-                    application.configManager.config.lxnsToken = it
+                when (globalViewModel.proberPlatform) {
+                    ProberPlatform.DIVING_FISH -> {
+                        divingfishToken = it
+                        application.configManager.config.divingfishToken = it
+                    }
+                    else -> {
+                        lxnsToken = it
+                        application.configManager.config.lxnsToken = it
+                    }
                 }
                 application.configManager.save()
             },
-            enable = globalViewModel.platformIndex != 2
+            enable = globalViewModel.proberPlatform != ProberPlatform.LOCAL
         )
 
         Button(
@@ -241,11 +250,10 @@ fun SyncCompose() {
                 .padding(15.dp)
                 .size(300.dp, 50.dp),
             onClick = {
-                application.copyTextToClipboard("http://127.0.0.2:${HttpServer.Port}/${globalViewModel.gametypeIndex}")
+                application.copyTextToClipboard("http://127.0.0.2:${HttpServer.Port}/${globalViewModel.gameType.ordinal}")
             }
         ) {
-            val gameName = if (globalViewModel.gametypeIndex == 0) "舞萌DX" else "中二节奏"
-            Text("复制${gameName} Hook链接(长期有效)")
+            Text("复制${globalViewModel.gameType.displayName} Hook链接(长期有效)")
         }
 
         Button(
@@ -255,10 +263,9 @@ fun SyncCompose() {
             onClick = {
                 openAskIsOverwriteScoresDialog = true
             },
-            enabled = globalViewModel.platformIndex != 2
+            enabled = globalViewModel.proberPlatform != ProberPlatform.LOCAL
         ) {
-            val gameName = if (globalViewModel.gametypeIndex == 0) "舞萌DX" else "中二节奏"
-            Text("从选定的查分器获取 $gameName 成绩")
+            Text("从选定的查分器获取 ${globalViewModel.gameType.displayName} 成绩")
         }
     }
 }

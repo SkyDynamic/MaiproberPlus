@@ -1,13 +1,13 @@
 package io.github.skydynamic.maiproberplus.core.prober
 
 import android.util.Log
+import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.utils.ParseScorePageUtil
-import io.github.skydynamic.maiproberplus.ui.compose.application
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -85,7 +85,7 @@ class DivingFishProberUtil : IProberUtil {
         val isCache = application.configManager.config.localConfig.cacheScore
         val scores = mutableListOf<MaimaiData.MusicDetail>()
 
-        application.sendNotifaction("水鱼查分器", "正在进行查分")
+        application.sendNotification("水鱼查分器", "正在进行查分")
         sendMessageToUi("开始获取舞萌DX数据并上传到水鱼查分器")
         fetchMaimaiScorePage(authUrl) { diff, body ->
             Log.i("DivingFishProberUtil", "正在上传${diff.diffName}成绩到水鱼查分器")
@@ -148,7 +148,7 @@ class DivingFishProberUtil : IProberUtil {
         sendMessageToUi("上传舞萌DX成绩到水鱼查分器完成")
         Log.d("DivingFishProberUtil", "上传完毕")
         GlobalViewModel.maimaiHooking = false
-        application.sendNotifaction("水鱼查分器", "查分完毕")
+        application.sendNotification("水鱼查分器", "查分完毕")
         if (isCache) {
             writeMaimaiScoreCache(scores)
         }
@@ -161,7 +161,7 @@ class DivingFishProberUtil : IProberUtil {
         val isCache = application.configManager.config.localConfig.cacheScore
         val scores = mutableListOf<ChuniData.MusicDetail>()
 
-        application.sendNotifaction("水鱼查分器", "正在进行查分")
+        application.sendNotification("水鱼查分器", "正在进行查分")
         sendMessageToUi("开始获取中二节奏数据并上传到水鱼查分器")
         fetchChuniScores(authUrl) { diff, body ->
             Log.i("DivingFishProberUtil", "正在上传${diff.diffName}成绩到水鱼查分器")
@@ -188,7 +188,7 @@ class DivingFishProberUtil : IProberUtil {
         sendMessageToUi("上传中二节奏成绩到水鱼查分器完成")
         Log.d("DivingFishProberUtil", "上传完毕")
         GlobalViewModel.chuniHooking = false
-        application.sendNotifaction("水鱼查分器", "查分完毕")
+        application.sendNotification("水鱼查分器", "查分完毕")
         if (isCache) {
             writeChuniScoreCache(scores)
         }

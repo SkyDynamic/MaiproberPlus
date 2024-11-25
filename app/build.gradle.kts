@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+val appVersion: String = "1.1.5"
+
 android {
     namespace = "io.github.skydynamic.maiproberplus"
     compileSdk = 34
@@ -15,8 +17,8 @@ android {
         applicationId = "io.github.skydynamic.maiproberplus"
         minSdk = 31
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1.0"
+        versionName = appVersion
+        versionCode = appVersion.replace(".", "").toInt()
 
         val gitCommitId: String = try {
             val stdout = ByteArrayOutputStream()

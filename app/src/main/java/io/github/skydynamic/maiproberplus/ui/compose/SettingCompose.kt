@@ -93,11 +93,12 @@ fun SettingCompose() {
                 onTrailingIconClick = {
                     divingfishTokenHidden = !divingfishTokenHidden
                 },
-            ) {
-                divingfishToken = it
-                Application.application.configManager.config.divingfishToken = it
-                Application.application.configManager.save()
-            }
+                onValueChange = {
+                    divingfishToken = it
+                    Application.application.configManager.config.divingfishToken = it
+                    Application.application.configManager.save()
+                }
+            )
 
             PasswordTextFiled(
                 modifier = Modifier.padding(15.dp).fillMaxWidth().height(60.dp),
@@ -108,11 +109,12 @@ fun SettingCompose() {
                 onTrailingIconClick = {
                     lxnsTokenHidden = !lxnsTokenHidden
                 },
-            ) {
-                lxnsToken = it
-                Application.application.configManager.config.lxnsToken = it
-                Application.application.configManager.save()
-            }
+                onValueChange = {
+                    lxnsToken = it
+                    Application.application.configManager.config.lxnsToken = it
+                    Application.application.configManager.save()
+                }
+            )
         }
 
         SettingItemGroup(

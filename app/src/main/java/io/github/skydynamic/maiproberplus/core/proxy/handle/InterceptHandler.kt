@@ -24,7 +24,7 @@ object InterceptHandler {
             token = config.divingfishToken
         }
 
-        if (!token.isEmpty()) {
+        if (!token.isEmpty() || currentPlatform == ProberPlatform.LOCAL) {
             if (target.contains("maimai-dx")) {
                 GlobalScope.launch(Dispatchers.IO) {
                     GlobalViewModel.maimaiHooking = true

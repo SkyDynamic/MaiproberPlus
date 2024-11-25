@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -68,28 +69,41 @@ fun PasswordTextFiled(
     hidden: Boolean,
     value: String,
     onTrailingIconClick: () -> Unit,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    enable: Boolean = true
 ) {
     OutlinedTextField(
         modifier = modifier,
+        enabled = enable,
         value = value,
         onValueChange = onValueChange,
         singleLine = true,
         visualTransformation = if (hidden) PasswordVisualTransformation() else VisualTransformation.None,
         trailingIcon = {
-            IconButton(
-                onClick = onTrailingIconClick
-            ) {
-                if (hidden) Icon(
-                    painterResource(R.drawable.visibility_24px),
-                    null,
-                    modifier = Modifier.size(28.dp)
-                )
-                else Icon(
-                    painterResource(R.drawable.visibility_off_24px),
-                    null,
-                    modifier = Modifier.size(28.dp)
-                )
+            Row {
+                if (!value.isEmpty()) {
+                    IconButton(
+                        onClick = {
+                            onValueChange("")
+                        }
+                    ) {
+                        Icon(Icons.Default.Clear, null)
+                    }
+                }
+                IconButton(
+                    onClick = onTrailingIconClick
+                ) {
+                    if (hidden) Icon(
+                        painterResource(R.drawable.visibility_24px),
+                        null,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    else Icon(
+                        painterResource(R.drawable.visibility_off_24px),
+                        null,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         },
         label = label,

@@ -33,7 +33,6 @@ import io.ktor.client.statement.readRawBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import java.io.File
 
 val httpClient = HttpClient(CIO) {
     install(HttpTimeout) {
@@ -47,7 +46,7 @@ fun InfoDialog(info: String, onRequest: () -> Unit) {
     Dialog(onDismissRequest = { onRequest() }) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
+                .wrapContentSize()
                 .height(200.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
@@ -72,6 +71,52 @@ fun InfoDialog(info: String, onRequest: () -> Unit) {
                         modifier = Modifier.padding(8.dp),
                     ) {
                         Text("确认")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ConfirmDialog(
+    info: String,
+    onRequest: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = { onRequest() }) {
+        Card(
+            modifier = Modifier
+                .wrapContentSize()
+                .height(200.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = info,
+                    modifier = Modifier.padding(16.dp),
+                )
+                Row {
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(
+                        onClick = {
+                            onRequest()
+                            onDismiss()
+                        }
+                    ) {
+                        Text("确认")
+                    }
+
+                    TextButton(
+                        onClick = onDismiss
+                    ) {
+                        Text("取消")
                     }
                 }
             }

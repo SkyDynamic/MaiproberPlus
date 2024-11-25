@@ -21,6 +21,15 @@ val JSON = Json {
 
 class MaimaiData {
     @Serializable
+    data class Aliases(
+        @SerialName("song_id") val songId: Int,
+        val aliases: List<String>
+    )
+
+    @Serializable
+    data class SongsAliases(val aliases: List<Aliases>)
+
+    @Serializable
     data class Notes(
         val total: Int,
         val tap: Int,
@@ -66,6 +75,7 @@ class MaimaiData {
 
     companion object {
         var MAIMAI_SONG_LIST = readMaimaiSongList()
+        var MAIMAI_SONG_ALIASES = readMaimaiSongAliases()
 
         @OptIn(DelicateCoroutinesApi::class)
         fun syncMaimaiSongList() {
@@ -94,9 +104,46 @@ class MaimaiData {
             ).songs
         }
 
+        private fun readMaimaiSongAliases(): List<Aliases> {
+            return JSON.decodeFromString<SongsAliases>(
+                Application.application.getFilesDirInputStream("maimai_song_aliases.json")
+                    .bufferedReader().use { it.readText() }
+            ).aliases
+        }
+
         fun getSongIdFromTitle(title: String): Int {
             val id = MAIMAI_SONG_LIST.find { it.title == title }?.id ?: -1
             return id
+        }
+
+        fun getLevelValue(
+            title: String,
+            diffculty: MaimaiEnums.Difficulty,
+            type: MaimaiEnums.SongType
+        ): Float {
+            val difficulties = MAIMAI_SONG_LIST.find { it.title == title }?.difficulties
+            return if (type == MaimaiEnums.SongType.DX) {
+                difficulties?.dx[diffculty.diffIndex]?.levelValue ?: 0.0F
+            } else if (type == MaimaiEnums.SongType.STANDARD) {
+                difficulties?.standard[diffculty.diffIndex]?.levelValue ?: 0.0F
+            } else {
+                0.0F
+            }
+        }
+
+        fun getChartVersion(
+            title: String,
+            diffculty: MaimaiEnums.Difficulty,
+            type: MaimaiEnums.SongType
+        ): Int {
+            val difficulties = MAIMAI_SONG_LIST.find { it.title == title }?.difficulties
+            return if (type == MaimaiEnums.SongType.DX) {
+                difficulties?.dx[diffculty.diffIndex]?.version ?: 0
+            } else if (type == MaimaiEnums.SongType.STANDARD) {
+                difficulties?.standard[diffculty.diffIndex]?.version ?: 0
+            } else {
+                0
+            }
         }
     }
 }

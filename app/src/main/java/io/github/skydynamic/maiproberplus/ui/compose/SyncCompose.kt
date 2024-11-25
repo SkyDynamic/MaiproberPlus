@@ -28,12 +28,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService
+import androidx.lifecycle.viewModelScope
 import io.github.skydynamic.maiproberplus.Application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
+import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
+import io.github.skydynamic.maiproberplus.core.prober.writeMaimaiScoreCache
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServer
 import io.github.skydynamic.maiproberplus.ui.compose.setting.PasswordTextFiled
+import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 data class FileDownloadMeta(
     val fileName: String,
@@ -59,6 +64,8 @@ fun SyncCompose() {
     var divingfishToken by remember { mutableStateOf(application.configManager.config.divingfishToken) }
     var lxnsToken by remember { mutableStateOf(application.configManager.config.lxnsToken) }
 
+    var openAskIsOverwriteScoresDialog by remember { mutableStateOf(false) }
+
     val proberPlatformList = ProberPlatform.entries.map { it.proberName }
     val gameTypeList = listOf("舞萌DX", "中二节奏")
 
@@ -71,6 +78,29 @@ fun SyncCompose() {
     }
 
     when {
+        openAskIsOverwriteScoresDialog -> {
+            ConfirmDialog(
+                info = "同步成绩到本地会覆盖所有的成绩缓存，你确定同步吗",
+                onRequest = {
+                    val token = if(globalViewModel.platformIndex == 0) {
+                        application.configManager.config.divingfishToken
+                    } else {
+                        application.configManager.config.lxnsToken
+                    }
+                    viewModel.viewModelScope.launch(Dispatchers.IO) {
+                        val result = ProberPlatform.entries[globalViewModel.platformIndex]
+                            .factory
+                            .getMaimaiProberData(token)
+                        if (result.isNotEmpty()) {
+                            writeMaimaiScoreCache(result)
+                            sendMessageToUi("成功从${proberPlatformList[globalViewModel.platformIndex]}同步成绩")
+                        }
+                    }
+                }
+            ) {
+                openAskIsOverwriteScoresDialog = false
+            }
+        }
         viewModel.openInitDialog -> {
             InfoDialog("首次启动需要下载资源文件，请耐心等待") {
                 viewModel.openInitDialog = false
@@ -79,18 +109,7 @@ fun SyncCompose() {
         }
         viewModel.openInitDownloadDialog -> {
             DownloadDialog(
-                listOf(
-                    FileDownloadMeta(
-                        "maimai_song_list.json",
-                        ".",
-                        "https://maimai.lxns.net/api/v0/maimai/song/list?notes=true"
-                    ),
-                    FileDownloadMeta(
-                        "chuni_song_list.json",
-                        ".",
-                        "https://maimai.lxns.net/api/v0/chunithm/song/list"
-                    )
-                )
+                resources
             ) {
                 viewModel.openInitDownloadDialog = false
             }
@@ -186,18 +205,22 @@ fun SyncCompose() {
             label = { Text("查分器Token") },
             icon = { Icon(Icons.Filled.Lock, null) },
             hidden = viewModel.tokenHidden,
-            value = if (globalViewModel.platformIndex == 0) divingfishToken else lxnsToken,
-            onTrailingIconClick = { viewModel.tokenHidden = !viewModel.tokenHidden }
-        ) {
-            if (globalViewModel.platformIndex == 0) {
-                divingfishToken = it
-                application.configManager.config.divingfishToken = it
-            } else {
-                lxnsToken = it
-                application.configManager.config.lxnsToken = it
-            }
-            application.configManager.save()
-        }
+            value = if (globalViewModel.platformIndex == 0) divingfishToken
+                    else if (globalViewModel.platformIndex == 1) lxnsToken
+                    else "",
+            onTrailingIconClick = { viewModel.tokenHidden = !viewModel.tokenHidden },
+            onValueChange = {
+                if (globalViewModel.platformIndex == 0) {
+                    divingfishToken = it
+                    application.configManager.config.divingfishToken = it
+                } else {
+                    lxnsToken = it
+                    application.configManager.config.lxnsToken = it
+                }
+                application.configManager.save()
+            },
+            enable = globalViewModel.platformIndex != 2
+        )
 
         Button(
             modifier = Modifier
@@ -209,6 +232,19 @@ fun SyncCompose() {
         ) {
             val gameName = if (globalViewModel.gametypeIndex == 0) "舞萌DX" else "中二节奏"
             Text("复制${gameName} Hook链接(长期有效)")
+        }
+
+        Button(
+            modifier = Modifier
+                .padding(15.dp)
+                .size(300.dp, 50.dp),
+            onClick = {
+                openAskIsOverwriteScoresDialog = true
+            },
+            enabled = globalViewModel.platformIndex != 2
+        ) {
+            val gameName = if (globalViewModel.gametypeIndex == 0) "舞萌DX" else "中二节奏"
+            Text("从选定的查分器获取 $gameName 成绩")
         }
     }
 }

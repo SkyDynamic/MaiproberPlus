@@ -1,7 +1,6 @@
 package io.github.skydynamic.maiproberplus.ui.compose
 
 import android.util.Log
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,9 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
@@ -43,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
@@ -50,38 +49,87 @@ import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.prober.getMaimaiScoreCache
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.floor
+
+val resources = listOf<FileDownloadMeta>(
+    FileDownloadMeta(
+        "maimai_song_list.json",
+        ".",
+        "https://maimai.lxns.net/api/v0/maimai/song/list?notes=true"
+    ),
+    FileDownloadMeta(
+        "chuni_song_list.json",
+        ".",
+        "https://maimai.lxns.net/api/v0/chunithm/song/list"
+    ),
+    FileDownloadMeta(
+        "maimai_song_aliases.json",
+        ".",
+        "https://maimai.lxns.net/api/v0/maimai/alias/list"
+    ),
+    FileDownloadMeta(
+        "chuni_song_aliases.json",
+        ".",
+        "https://maimai.lxns.net/api/v0/chunithm/alias/list"
+    )
+)
 
 object ScoreManagerViewModel : ViewModel() {
     val maimaiLoadedScores = mutableStateListOf<MaimaiData.MusicDetail>()
     val maimaiSearchScores = mutableStateListOf<MaimaiData.MusicDetail>()
     val maimaiSearchText = mutableStateOf("")
+    private val aliasMap: Map<Int, List<String>> by lazy {
+        MaimaiData.MAIMAI_SONG_ALIASES.associateBy({ it.songId }, { it.aliases })
+    }
+    private val searchCache = mutableMapOf<String, List<MaimaiData.MusicDetail>>()
 
     fun searchMaimaiScore(text: String) {
         if (text.isEmpty()) {
             maimaiSearchScores.clear()
         } else {
-            val searchResult = maimaiLoadedScores.filter {
-                it.name.contains(text, ignoreCase = true)
+            val cachedResult = searchCache[text]
+            if (cachedResult != null) {
+                maimaiSearchScores.clear()
+                maimaiSearchScores.addAll(cachedResult)
+            } else {
+                ScoreManagerViewModel.viewModelScope.launch(Dispatchers.IO) {
+                    val searchResult = maimaiLoadedScores.filter { musicDetail ->
+                        musicDetail.name.contains(text, ignoreCase = true) ||
+                                aliasMap[MaimaiData.getSongIdFromTitle(musicDetail.name)]?.any { alias ->
+                                    alias.contains(text, ignoreCase = true)
+                                } == true
+                    }
+                    withContext(Dispatchers.Main) {
+                        maimaiSearchScores.clear()
+                        maimaiSearchScores.addAll(searchResult)
+                        searchCache[text] = searchResult
+                    }
+                }
             }
-            maimaiSearchScores.clear()
-            maimaiSearchScores.addAll(searchResult)
         }
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 fun refreshMaimaiScore() {
-    GlobalScope.launch(Dispatchers.IO) {
+    ScoreManagerViewModel.viewModelScope.launch(Dispatchers.IO) {
         ScoreManagerViewModel.maimaiLoadedScores.clear()
         ScoreManagerViewModel.maimaiLoadedScores.addAll(getMaimaiScoreCache().sortedByDescending {
             it.rating
         })
     }
+}
+
+fun checkResourceComplete(): List<FileDownloadMeta> {
+    val returnList = arrayListOf<FileDownloadMeta>()
+    resources.forEach {
+        if (!application.filesDir.resolve(it.fileSavePath).resolve(it.fileName).exists()) {
+            returnList.add(it)
+        }
+    }
+    return returnList
 }
 
 @Composable
@@ -94,9 +142,8 @@ fun ScoreManager() {
 
     val gameTypeList = listOf("舞萌DX", "中二节奏")
 
-    if (!application.filesDir.resolve("maimai_song_list.json").exists() ||
-        !application.filesDir.resolve("chuni_song_list.json").exists()
-    ) {
+    val checkResourceResult = checkResourceComplete()
+    if (!checkResourceResult.isEmpty()) {
         openInitDownloadDialog = true
     } else {
         canShow = true
@@ -136,51 +183,54 @@ fun ScoreManager() {
             }
         }
 
-        item {
-            Row {
-                OutlinedTextField(
-                    value = viewModel.maimaiSearchText.value,
-                    onValueChange = {
-                        viewModel.maimaiSearchText.value = it
-                        viewModel.searchMaimaiScore(it)
-                    },
-                    modifier = Modifier.height(60.dp).weight(0.6f, fill = false),
-                    label = { Text("搜索歌曲") },
-                    trailingIcon = {
-                        if (!viewModel.maimaiSearchText.value.isEmpty()) {
-                            IconButton(
-                                onClick = {
-                                    viewModel.maimaiSearchText.value = ""
-                                    viewModel.searchMaimaiScore("")
-                                }
-                            ) {
-                                Icon(Icons.Default.Clear, null)
-                            }
-                        }
-                    },
-                )
-
-                Button(
-                    modifier = Modifier.height(60.dp).weight(0.4f, fill = false),
-                    onClick = {
-                        viewModel.maimaiLoadedScores.clear()
-                        viewModel.maimaiSearchScores.clear()
-
-                        refreshMaimaiScore()
-                    }
-                ) {
-                    Text("刷新列表")
-                }
-            }
-        }
-
-        item {
-            Spacer(Modifier.height(15.dp))
-        }
-
         if (canShow) {
             when (gameTypeIndex) {
                 0 -> {
+                    item {
+                        Row {
+
+                            OutlinedTextField(
+                                value = viewModel.maimaiSearchText.value,
+                                onValueChange = {
+                                    viewModel.maimaiSearchText.value = it
+                                    viewModel.searchMaimaiScore(it)
+                                },
+                                modifier = Modifier.height(60.dp).weight(0.65f, fill = false),
+                                label = { Text("搜索曲目或者曲目别名", fontSize = 12.sp) },
+                                trailingIcon = {
+                                    if (!viewModel.maimaiSearchText.value.isEmpty()) {
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.maimaiSearchText.value = ""
+                                                viewModel.searchMaimaiScore("")
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.Clear, null)
+                                        }
+                                    }
+                                },
+                            )
+
+                            Button(
+                                modifier = Modifier
+                                    .padding(start = 5.dp)
+                                    .height(35.dp)
+                                    .weight(0.35f, fill = false)
+                                    .align(Alignment.CenterVertically),
+                                onClick = {
+                                    viewModel.maimaiLoadedScores.clear()
+                                    viewModel.maimaiSearchScores.clear()
+                                    refreshMaimaiScore()
+                                }
+                            ) {
+                                Text("刷新列表")
+                            }
+                        }
+                    }
+
+                    item {
+                        Spacer(Modifier.height(15.dp))
+                    }
                     if (viewModel.maimaiSearchText.value.isNotEmpty()) {
                         items(viewModel.maimaiSearchScores.chunked(2)) { rowItems ->
                             Row {
@@ -189,8 +239,18 @@ fun ScoreManager() {
                                         modifier = Modifier
                                             .height(80.dp)
                                             .weight(1f)
-                                            .padding(4.dp),
+                                            .padding(4.dp)
+                                            .fillMaxWidth(0.5f),
                                         scoreDetail = score
+                                    )
+                                }
+                                if (rowItems.size < 2) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(80.dp)
+                                            .weight(1f)
+                                            .padding(4.dp)
+                                            .fillMaxWidth(0.5f)
                                     )
                                 }
                             }
@@ -203,36 +263,34 @@ fun ScoreManager() {
                                         modifier = Modifier
                                             .height(80.dp)
                                             .weight(1f)
-                                            .padding(4.dp),
+                                            .padding(4.dp)
+                                            .fillMaxWidth(0.5f),
                                         scoreDetail = score
+                                    )
+                                }
+                                if (rowItems.size < 2) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(80.dp)
+                                            .weight(1f)
+                                            .padding(4.dp)
+                                            .fillMaxWidth(0.5f)
                                     )
                                 }
                             }
                         }
                     }
                 }
+
                 1 -> {
                 }
             }
         }
     }
 
-    when {
+        when {
         openInitDownloadDialog -> {
-            DownloadDialog(
-                listOf(
-                    FileDownloadMeta(
-                        "maimai_song_list.json",
-                        ".",
-                        "https://maimai.lxns.net/api/v0/maimai/song/list?notes=true"
-                    ),
-                    FileDownloadMeta(
-                        "chuni_song_list.json",
-                        ".",
-                        "https://maimai.lxns.net/api/v0/chunithm/song/list"
-                    )
-                )
-            ) {
+            DownloadDialog(checkResourceResult) {
                 openInitDownloadDialog = false
                 canShow = true
             }
@@ -287,7 +345,8 @@ fun MaimaiScoreDetailCard(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.BottomStart).padding(start = 5.dp, end = 40.dp),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                color = Color.White
             )
 
             GetMaimaiSongTypeIco(
@@ -312,10 +371,12 @@ fun MaimaiScoreDetailCard(
                 text = "${scoreDetail.score}%",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
+                color = Color.White
             )
             Text(
                 text = "DX Rating: ${floor(rating.toDouble()).toInt()}",
-                style = MaterialTheme.typography.labelSmall
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White
             )
         }
     }
@@ -345,7 +406,8 @@ fun GetMaimaiSongTypeIco(
         Text(
             text = if (type == MaimaiEnums.SongType.DX) "DX" else "标准",
             fontSize = 10.sp,
-            modifier = Modifier.fillMaxHeight().align(Alignment.Center)
+            modifier = Modifier.fillMaxHeight().align(Alignment.Center),
+            color = Color.White
         )
     }
 }

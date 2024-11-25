@@ -10,6 +10,18 @@ class MaimaiEnums {
         @SerialName("standard") STANDARD("standard", "SD"),
         @SerialName("dx") DX("dx", "DX"),
         @SerialName("utage") UTAGE("utage", "UTAGE");
+
+        companion object {
+            @JvmStatic
+            fun getSongTypeByName(typeName: String): SongType {
+                for (songType in SongType.entries) {
+                    if (typeName == songType.type || typeName == songType.type2) {
+                        return songType
+                    }
+                }
+                return STANDARD
+            }
+        }
     }
 
     @Serializable

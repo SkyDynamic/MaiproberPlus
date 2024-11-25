@@ -3,9 +3,11 @@ package io.github.skydynamic.maiproberplus.core.prober
 import android.util.Log
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.ui.compose.application
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
@@ -15,6 +17,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.math.floor
 
 class LxnsProberUtil : IProberUtil {
 
@@ -38,7 +41,12 @@ class LxnsProberUtil : IProberUtil {
     ) : LxnsResponse()
 
     @Serializable
-    data class LxnsChuniUploadScoreBody(
+    data class LxnsGetMaimaiScoreResponse(
+        val data: List<LxnsMaimaiScoreBody>
+    ) : LxnsResponse()
+
+    @Serializable
+    data class LxnsChuniScoreBody(
         val id: Int,
         @SerialName("song_name") val songName: String = "",
         val level: String = "",
@@ -72,14 +80,14 @@ class LxnsProberUtil : IProberUtil {
     )
 
     @Serializable
-    data class LxnsMaimaiUploadScoreBody(
+    data class LxnsMaimaiScoreBody(
         val id: Int,
         @SerialName("song_name") val songName: String = "",
         val level: String = "",
         @SerialName("level_index") val levelIndex: Int,
         val achievements: Float,
-        val fc: String = "",
-        val fs: String = "",
+        val fc: String? = "",
+        val fs: String? = "",
         @SerialName("dx_score") val dxScore: Int,
         @SerialName("dx_rating") val dxRating: Float = 0.0F,
         val rate: String = "",
@@ -112,10 +120,10 @@ class LxnsProberUtil : IProberUtil {
     )
 
     @Serializable
-    data class LxnsMaimaiRequestBody(val scores: List<LxnsMaimaiUploadScoreBody>)
+    data class LxnsMaimaiRequestBody(val scores: List<LxnsMaimaiScoreBody>)
 
     @Serializable
-    data class LxnsChuniRequestBody(val scores: List<LxnsChuniUploadScoreBody>)
+    data class LxnsChuniRequestBody(val scores: List<LxnsChuniScoreBody>)
 
     override suspend fun uploadMaimaiProberData(
         importToken: String,
@@ -132,7 +140,7 @@ class LxnsProberUtil : IProberUtil {
         }
 
         val postScores = scores.map {
-            LxnsMaimaiUploadScoreBody(
+            LxnsMaimaiScoreBody(
                 id = MaimaiData.getSongIdFromTitle(it.name),
                 levelIndex = it.diff.diffIndex,
                 achievements = it.score,
@@ -186,7 +194,7 @@ class LxnsProberUtil : IProberUtil {
         }
 
         val postScores = scores.map {
-            LxnsChuniUploadScoreBody(
+            LxnsChuniScoreBody(
                 id = it.id,
                 levelIndex = it.diff.diffIndex,
                 score = it.score,
@@ -224,6 +232,42 @@ class LxnsProberUtil : IProberUtil {
         application.sendNotifaction("落雪查分器", "中二数据上传完毕")
         if (isCache) {
             writeChuniScoreCache(scores)
+        }
+    }
+
+    override suspend fun getMaimaiProberData(importToken: String): List<MaimaiData.MusicDetail> {
+        try {
+            val response = client.get("$baseApiUrl/api/v0/user/maimai/player/scores") {
+                header("X-User-Token", importToken)
+            }
+            val body = response.body<LxnsGetMaimaiScoreResponse>()
+            val parseList = arrayListOf<MaimaiData.MusicDetail>()
+            body.data.forEach {
+                val type = MaimaiEnums.SongType.getSongTypeByName(it.type)
+                val diff = MaimaiEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
+                val levelValue = MaimaiData.getLevelValue(it.songName, diff, type)
+                val version = MaimaiData.getChartVersion(it.songName, diff, type)
+                parseList.add(
+                    MaimaiData.MusicDetail(
+                        name = it.songName,
+                        level = levelValue,
+                        score = it.achievements,
+                        dxScore = it.dxScore,
+                        rating = floor(it.dxRating).toInt(),
+                        version = version,
+                        type = type,
+                        diff = diff,
+                        rankType = MaimaiEnums.RankType.getRankTypeByScore(it.achievements),
+                        syncType = MaimaiEnums.SyncType.getSyncTypeByName(it.fs ?: ""),
+                        fullComboType = MaimaiEnums.FullComboType.getFullComboTypeByName(it.fc ?: "")
+                    )
+                )
+            }
+            return parseList
+        } catch (e: Exception) {
+            Log.d("LxnsProberUtil", "获取舞萌成绩失败: $e")
+            sendMessageToUi("获取舞萌成绩失败: ${e.message}")
+            return emptyList()
         }
     }
 }

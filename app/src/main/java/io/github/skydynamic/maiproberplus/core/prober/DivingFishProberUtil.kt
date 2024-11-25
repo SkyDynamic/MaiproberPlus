@@ -8,6 +8,7 @@ import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.utils.ParseScorePageUtil
 import io.github.skydynamic.maiproberplus.ui.compose.application
 import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -22,7 +23,8 @@ class DivingFishProberUtil : IProberUtil {
     private val baseApiUrl = "https://www.diving-fish.com/api"
 
     @Serializable
-    data class DivingFishParserResult(
+    data class DivingFishScoreBody(
+        @SerialName("song_id") val songId: Int? = null,
         val title: String,
         val level: String,
         @SerialName("level_index") val levelIndex: Int,
@@ -35,6 +37,16 @@ class DivingFishProberUtil : IProberUtil {
         val ds: Float = 0F,
         @SerialName("level_label")val levelLabel: String,
         val ra: Int,
+    )
+
+    @Serializable
+    data class DivingFishGetScoresResponse(
+        @SerialName("additional_rating") val additionalRating: Float,
+        val nickname: String,
+        val plate: String,
+        val rating: Int,
+        val username: String,
+        val records: List<DivingFishScoreBody>
     )
 
     override suspend fun uploadMaimaiProberData(
@@ -58,7 +70,7 @@ class DivingFishProberUtil : IProberUtil {
                 }
 
                 if (isCache) {
-                    val scoreBody = result.body<List<DivingFishParserResult>>()
+                    val scoreBody = result.body<List<DivingFishScoreBody>>()
                     scoreBody.forEach { score ->
                         val res = MaimaiData.MAIMAI_SONG_LIST.find { it.title == score.title }
                         if (res != null) {
@@ -149,6 +161,44 @@ class DivingFishProberUtil : IProberUtil {
         application.sendNotifaction("水鱼查分器", "查分完毕")
         if (isCache) {
             writeChuniScoreCache(scores)
+        }
+    }
+
+    override suspend fun getMaimaiProberData(importToken: String): List<MaimaiData.MusicDetail> {
+        try {
+            val result = client.get("$baseApiUrl/maimaidxprober/player/records") {
+                headers {
+                    append("Import-Token", importToken)
+                }
+            }
+            val body = result.body<DivingFishGetScoresResponse>()
+            val scores = mutableListOf<MaimaiData.MusicDetail>()
+            body.records.forEach {
+                val type = MaimaiEnums.SongType.getSongTypeByName(it.type)
+                val diff = MaimaiEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
+                val levelValue = MaimaiData.getLevelValue(it.title, diff, type)
+                val version = MaimaiData.getChartVersion(it.title, diff, type)
+                scores.add(
+                    MaimaiData.MusicDetail(
+                        name = it.title,
+                        level = levelValue,
+                        score = it.achievements,
+                        dxScore = it.dxScore,
+                        rating = it.ra,
+                        version = version,
+                        type = type,
+                        diff = diff,
+                        rankType = MaimaiEnums.RankType.getRankTypeByScore(it.achievements),
+                        syncType = MaimaiEnums.SyncType.getSyncTypeByName(it.fs),
+                        fullComboType = MaimaiEnums.FullComboType.getFullComboTypeByName(it.fc)
+                    )
+                )
+            }
+            return scores
+        } catch (e: Exception) {
+            Log.e("DivingFishProberUtil", "获取舞萌DX成绩失败", e)
+            sendMessageToUi("获取舞萌DX成绩失败")
+            return emptyList()
         }
     }
 }

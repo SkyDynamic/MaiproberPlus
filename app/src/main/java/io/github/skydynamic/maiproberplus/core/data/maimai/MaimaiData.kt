@@ -62,6 +62,7 @@ class MaimaiData {
 
     @Serializable
     data class MusicDetail(
+        val id: Int = -1,
         val name: String, val level: Float,
         val score: Float, val dxScore: Int,
         val rating: Int, val version: Int,
@@ -112,8 +113,7 @@ class MaimaiData {
         }
 
         fun getSongIdFromTitle(title: String): Int {
-            val id = MAIMAI_SONG_LIST.find { it.title == title }?.id ?: -1
-            return id
+            return MAIMAI_SONG_LIST.find { it.title == title }?.id ?: -1
         }
 
         fun getLevelValue(
@@ -123,11 +123,11 @@ class MaimaiData {
         ): Float {
             val difficulties = MAIMAI_SONG_LIST.find { it.title == title }?.difficulties
             return if (type == MaimaiEnums.SongType.DX) {
-                difficulties?.dx[diffculty.diffIndex]?.levelValue ?: 0.0F
+                difficulties?.dx[diffculty.diffIndex]?.levelValue ?: 0F
             } else if (type == MaimaiEnums.SongType.STANDARD) {
-                difficulties?.standard[diffculty.diffIndex]?.levelValue ?: 0.0F
+                difficulties?.standard[diffculty.diffIndex]?.levelValue ?: 0F
             } else {
-                0.0F
+                0F
             }
         }
 

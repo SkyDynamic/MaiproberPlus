@@ -21,6 +21,15 @@ val JSON = Json {
 
 class ChuniData {
     @Serializable
+    data class Aliases(
+        @SerialName("song_id") val songId: Int,
+        val aliases: List<String>
+    )
+
+    @Serializable
+    data class SongsAliases(val aliases: List<Aliases>)
+
+    @Serializable
     data class SongDifficulty(
         val difficulty: Int,
         val level: String,
@@ -40,7 +49,7 @@ class ChuniData {
 
     @Serializable
     data class MusicDetail(
-        val id: Int,
+        val id: Int = -1,
         val name: String, val level: Float,
         val score: Int, val rating: Float,
         val version: Int, val playTime: String = "",
@@ -54,6 +63,7 @@ class ChuniData {
 
     companion object {
         var CHUNI_SONG_LIST = readChuniSongList()
+        var CHUNI_SONG_ALIASES = readChuniSongAliases()
 
         @OptIn(DelicateCoroutinesApi::class)
         fun syncMaimaiSongList() {
@@ -80,6 +90,31 @@ class ChuniData {
                 Application.application.getFilesDirInputStream("chuni_song_list.json")
                     .bufferedReader().use { it.readText() }
             ).songs
+        }
+
+        private fun readChuniSongAliases(): List<Aliases> {
+            return JSON.decodeFromString<SongsAliases>(
+                Application.application.getFilesDirInputStream("chuni_song_aliases.json")
+                    .bufferedReader().use { it.readText() }
+            ).aliases
+        }
+
+        fun getSongIdFromTitle(title: String): Int {
+            return CHUNI_SONG_LIST.find { it.title == title }?.id ?: -1
+        }
+
+        fun getLevelValue(title: String, difficulty: ChuniEnums.Difficulty): Float {
+            val level= CHUNI_SONG_LIST.find { it.title == title }
+                ?.difficulties[difficulty.diffIndex]
+                ?.levelValue
+            return level ?: 0F
+        }
+
+        fun getChartVersion(title: String, difficulty: ChuniEnums.Difficulty): Int {
+            val version= CHUNI_SONG_LIST.find { it.title == title }
+                ?.difficulties[difficulty.diffIndex]
+                ?.version
+            return version ?: 0
         }
     }
 }

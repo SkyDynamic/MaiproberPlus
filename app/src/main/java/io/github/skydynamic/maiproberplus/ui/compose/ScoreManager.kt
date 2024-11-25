@@ -1,5 +1,6 @@
 package io.github.skydynamic.maiproberplus.ui.compose
 
+import android.icu.math.BigDecimal
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,12 +47,15 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
+import io.github.skydynamic.maiproberplus.core.prober.getChuniScoreCache
 import io.github.skydynamic.maiproberplus.core.prober.getMaimaiScoreCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.NumberFormat
 import kotlin.math.floor
 
 val resources = listOf<FileDownloadMeta>(
@@ -81,16 +85,56 @@ object ScoreManagerViewModel : ViewModel() {
     val maimaiLoadedScores = mutableStateListOf<MaimaiData.MusicDetail>()
     val maimaiSearchScores = mutableStateListOf<MaimaiData.MusicDetail>()
     val maimaiSearchText = mutableStateOf("")
-    private val aliasMap: Map<Int, List<String>> by lazy {
+    val chuniLoadedScores = mutableStateListOf<ChuniData.MusicDetail>()
+    val chuniSearchScores = mutableStateListOf<ChuniData.MusicDetail>()
+    val chuniSearchText = mutableStateOf("")
+
+    private val chuniAliasMap: Map<Int, List<String>> by lazy {
+        ChuniData.CHUNI_SONG_ALIASES.associateBy({ it.songId }, { it.aliases })
+    }
+    private val chuniSearchCache = mutableMapOf<String, List<ChuniData.MusicDetail>>()
+
+    fun searchChuniScore(text: String) {
+        if (text.isEmpty()) {
+            chuniSearchScores.clear()
+        } else {
+            val cachedResult = chuniSearchCache[text]
+            if (cachedResult != null) {
+                chuniSearchScores.clear()
+                chuniSearchScores.addAll(cachedResult)
+            } else {
+                ScoreManagerViewModel.viewModelScope.launch(Dispatchers.IO) {
+                    val searchResult = chuniLoadedScores.filter { musicDetail ->
+                        musicDetail.name.contains(text, ignoreCase = true) ||
+                                chuniAliasMap[
+                                    if (musicDetail.id == -1)
+                                        ChuniData.getSongIdFromTitle(musicDetail.name)
+                                    else
+                                        musicDetail.id
+                                ]?.any { alias ->
+                                    alias.contains(text, ignoreCase = true)
+                                } == true
+                    }
+                    withContext(Dispatchers.Main) {
+                        chuniSearchScores.clear()
+                        chuniSearchScores.addAll(searchResult)
+                        chuniSearchCache[text] = searchResult
+                    }
+                }
+            }
+        }
+    }
+
+    private val maimaiAliasMap: Map<Int, List<String>> by lazy {
         MaimaiData.MAIMAI_SONG_ALIASES.associateBy({ it.songId }, { it.aliases })
     }
-    private val searchCache = mutableMapOf<String, List<MaimaiData.MusicDetail>>()
+    private val maimaiSearchCache = mutableMapOf<String, List<MaimaiData.MusicDetail>>()
 
     fun searchMaimaiScore(text: String) {
         if (text.isEmpty()) {
             maimaiSearchScores.clear()
         } else {
-            val cachedResult = searchCache[text]
+            val cachedResult = maimaiSearchCache[text]
             if (cachedResult != null) {
                 maimaiSearchScores.clear()
                 maimaiSearchScores.addAll(cachedResult)
@@ -98,14 +142,19 @@ object ScoreManagerViewModel : ViewModel() {
                 ScoreManagerViewModel.viewModelScope.launch(Dispatchers.IO) {
                     val searchResult = maimaiLoadedScores.filter { musicDetail ->
                         musicDetail.name.contains(text, ignoreCase = true) ||
-                                aliasMap[MaimaiData.getSongIdFromTitle(musicDetail.name)]?.any { alias ->
+                                maimaiAliasMap[
+                                    if (musicDetail.id == -1)
+                                        MaimaiData.getSongIdFromTitle(musicDetail.name)
+                                    else
+                                        musicDetail.id
+                                ]?.any { alias ->
                                     alias.contains(text, ignoreCase = true)
                                 } == true
                     }
                     withContext(Dispatchers.Main) {
                         maimaiSearchScores.clear()
                         maimaiSearchScores.addAll(searchResult)
-                        searchCache[text] = searchResult
+                        maimaiSearchCache[text] = searchResult
                     }
                 }
             }
@@ -117,6 +166,15 @@ fun refreshMaimaiScore() {
     ScoreManagerViewModel.viewModelScope.launch(Dispatchers.IO) {
         ScoreManagerViewModel.maimaiLoadedScores.clear()
         ScoreManagerViewModel.maimaiLoadedScores.addAll(getMaimaiScoreCache().sortedByDescending {
+            it.rating
+        })
+    }
+}
+
+fun refreshChuniScore() {
+    ScoreManagerViewModel.viewModelScope.launch(Dispatchers.IO) {
+        ScoreManagerViewModel.chuniLoadedScores.clear()
+        ScoreManagerViewModel.chuniLoadedScores.addAll(getChuniScoreCache().sortedByDescending {
             it.rating
         })
     }
@@ -151,7 +209,11 @@ fun ScoreManager() {
 
     LaunchedEffect(key1 = canShow) {
         if (canShow) {
-            refreshMaimaiScore()
+            if (gameTypeIndex == 0) {
+                refreshMaimaiScore()
+            } else {
+                refreshChuniScore()
+            }
         }
     }
 
@@ -174,7 +236,14 @@ fun ScoreManager() {
                         shape = SegmentedButtonDefaults.itemShape(
                             index = index, count = gameTypeList.size
                         ),
-                        onClick = { gameTypeIndex = index },
+                        onClick = {
+                            gameTypeIndex = index
+                            if (index == 0) {
+                                refreshMaimaiScore()
+                            } else {
+                                refreshChuniScore()
+                            }
+                        },
                         selected = index == gameTypeIndex
                     ) {
                         Text(name)
@@ -188,7 +257,6 @@ fun ScoreManager() {
                 0 -> {
                     item {
                         Row {
-
                             OutlinedTextField(
                                 value = viewModel.maimaiSearchText.value,
                                 onValueChange = {
@@ -221,6 +289,7 @@ fun ScoreManager() {
                                     viewModel.maimaiLoadedScores.clear()
                                     viewModel.maimaiSearchScores.clear()
                                     refreshMaimaiScore()
+                                    viewModel.searchMaimaiScore(viewModel.maimaiSearchText.value)
                                 }
                             ) {
                                 Text("刷新列表")
@@ -283,6 +352,101 @@ fun ScoreManager() {
                 }
 
                 1 -> {
+                    item {
+                        Row {
+                            OutlinedTextField(
+                                value = viewModel.chuniSearchText.value,
+                                onValueChange = {
+                                    viewModel.chuniSearchText.value = it
+                                    viewModel.searchChuniScore(it)
+                                },
+                                modifier = Modifier.height(60.dp).weight(0.65f, fill = false),
+                                label = { Text("搜索曲目或者曲目别名", fontSize = 12.sp) },
+                                trailingIcon = {
+                                    if (!viewModel.chuniSearchText.value.isEmpty()) {
+                                        IconButton(
+                                            onClick = {
+                                                viewModel.chuniSearchText.value = ""
+                                                viewModel.searchChuniScore("")
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.Clear, null)
+                                        }
+                                    }
+                                },
+                            )
+
+                            Button(
+                                modifier = Modifier
+                                    .padding(start = 5.dp)
+                                    .height(35.dp)
+                                    .weight(0.35f, fill = false)
+                                    .align(Alignment.CenterVertically),
+                                onClick = {
+                                    viewModel.chuniLoadedScores.clear()
+                                    viewModel.chuniSearchScores.clear()
+                                    refreshChuniScore()
+
+                                }
+                            ) {
+                                Text("刷新列表")
+                            }
+                        }
+                    }
+
+                    item {
+                        Spacer(Modifier.height(15.dp))
+                    }
+                    if (viewModel.chuniSearchText.value.isNotEmpty()) {
+                        items(viewModel.chuniSearchScores.chunked(2)) { rowItems ->
+                            Row {
+                                rowItems.forEach { score ->
+                                    ChuniScoreDetailCard(
+                                        modifier = Modifier
+                                            .height(80.dp)
+                                            .weight(1f)
+                                            .padding(4.dp)
+                                            .fillMaxWidth(0.5f),
+                                        scoreDetail = score
+                                    )
+                                }
+                                if (rowItems.size < 2) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(80.dp)
+                                            .weight(1f)
+                                            .padding(4.dp)
+                                            .fillMaxWidth(0.5f)
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        items(viewModel.chuniLoadedScores.chunked(2)) { rowItems ->
+                            Row {
+                                rowItems.forEach { score ->
+                                    ChuniScoreDetailCard(
+                                        modifier = Modifier
+                                            .height(80.dp)
+                                            .weight(1f)
+                                            .padding(4.dp)
+                                            .fillMaxWidth(0.5f),
+                                        scoreDetail = score
+                                    )
+                                }
+                                if (rowItems.size < 2) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(80.dp)
+                                            .weight(1f)
+                                            .padding(4.dp)
+                                            .fillMaxWidth(0.5f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                 }
             }
         }
@@ -298,8 +462,6 @@ fun ScoreManager() {
     }
 }
 
-
-
 @Composable
 fun MaimaiScoreDetailCard(
     modifier: Modifier,
@@ -310,12 +472,18 @@ fun MaimaiScoreDetailCard(
     var color = scoreDetail.diff.color
     var rating = scoreDetail.rating
 
+    val id = if (scoreDetail.id == -1) {
+        MaimaiData.getSongIdFromTitle(scoreDetail.name)
+    } else {
+        scoreDetail.id
+    }
+
     Box(
         modifier = modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data("https://assets2.lxns.net/maimai/jacket/${MaimaiData.getSongIdFromTitle(title)}.png")
+                .data("https://assets2.lxns.net/maimai/jacket/$id.png")
                 .crossfade(true)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .diskCachePolicy(CachePolicy.ENABLED)
@@ -375,6 +543,88 @@ fun MaimaiScoreDetailCard(
             )
             Text(
                 text = "DX Rating: ${floor(rating.toDouble()).toInt()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+fun ChuniScoreDetailCard(
+    modifier: Modifier,
+    scoreDetail: ChuniData.MusicDetail
+) {
+    var title = scoreDetail.name
+    var level = scoreDetail.level
+    var color = scoreDetail.diff.color
+    var rating = scoreDetail.rating
+    val id = if (scoreDetail.id == -1) {
+        ChuniData.getSongIdFromTitle(title)
+    } else {
+        scoreDetail.id
+    }
+
+    Box(
+        modifier = modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data("https://assets2.lxns.net/chunithm/jacket/$id.png")
+                .crossfade(true)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .build(),
+            contentDescription = null,
+            onError = { error ->
+                Log.e("Image", "Error loading image", error.result.throwable)
+            },
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(color.red, color.green, color.blue, 0.4F))
+        )
+
+        Box(
+            modifier = Modifier
+                .height(25.dp)
+                .fillMaxWidth()
+                .background(Color(color.red, color.green, color.blue, 0.8F))
+        ) {
+            Text(
+                text = title,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.BottomStart).padding(start = 5.dp, end = 40.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = Color.White
+            )
+        }
+
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            GetMaimaiLevelBox(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                level = level
+            )
+        }
+
+        Column(
+            modifier = Modifier.align(Alignment.BottomStart).padding(4.dp)
+        ) {
+            Text(
+                text = NumberFormat.getNumberInstance().format(scoreDetail.score),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(
+                text = "Rating: ${BigDecimal(rating.toDouble()).setScale(2, BigDecimal.ROUND_DOWN).toDouble()}",
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White
             )

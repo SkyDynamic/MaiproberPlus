@@ -33,6 +33,7 @@ import io.github.skydynamic.maiproberplus.Application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
+import io.github.skydynamic.maiproberplus.core.prober.writeChuniScoreCache
 import io.github.skydynamic.maiproberplus.core.prober.writeMaimaiScoreCache
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServer
 import io.github.skydynamic.maiproberplus.ui.compose.setting.PasswordTextFiled
@@ -87,13 +88,26 @@ fun SyncCompose() {
                     } else {
                         application.configManager.config.lxnsToken
                     }
+
+                    if (token.isEmpty()) {
+                        sendMessageToUi("请先设置token")
+                        return@ConfirmDialog
+                    }
+
                     viewModel.viewModelScope.launch(Dispatchers.IO) {
-                        val result = ProberPlatform.entries[globalViewModel.platformIndex]
-                            .factory
-                            .getMaimaiProberData(token)
-                        if (result.isNotEmpty()) {
-                            writeMaimaiScoreCache(result)
-                            sendMessageToUi("成功从${proberPlatformList[globalViewModel.platformIndex]}同步成绩")
+                        val proberUtil = ProberPlatform.entries[globalViewModel.platformIndex].factory
+                        if (globalViewModel.gametypeIndex == 0) {
+                            val result = proberUtil.getMaimaiProberData(token)
+                            if (result.isNotEmpty()) {
+                                writeMaimaiScoreCache(result)
+                                sendMessageToUi("成功从${proberPlatformList[globalViewModel.platformIndex]}同步${gameTypeList[globalViewModel.gametypeIndex]}成绩")
+                            }
+                        } else {
+                            val result = proberUtil.getChuniProberData(token)
+                            if (result.isNotEmpty()) {
+                                writeChuniScoreCache(result)
+                                sendMessageToUi("成功从${proberPlatformList[globalViewModel.platformIndex]}同步${gameTypeList[globalViewModel.gametypeIndex]}成绩")
+                            }
                         }
                     }
                 }

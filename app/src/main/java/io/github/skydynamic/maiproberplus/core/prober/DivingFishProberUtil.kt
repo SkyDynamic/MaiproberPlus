@@ -3,6 +3,7 @@ package io.github.skydynamic.maiproberplus.core.prober
 import android.util.Log
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.utils.ParseScorePageUtil
@@ -23,7 +24,7 @@ class DivingFishProberUtil : IProberUtil {
     private val baseApiUrl = "https://www.diving-fish.com/api"
 
     @Serializable
-    data class DivingFishScoreBody(
+    data class DivingFishMaimaiScoreBody(
         @SerialName("song_id") val songId: Int? = null,
         val title: String,
         val level: String,
@@ -40,13 +41,41 @@ class DivingFishProberUtil : IProberUtil {
     )
 
     @Serializable
-    data class DivingFishGetScoresResponse(
+    data class DivingFishChuniScoreBody(
+        val cid: Int,
+        val ds: Float,
+        val fc: String,
+        val level: String,
+        @SerialName("level_index") val levelIndex: Int,
+        @SerialName("level_label") val levelLabel: String,
+        val mid: Int,
+        val ra: Float,
+        val score: Int,
+        val title: String
+    )
+
+    @Serializable
+    data class DivingFishChuniRecordsBody(
+        val best: List<DivingFishChuniScoreBody>,
+        val r10: List<DivingFishChuniScoreBody>
+    )
+
+    @Serializable
+    data class DivingFishGetMaimaiScoresResponse(
         @SerialName("additional_rating") val additionalRating: Float,
         val nickname: String,
         val plate: String,
         val rating: Int,
         val username: String,
-        val records: List<DivingFishScoreBody>
+        val records: List<DivingFishMaimaiScoreBody>
+    )
+
+    @Serializable
+    data class DivingFishGetChuniSCoreResponse(
+        val nickname: String,
+        val rating: Float,
+        val username: String,
+        val records: DivingFishChuniRecordsBody
     )
 
     override suspend fun uploadMaimaiProberData(
@@ -70,7 +99,7 @@ class DivingFishProberUtil : IProberUtil {
                 }
 
                 if (isCache) {
-                    val scoreBody = result.body<List<DivingFishScoreBody>>()
+                    val scoreBody = result.body<List<DivingFishMaimaiScoreBody>>()
                     scoreBody.forEach { score ->
                         val res = MaimaiData.MAIMAI_SONG_LIST.find { it.title == score.title }
                         if (res != null) {
@@ -86,6 +115,7 @@ class DivingFishProberUtil : IProberUtil {
                                 level = res.difficulties.standard[score.levelIndex].levelValue
                             }
                             scores.add(MaimaiData.MusicDetail(
+                                id = res.id,
                                 name = score.title,
                                 level = score.ds,
                                 score = score.achievements,
@@ -171,7 +201,7 @@ class DivingFishProberUtil : IProberUtil {
                     append("Import-Token", importToken)
                 }
             }
-            val body = result.body<DivingFishGetScoresResponse>()
+            val body = result.body<DivingFishGetMaimaiScoresResponse>()
             val scores = mutableListOf<MaimaiData.MusicDetail>()
             body.records.forEach {
                 val type = MaimaiEnums.SongType.getSongTypeByName(it.type)
@@ -180,6 +210,7 @@ class DivingFishProberUtil : IProberUtil {
                 val version = MaimaiData.getChartVersion(it.title, diff, type)
                 scores.add(
                     MaimaiData.MusicDetail(
+                        id = MaimaiData.getSongIdFromTitle(it.title),
                         name = it.title,
                         level = levelValue,
                         score = it.achievements,
@@ -198,6 +229,42 @@ class DivingFishProberUtil : IProberUtil {
         } catch (e: Exception) {
             Log.e("DivingFishProberUtil", "获取舞萌DX成绩失败", e)
             sendMessageToUi("获取舞萌DX成绩失败")
+            return emptyList()
+        }
+    }
+
+    override suspend fun getChuniProberData(importToken: String): List<ChuniData.MusicDetail> {
+        try {
+            val result = client.get("$baseApiUrl/chunithmprober/player/records") {
+                headers {
+                    append("Import-Token", importToken)
+                }
+            }
+            val body = result.body<DivingFishGetChuniSCoreResponse>()
+            val scores = arrayListOf<ChuniData.MusicDetail>()
+            body.records.best.forEach {
+                val diff = ChuniEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
+                val version = ChuniData.getChartVersion(it.title, diff)
+                scores.add(
+                    ChuniData.MusicDetail(
+                        id = ChuniData.getSongIdFromTitle(it.title),
+                        name = it.title,
+                        level = it.ds,
+                        score = it.score,
+                        rating = it.ra,
+                        version = version,
+                        diff = diff,
+                        rankType = ChuniEnums.RankType.getRankTypeByScore(it.score),
+                        fullComboType = ChuniEnums.FullComboType.NULL,
+                        fullChainType = ChuniEnums.FullChainType.NULL,
+                        clearType = ChuniEnums.ClearType.FAILED
+                    )
+                )
+            }
+            return scores
+        } catch (e: Exception) {
+            Log.e("DivingFishProberUtil", "获取中二节奏成绩失败", e)
+            sendMessageToUi("获取中二节奏成绩失败")
             return emptyList()
         }
     }

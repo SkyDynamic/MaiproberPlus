@@ -1,17 +1,22 @@
 package io.github.skydynamic.maiproberplus.core.data.chuni
 
+import androidx.compose.ui.graphics.Color
 import kotlinx.serialization.Serializable
 
 class ChuniEnums {
     @Serializable
-    enum class Difficulty(val diffName: String, val diffIndex: Int) {
-        BASIC("Basic", 0),
-        ADVANCED("Advanced", 1),
-        EXPERT("Expert", 2),
-        MASTER("Master", 3),
-        ULTIMA("Ultima", 4),
-        WORLDSEND("World's End", 0),
-        RECENT("Recent", 6);
+    enum class Difficulty(
+        val diffName: String,
+        val diffIndex: Int,
+        val color: Color
+    ) {
+        BASIC("Basic", 0, Color(28, 133, 0)),
+        ADVANCED("Advanced", 1, Color(168, 137, 0, 255)),
+        EXPERT("Expert", 2, Color(220, 40, 40)),
+        MASTER("Master", 3, Color(165, 0, 235)),
+        ULTIMA("Ultima", 4, Color(33, 29, 29, 255)),
+        WORLDSEND("World's End", 0, Color.Magenta),
+        RECENT("Recent", 6, Color.White);
 
         companion object {
             @JvmStatic
@@ -44,6 +49,18 @@ class ChuniEnums {
         HARD("hard"),
         CLEAR("clear"),
         FAILED("failed");
+
+        companion object {
+            @JvmStatic
+            fun getClearTypeWithName(typeName: String): ClearType {
+                for (type in ClearType.entries) {
+                    if (type.type.lowercase() == typeName.lowercase()) {
+                        return type
+                    }
+                }
+                return FAILED
+            }
+        }
     }
 
     @Serializable
@@ -52,13 +69,37 @@ class ChuniEnums {
         AJC("alljusticecritical"),
         AJ("alljustice"),
         FC("fullcombo");
+
+        companion object {
+            @JvmStatic
+            fun getFullComboTypeWithName(typeName: String): FullComboType {
+                for (type in FullComboType.entries) {
+                    if (type.type.lowercase() == typeName.lowercase()) {
+                        return type
+                    }
+                }
+                return NULL
+            }
+        }
     }
 
     @Serializable
     enum class FullChainType(val type: String) {
         NULL(""),
         FC("fullchain"),
-        GFC("fullchain2")
+        GFC("fullchain2");
+
+        companion object {
+            @JvmStatic
+            fun getFullChainTypeWithName(typeName: String): FullChainType {
+                for (type in FullChainType.entries) {
+                    if (type.type.lowercase() == typeName.lowercase()) {
+                        return type
+                    }
+                }
+                return NULL
+            }
+        }
     }
 
     @Serializable

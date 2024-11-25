@@ -144,6 +144,7 @@ object ParseScorePageUtil {
             }
             musicList.add(
                 MaimaiData.MusicDetail(
+                    res.id,
                     musicName, musicLevel,
                     musicScoreNum, musicDxScoreNum ?: 0,
                     musicRating, musicVersion,

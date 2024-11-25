@@ -2,6 +2,8 @@ package io.github.skydynamic.maiproberplus.core.prober
 
 import android.util.Log
 import io.github.skydynamic.maiproberplus.GlobalViewModel
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.ui.compose.application
@@ -46,6 +48,11 @@ class LxnsProberUtil : IProberUtil {
     ) : LxnsResponse()
 
     @Serializable
+    data class LxnsGetChuniScoreResponse(
+        val data: List<LxnsChuniScoreBody>
+    ) : LxnsResponse()
+
+    @Serializable
     data class LxnsChuniScoreBody(
         val id: Int,
         @SerialName("song_name") val songName: String = "",
@@ -55,8 +62,8 @@ class LxnsProberUtil : IProberUtil {
         val rating: Float = 0.0F,
         @SerialName("over_power") val overPower: Float = 0.0F,
         val clear: String,
-        @SerialName("full_combo") val fullCombo: String = "",
-        @SerialName("full_chain") val fullChain: String = "",
+        @SerialName("full_combo") val fullCombo: String? = "",
+        @SerialName("full_chain") val fullChain: String? = "",
         val rank: String = "",
         @SerialName("play_time") val playTime: String = "",
         @SerialName("upload_time") val uploadTime: String = ""
@@ -249,6 +256,7 @@ class LxnsProberUtil : IProberUtil {
                 val version = MaimaiData.getChartVersion(it.songName, diff, type)
                 parseList.add(
                     MaimaiData.MusicDetail(
+                        id = MaimaiData.getSongIdFromTitle(it.songName),
                         name = it.songName,
                         level = levelValue,
                         score = it.achievements,
@@ -267,6 +275,41 @@ class LxnsProberUtil : IProberUtil {
         } catch (e: Exception) {
             Log.d("LxnsProberUtil", "获取舞萌成绩失败: $e")
             sendMessageToUi("获取舞萌成绩失败: ${e.message}")
+            return emptyList()
+        }
+    }
+
+    override suspend fun getChuniProberData(importToken: String): List<ChuniData.MusicDetail> {
+        try {
+            val response = client.get("$baseApiUrl/api/v0/user/chunithm/player/scores") {
+                header("X-User-Token", importToken)
+            }
+            val body = response.body<LxnsGetChuniScoreResponse>()
+            val parseList = arrayListOf<ChuniData.MusicDetail>()
+            body.data.forEach {
+                val diff = ChuniEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
+                val levelValue = ChuniData.getLevelValue(it.songName, diff)
+                val version = ChuniData.getChartVersion(it.songName, diff)
+                parseList.add(
+                    ChuniData.MusicDetail(
+                        id = it.id,
+                        name = it.songName,
+                        level = levelValue,
+                        score = it.score,
+                        rating = it.rating,
+                        version = version,
+                        diff = diff,
+                        rankType = ChuniEnums.RankType.getRankTypeByScore(it.score),
+                        fullComboType = ChuniEnums.FullComboType.getFullComboTypeWithName(it.fullCombo ?: ""),
+                        clearType = ChuniEnums.ClearType.getClearTypeWithName(it.clear),
+                        fullChainType = ChuniEnums.FullChainType.getFullChainTypeWithName(it.fullChain ?: "")
+                    )
+                )
+            }
+            return parseList
+        } catch (e: Exception) {
+            Log.d("LxnsProberUtil", "获取中二成绩失败: $e")
+            sendMessageToUi("获取中二成绩失败: ${e.message}")
             return emptyList()
         }
     }

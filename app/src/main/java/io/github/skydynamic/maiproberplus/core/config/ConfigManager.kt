@@ -1,10 +1,9 @@
 package io.github.skydynamic.maiproberplus.core.config
 
 import android.content.Context
+import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
-import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
-import io.github.skydynamic.maiproberplus.ui.compose.application
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json

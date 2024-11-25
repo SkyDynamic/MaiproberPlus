@@ -15,7 +15,7 @@ object InterceptHandler {
     @OptIn(DelicateCoroutinesApi::class)
     fun onAuthHook(authUrl: String, config: ConfigStorage) {
         val target = authUrl.replace("http", "https")
-        val currentPlatform = ProberPlatform.entries[GlobalViewModel.platformIndex]
+        val currentPlatform = GlobalViewModel.proberPlatform
         val proberUtil = currentPlatform.factory
         var token: String = ""
         if (currentPlatform == ProberPlatform.LXNS) {

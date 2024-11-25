@@ -1,4 +1,4 @@
-package io.github.skydynamic.maiproberplus.ui.compose
+package io.github.skydynamic.maiproberplus.ui.compose.setting
 
 import android.content.Intent
 import android.net.Uri
@@ -15,32 +15,26 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.skydynamic.maiproberplus.Application
+import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.BuildConfig
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
-import io.github.skydynamic.maiproberplus.ui.compose.setting.PasswordTextFiled
-import io.github.skydynamic.maiproberplus.ui.compose.setting.SettingItemGroup
-import io.github.skydynamic.maiproberplus.ui.compose.setting.SwitchSettingItem
-import io.github.skydynamic.maiproberplus.ui.compose.setting.TextButtonItem
-
-val horizontalDivider = @Composable {
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        color = Color.LightGray,
-        thickness = 1.dp
-    )
-}
+import io.github.skydynamic.maiproberplus.ui.compose.DiffChooseDialog
 
 @Composable
 fun SettingCompose() {
     var divingfishToken by remember { mutableStateOf(Application.application.configManager.config.divingfishToken) }
-    var lxnsToken by remember { mutableStateOf(Application.application.configManager.config.lxnsToken) }
+    var lxnsToken by remember { mutableStateOf(application.configManager.config.lxnsToken) }
 
     var divingfishTokenHidden by remember { mutableStateOf(true) }
     var lxnsTokenHidden by remember { mutableStateOf(true)}
@@ -96,7 +90,7 @@ fun SettingCompose() {
                 onValueChange = {
                     divingfishToken = it
                     Application.application.configManager.config.divingfishToken = it
-                    Application.application.configManager.save()
+                    application.configManager.save()
                 }
             )
 
@@ -111,8 +105,8 @@ fun SettingCompose() {
                 },
                 onValueChange = {
                     lxnsToken = it
-                    Application.application.configManager.config.lxnsToken = it
-                    Application.application.configManager.save()
+                    application.configManager.config.lxnsToken = it
+                    application.configManager.save()
                 }
             )
         }
@@ -161,7 +155,12 @@ fun SettingCompose() {
                 modifier = Modifier.padding(8.dp)
             )
 
-            horizontalDivider()
+            HorizontalDivider(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                color = Color.LightGray,
+                thickness = 1.dp
+            )
 
             TextButtonItem(
                 title = "项目仓库",

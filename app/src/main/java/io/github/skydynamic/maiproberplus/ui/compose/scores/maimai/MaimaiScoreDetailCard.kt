@@ -1,6 +1,5 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores.maimai
 
-import android.icu.math.BigDecimal
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,21 +29,22 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.ui.compose.scores.common.LevelBox
-import java.text.NumberFormat
 
 @Composable
 fun MaimaiScoreDetailCard(
     modifier: Modifier,
-    scoreDetail: MaimaiData.MusicDetail
+    scoreDetail: MaimaiData.MusicDetail,
+    onClick: () -> Unit,
 ) {
     val title = scoreDetail.name
     val level = scoreDetail.level
     val color = scoreDetail.diff.color
     val rating = scoreDetail.rating
 
-    Card (
+    ElevatedCard (
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxSize(),
+        onClick = onClick
     ) {
         Box(
             modifier = Modifier
@@ -111,17 +111,13 @@ fun MaimaiScoreDetailCard(
                 ) {
                     Column {
                         Text(
-                            text = NumberFormat.getNumberInstance().format(scoreDetail.score),
+                            text = "${scoreDetail.score}%",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Text(
-                            text = "Rating: ${
-                                BigDecimal(rating.toDouble())
-                                    .setScale(2, BigDecimal.ROUND_DOWN)
-                                    .toDouble()
-                            }",
+                            text = "DX Rating: $rating",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White
                         )

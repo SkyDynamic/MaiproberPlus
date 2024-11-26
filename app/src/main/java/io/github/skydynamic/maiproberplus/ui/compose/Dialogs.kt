@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
@@ -59,6 +60,7 @@ fun InfoDialog(info: String, onRequest: () -> Unit) {
                 .height(200.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(getCardColor())
         ) {
             Column(
                 modifier = Modifier
@@ -96,10 +98,11 @@ fun ConfirmDialog(
     Dialog(onDismissRequest = { onRequest() }) {
         Card(
             modifier = Modifier
-                .wrapContentSize()
                 .height(200.dp)
+                .width(300.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(getCardColor())
         ) {
             Column(
                 modifier = Modifier
@@ -187,6 +190,7 @@ fun DownloadDialog(
                 .height(200.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(getCardColor())
         ) {
             Column(
                 modifier = Modifier

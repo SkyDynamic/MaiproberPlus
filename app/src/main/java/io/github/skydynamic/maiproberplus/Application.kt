@@ -52,12 +52,14 @@ object GlobalViewModel : ViewModel() {
 class Application : Application() {
     lateinit var configManager: ConfigManager
     lateinit var proberContext: ProberContext
+    lateinit var assetsManager: AssetsManager
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         application = this
         configManager = ConfigManager(this)
+        assetsManager = AssetsManager(this)
         startService(Intent(this, HttpServerService::class.java))
         this.initProberContext()
     }

@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
@@ -30,7 +31,7 @@ fun MaimaiSongTypeIco(
         modifier = modifier
     ) {
         Box(
-            modifier = Modifier.align(Alignment.CenterEnd)
+            modifier = Modifier.align(Alignment.Center)
                 .width(30.dp)
                 .height(16.dp)
                 .clip(RoundedCornerShape(8.dp))
@@ -40,7 +41,8 @@ fun MaimaiSongTypeIco(
         Text(
             text = if (type == MaimaiEnums.SongType.DX) "DX" else "标准",
             fontSize = 10.sp,
-            modifier = Modifier.fillMaxHeight().align(Alignment.Center),
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.Center),
             color = Color.White
         )
     }

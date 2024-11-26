@@ -41,3 +41,29 @@ fun LevelBox(
         )
     }
 }
+
+@Composable
+fun ColorLevelBox(
+    level: Float,
+    modifier: Modifier = Modifier,
+    color: Color,
+) {
+    Box(
+        modifier = modifier
+            .width(40.dp)
+            .height(24.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(color)
+    ) {
+        Text(
+            text = "$level",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier
+                .fillMaxHeight()
+                .align(Alignment.Center)
+                .padding(horizontal = 2.dp),
+        )
+    }
+}

@@ -1,6 +1,8 @@
 package io.github.skydynamic.maiproberplus.core.data.maimai
 
+import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
+import io.github.skydynamic.maiproberplus.Application
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -50,20 +52,26 @@ class MaimaiEnums {
         val rank: String,
         private val scoreRange: ClosedFloatingPointRange<Double>,
     ) {
-        D("d", 0.0000..49.9999),
-        C("c", 50.0000..59.9999),
-        B("b", 60.0000..69.9999),
-        BB("bb", 70.0000..74.9999),
-        BBB("bbb", 75.0000..79.9999),
-        A("a", 80.0000..89.9999),
-        AA("aa", 90.0000..93.9999),
-        AAA("aaa", 94.0000..96.9999),
-        S("s", 97.0000..97.9999),
-        SP("sp", 98.0000..98.9999),
-        SS("ss", 99.0000..99.4999),
-        SSP("ssp", 99.5000..99.9999),
-        SSS("sss", 100.0000..100.4999),
-        SSSP("sssp", 100.5000..101.0000);
+        D("D", 0.0000..49.9999),
+        C("C", 50.0000..59.9999),
+        B("B", 60.0000..69.9999),
+        BB("BB", 70.0000..74.9999),
+        BBB("BBB", 75.0000..79.9999),
+        A("A", 80.0000..89.9999),
+        AA("AA", 90.0000..93.9999),
+        AAA("AAA", 94.0000..96.9999),
+        S("S", 97.0000..97.9999),
+        SP("Sp", 98.0000..98.9999),
+        SS("SS", 99.0000..99.4999),
+        SSP("SSp", 99.5000..99.9999),
+        SSS("SSS", 100.0000..100.4999),
+        SSSP("SSSp", 100.5000..101.0000);
+
+        fun getIcoBitmap(): Bitmap? {
+            return Application.application.assetsManager.getMaimaiUIAssets(
+                "UI_TTR_Rank_${rank}.png"
+            )
+        }
 
         companion object {
             @JvmStatic
@@ -80,13 +88,16 @@ class MaimaiEnums {
     }
 
     @Serializable
-    enum class FullComboType(val typeName: String) {
-        @SerialName("")
-        NULL(""),
-        FC("fc"),
-        FCP("fcp"),
-        AP("ap"),
-        APP("app");
+    enum class FullComboType(val typeName: String, val icoFileName: String) {
+        @SerialName("") NULL("", "UI_CHR_PlayBonus_Back.png"),
+        FC("fc", "UI_CHR_PlayBonus_FC.png"),
+        FCP("fcp", "UI_CHR_PlayBonus_FCp.png"),
+        AP("ap", "UI_CHR_PlayBonus_AP.png"),
+        APP("app", "UI_CHR_PlayBonus_APp.png");
+
+        fun getIcoBitmap(): Bitmap? {
+            return Application.application.assetsManager.getMaimaiUIAssets(icoFileName)
+        }
 
         companion object {
             @JvmStatic
@@ -102,14 +113,17 @@ class MaimaiEnums {
     }
 
     @Serializable
-    enum class SyncType(val syncName: String) {
-        @SerialName("")
-        NULL(""),
-        SYNC("sync"),
-        FS("fs"),
-        FSP("fsp"),
-        FDX("fsd"),
-        FDXP("fsdp");
+    enum class SyncType(val syncName: String, val icoFileName: String) {
+        @SerialName("") NULL("", "UI_CHR_PlayBonus_Back.png"),
+        SYNC("sync", "UI_CHR_PlayBonus_Sync.png"),
+        FS("fs", "UI_CHR_PlayBonus_FS.png"),
+        FSP("fsp", "UI_CHR_PlayBonus_FSp.png"),
+        FDX("fsd", "UI_CHR_PlayBonus_FSD.png"),
+        FDXP("fsdp", "UI_CHR_PlayBonus_FSDp.png");
+
+        fun getIcoBitmap(): Bitmap? {
+            return Application.application.assetsManager.getMaimaiUIAssets(icoFileName)
+        }
 
         companion object {
             @JvmStatic

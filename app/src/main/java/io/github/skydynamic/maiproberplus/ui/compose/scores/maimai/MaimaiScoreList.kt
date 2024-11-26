@@ -102,6 +102,10 @@ fun MaimaiScoreList(gridState: LazyGridState) {
                     .height(80.dp)
                     .padding(4.dp),
                 scoreDetail = it,
+                onClick = {
+                    ScoreManagerViewModel.maimaiScoreSelection = it
+                    ScoreManagerViewModel.showMaimaiScoreSelectionDialog = true
+                }
             )
         }
     }

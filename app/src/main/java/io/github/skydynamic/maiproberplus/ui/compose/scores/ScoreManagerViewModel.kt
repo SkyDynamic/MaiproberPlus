@@ -1,7 +1,9 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
@@ -18,6 +20,12 @@ object ScoreManagerViewModel : ViewModel() {
     val chuniLoadedScores = mutableStateListOf<ChuniData.MusicDetail>()
     val chuniSearchScores = mutableStateListOf<ChuniData.MusicDetail>()
     val chuniSearchText = mutableStateOf("")
+
+    var maimaiScoreSelection: MaimaiData.MusicDetail? by mutableStateOf(null)
+    var chuniScoreSelection: ChuniData.MusicDetail? by mutableStateOf(null)
+
+    var showMaimaiScoreSelectionDialog by mutableStateOf(false)
+    var showChuniScoreSelectionDialog by mutableStateOf(false)
 
     private val chuniAliasMap: Map<Int, List<String>> by lazy {
         ChuniData.CHUNI_SONG_ALIASES.associateBy({ it.songId }, { it.aliases })

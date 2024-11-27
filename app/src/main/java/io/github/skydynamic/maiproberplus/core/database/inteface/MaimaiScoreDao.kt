@@ -33,15 +33,15 @@ interface MaimaiScoreDao {
         SELECT t1.*
         FROM maimai_score_entity t1
         JOIN (
-            SELECT title, diff, MAX(achievement) as maxAchievement
+            SELECT title, diff, type, MAX(achievement) as maxAchievement
             FROM maimai_score_entity
-            GROUP BY title, diff
-        ) t2 ON t1.title = t2.title AND t1.diff = t2.diff AND t1.achievement = t2.maxAchievement
+            GROUP BY title, diff, type
+        ) t2 ON t1.title = t2.title AND t1.diff = t2.diff AND t1.type = t2.type AND t1.achievement = t2.maxAchievement
         JOIN (
-            SELECT title, diff, achievement, MAX(dxScore) as maxDxScore
+            SELECT title, diff, type, achievement, MAX(dxScore) as maxDxScore
             FROM maimai_score_entity
-            GROUP BY title, diff, achievement
-        ) t3 ON t1.title = t3.title AND t1.diff = t3.diff AND t1.achievement = t3.achievement AND t1.dxScore = t3.maxDxScore
+            GROUP BY title, diff, type, achievement
+        ) t3 ON t1.title = t3.title AND t1.diff = t3.diff AND t1.type = t3.type AND t1.achievement = t3.achievement AND t1.dxScore = t3.maxDxScore
         ORDER BY t1.achievement DESC, t1.dxScore DESC
     """)
     suspend fun getAllHighestMusicScore(): List<MaimaiScoreEntity>

@@ -1,6 +1,10 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores.chuni
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,14 +13,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -29,15 +34,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.skydynamic.maiproberplus.R
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.deleteAllScore
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
-fun ChuniScoreList(gridState: LazyGridState) {
+fun ChuniScoreList(
+    coroutineScope: CoroutineScope
+) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
+
+    val gridState = rememberLazyGridState()
 
     when {
         openDeleteConfirmDialog -> {
@@ -158,6 +171,33 @@ fun ChuniScoreList(gridState: LazyGridState) {
                     .padding(4.dp),
                 scoreDetail = it
             )
+        }
+    }
+
+    AnimatedVisibility(
+        visible = gridState.canScrollBackward,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Box(
+            Modifier
+                .fillMaxSize()
+        ) {
+            FloatingActionButton(
+                onClick = {
+                    coroutineScope.launch {
+                        gridState.scrollToItem(0)
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    painterResource(R.drawable.arrow_upward_24px),
+                    contentDescription = null
+                )
+            }
         }
     }
 }

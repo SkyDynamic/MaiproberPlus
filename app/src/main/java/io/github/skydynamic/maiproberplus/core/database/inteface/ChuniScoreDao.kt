@@ -32,14 +32,15 @@ interface ChuniScoreDao {
     @Query("""
         SELECT t1.*
         FROM chuni_score_entity t1
-        JOIN(
-            SELECT score, MIN(rowid) as minRowId
+        JOIN (
+            SELECT title, diff, MAX(score) as maxScore
             FROM chuni_score_entity
-            GROUP BY score
-        ) t2 ON t1.score == t2.score AND t1.rowid == t2.minRowId
+            GROUP BY title, diff
+        ) t2 ON t1.title = t2.title AND t1.diff = t2.diff AND t1.score = t2.maxScore
         ORDER BY t1.score DESC
     """)
     suspend fun getAllHighestMusicScore(): List<ChuniScoreEntity>
+
 
     @Query("SELECT COUNT(*) FROM chuni_score_entity")
     suspend fun getMusicScoreCount(): Int

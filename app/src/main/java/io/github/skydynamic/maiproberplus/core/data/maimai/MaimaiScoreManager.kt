@@ -21,6 +21,27 @@ object MaimaiScoreManager {
         }
     }
 
+    fun createMaimaiScore(score: MaimaiScoreEntity) {
+        GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
+            val dao = application.db.maimaiScoreDao()
+            if (!dao.exists(score.achievement, score.dxScore)) {
+                dao.insert(score)
+                refreshMaimaiScore()
+            }
+        }
+    }
+
+    fun getMaimaiScoreByScoreId(scoreId: Int): MaimaiScoreEntity? {
+        var score: MaimaiScoreEntity? = null
+        runBlocking {
+            GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
+                val dao = application.db.maimaiScoreDao()
+                score = dao.getMusicScoreByScoreId(scoreId)
+            }.join()
+        }
+        return score
+    }
+
     fun getMaimaiScoreCache(): List<MaimaiScoreEntity> {
         var scores: List<MaimaiScoreEntity> = emptyList()
         runBlocking {

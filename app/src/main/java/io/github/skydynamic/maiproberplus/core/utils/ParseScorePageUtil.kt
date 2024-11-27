@@ -12,7 +12,7 @@ import org.jsoup.nodes.Entities
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-fun calcMaimaiScore(score: String, songLevel: Float): Int {
+fun calcMaimaiRating(score: String, songLevel: Float): Int {
     var formatScore = score.replace("%", "").toFloat()
     val multiplierFactor = when (formatScore) {
         in 10.0000..19.9999 -> 0.016 // D
@@ -43,7 +43,7 @@ fun calcMaimaiScore(score: String, songLevel: Float): Int {
 }
 
 @SuppressLint("DefaultLocale")
-fun calcChuniScore(score: Int, songLevel: Float): Float {
+fun calcChuniRating(score: Int, songLevel: Float): Float {
         return when {
             score >= 1009000 -> songLevel + 2.15f
             score >= 1007500 -> songLevel + 2.0f + (score - 1007500) / 100.0 * 0.01
@@ -125,7 +125,7 @@ object ParseScorePageUtil {
                 musicVersion = res.difficulties.standard[difficulty.diffIndex].version
             }
 
-            val musicRating = calcMaimaiScore(musicScore, musicLevel)
+            val musicRating = calcMaimaiRating(musicScore, musicLevel)
 
             for (musicClearTypeElement in musicClearTypes) {
                 val regex = Regex(".*music_icon_(.*?)?.png?.*")
@@ -218,7 +218,7 @@ object ParseScorePageUtil {
                 res.difficulties[0].levelValue
             }
 
-            val musicRating = calcChuniScore(musicScoreNum, musicLevel)
+            val musicRating = calcChuniRating(musicScoreNum, musicLevel)
 
             val musicVersion = res.version
 

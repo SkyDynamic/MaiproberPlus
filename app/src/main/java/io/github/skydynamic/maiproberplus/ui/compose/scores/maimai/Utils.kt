@@ -12,5 +12,7 @@ fun refreshMaimaiScore() {
         ScoreManagerViewModel.maimaiLoadedScores.addAll(getMaimaiScoreCache().sortedByDescending {
             it.rating
         })
+        ScoreManagerViewModel.maimaiSearchScores.clear()
+        ScoreManagerViewModel.maimaiSearchText.value = ""
     }
 }

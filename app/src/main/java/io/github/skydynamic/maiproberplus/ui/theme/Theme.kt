@@ -301,3 +301,12 @@ fun getDescFontColor() : Color {
         else -> lightScheme.outline
     }
 }
+
+@Composable
+fun getLazyColumnColor() : Color {
+    val darkTheme = isSystemInDarkTheme()
+    return when {
+        darkTheme -> darkScheme.surfaceContainerHighest
+        else -> lightScheme.surfaceContainerHighest
+    }
+}

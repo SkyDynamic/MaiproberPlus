@@ -171,5 +171,15 @@ class MaimaiData {
                 .assetsManager
                 .getMaimaiUIAssets("UI_GAM_Gauge_DXScoreIcon_0$dxStar.png")
         }
+
+        fun songHasTypeDifficulty(title: String, type: MaimaiEnums.SongType): Boolean {
+            val difficulty = MAIMAI_SONG_LIST.find { it.title == title }?.difficulties
+            if (type == MaimaiEnums.SongType.STANDARD) {
+                return difficulty?.standard?.isNotEmpty() == true
+            } else if (type == MaimaiEnums.SongType.DX) {
+                return difficulty?.dx?.isNotEmpty() == true
+            }
+            return false
+        }
     }
 }

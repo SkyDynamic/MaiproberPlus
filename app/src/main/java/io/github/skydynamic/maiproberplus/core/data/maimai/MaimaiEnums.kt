@@ -10,8 +10,7 @@ class MaimaiEnums {
     @Serializable
     enum class SongType(val type: String, val type2: String) {
         @SerialName("standard") STANDARD("standard", "SD"),
-        @SerialName("dx") DX("dx", "DX"),
-        @SerialName("utage") UTAGE("utage", "UTAGE");
+        @SerialName("dx") DX("dx", "DX");
 
         companion object {
             @JvmStatic
@@ -88,12 +87,12 @@ class MaimaiEnums {
     }
 
     @Serializable
-    enum class FullComboType(val typeName: String, val icoFileName: String) {
-        @SerialName("") NULL("", "UI_CHR_PlayBonus_Back.png"),
-        FC("fc", "UI_CHR_PlayBonus_FC.png"),
-        FCP("fcp", "UI_CHR_PlayBonus_FCp.png"),
-        AP("ap", "UI_CHR_PlayBonus_AP.png"),
-        APP("app", "UI_CHR_PlayBonus_APp.png");
+    enum class FullComboType(val typeName: String, val typeName2: String, val icoFileName: String) {
+        @SerialName("") NULL("", "无", "UI_CHR_PlayBonus_Back.png"),
+        FC("fc", "FC", "UI_CHR_PlayBonus_FC.png"),
+        FCP("fcp", "FC+", "UI_CHR_PlayBonus_FCp.png"),
+        AP("ap", "AP", "UI_CHR_PlayBonus_AP.png"),
+        APP("app", "AP+", "UI_CHR_PlayBonus_APp.png");
 
         fun getIcoBitmap(): Bitmap? {
             return Application.application.assetsManager.getMaimaiUIAssets(icoFileName)
@@ -113,13 +112,13 @@ class MaimaiEnums {
     }
 
     @Serializable
-    enum class SyncType(val syncName: String, val icoFileName: String) {
-        @SerialName("") NULL("", "UI_CHR_PlayBonus_Back.png"),
-        SYNC("sync", "UI_CHR_PlayBonus_Sync.png"),
-        FS("fs", "UI_CHR_PlayBonus_FS.png"),
-        FSP("fsp", "UI_CHR_PlayBonus_FSp.png"),
-        FDX("fsd", "UI_CHR_PlayBonus_FSD.png"),
-        FDXP("fsdp", "UI_CHR_PlayBonus_FSDp.png");
+    enum class SyncType(val syncName: String, val typeName2: String, val icoFileName: String) {
+        @SerialName("") NULL("", "无", "UI_CHR_PlayBonus_Back.png"),
+        SYNC("sync", "SYNC", "UI_CHR_PlayBonus_Sync.png"),
+        FS("fs", "FS", "UI_CHR_PlayBonus_FS.png"),
+        FSP("fsp", "FS+", "UI_CHR_PlayBonus_FSp.png"),
+        FDX("fsd", "FDX", "UI_CHR_PlayBonus_FSD.png"),
+        FDXP("fsdp", "FDX+", "UI_CHR_PlayBonus_FSDp.png");
 
         fun getIcoBitmap(): Bitmap? {
             return Application.application.assetsManager.getMaimaiUIAssets(icoFileName)

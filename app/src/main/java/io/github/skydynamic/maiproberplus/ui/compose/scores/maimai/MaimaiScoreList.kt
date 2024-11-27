@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
@@ -38,6 +39,7 @@ import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewMode
 @Composable
 fun MaimaiScoreList(gridState: LazyGridState) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var openCreateScoreDialog by remember { mutableStateOf(false) }
 
     when {
         openDeleteConfirmDialog -> {
@@ -50,6 +52,13 @@ fun MaimaiScoreList(gridState: LazyGridState) {
                     deleteAllScore()
                     ScoreManagerViewModel.searchMaimaiScore("")
                     ScoreManagerViewModel.maimaiSearchCache.clear()
+                }
+            )
+        }
+        openCreateScoreDialog -> {
+            MaimaiCreateScoreDialog(
+                onDismissRequest = {
+                    openCreateScoreDialog = false
                 }
             )
         }
@@ -132,7 +141,17 @@ fun MaimaiScoreList(gridState: LazyGridState) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Button(
-                    modifier = Modifier.padding(8.dp).weight(1f),
+                    modifier = Modifier.padding(4.dp).weight(0.45f),
+                    onClick = {
+                        openCreateScoreDialog = true
+                    }
+                ) {
+                    Icon(Icons.Default.Add, null)
+                    Text("新增成绩")
+                }
+
+                Button(
+                    modifier = Modifier.padding(4.dp).weight(0.55f),
                     onClick = {
                         openDeleteConfirmDialog = true
                     },

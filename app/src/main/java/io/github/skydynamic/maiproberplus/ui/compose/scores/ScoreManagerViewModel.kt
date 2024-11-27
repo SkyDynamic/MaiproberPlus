@@ -83,10 +83,7 @@ object ScoreManagerViewModel : ViewModel() {
                     val searchResult = maimaiLoadedScores.filter { musicDetail ->
                         musicDetail.title.contains(text, ignoreCase = true) ||
                                 maimaiAliasMap[
-                                    if (musicDetail.scoreId == -1)
-                                        MaimaiData.getSongIdFromTitle(musicDetail.title)
-                                    else
-                                        musicDetail.scoreId
+                                    MaimaiData.getSongIdFromTitle(musicDetail.title)
                                 ]?.any { alias ->
                                     alias.contains(text, ignoreCase = true)
                                 } == true

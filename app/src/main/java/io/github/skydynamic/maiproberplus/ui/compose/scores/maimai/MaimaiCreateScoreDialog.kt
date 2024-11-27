@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -63,7 +66,9 @@ import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.cr
 import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
 import io.github.skydynamic.maiproberplus.core.utils.calcMaimaiRating
+import io.github.skydynamic.maiproberplus.ui.theme.getButtonSelectedColor
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
+import io.github.skydynamic.maiproberplus.ui.theme.getTitleFontColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -116,7 +121,7 @@ fun MaimaiCreateScoreDialog(
 
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = Modifier.fillMaxWidth().height(580.dp).padding(start = 16.dp, end = 16.dp),
+        modifier = Modifier.fillMaxWidth().height(630.dp).padding(start = 16.dp, end = 16.dp),
     ) {
         Card(
             modifier = Modifier.fillMaxSize(),
@@ -157,7 +162,7 @@ fun MaimaiCreateScoreDialog(
                             .width(100.dp)
                             .height(100.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color(54, 53, 53, 255))
+                            .background(getButtonSelectedColor(false))
                     ) {
                         if (title.isNotEmpty()) {
                             AsyncImage(
@@ -348,26 +353,64 @@ fun MaimaiCreateScoreDialog(
                     modifier = Modifier
                         .padding(start = 12.dp, end = 12.dp, top = 12.dp)
                         .fillMaxWidth()
-                        .height(60.dp)
+                        .height(110.dp)
                 ) {
                     Text("Full Sync", fontSize = 12.sp)
-                    SingleChoiceSegmentedButtonRow(
+
+                    val row1 = MaimaiEnums.SyncType.entries.take(MaimaiEnums.SyncType.entries.size / 2)
+                    val row2 = MaimaiEnums.SyncType.entries.drop(MaimaiEnums.SyncType.entries.size / 2)
+
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(35.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        MaimaiEnums.SyncType.entries.forEachIndexed { index, it ->
-                            SegmentedButton(
-                                shape = SegmentedButtonDefaults.itemShape(
-                                    index = it.ordinal,
-                                    count = MaimaiEnums.SyncType.entries.size,
-                                ),
-                                selected = fullSyncType == it,
+                        row1.forEach { syncTypeOption ->
+                            Button(
                                 onClick = {
-                                    fullSyncType = it
-                                }
+                                    fullSyncType = syncTypeOption
+                                },
+                                modifier = Modifier.padding(horizontal = 4.dp).width(80.dp),
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = syncTypeOption.ordinal,
+                                    count = MaimaiEnums.SyncType.entries.size / 2
+                                ),
+                                colors = ButtonDefaults.buttonColors(
+                                    getButtonSelectedColor(fullSyncType == syncTypeOption)
+                                )
                             ) {
-                                Text(it.typeName2)
+                                var color = getTitleFontColor()
+                                if (fullSyncType == syncTypeOption) color = Color.White
+                                Text(syncTypeOption.typeName2, color = color)
+                            }
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .fillMaxWidth()
+                            .height(35.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        row2.forEach { syncTypeOption ->
+                            Button(
+                                onClick = {
+                                    fullSyncType = syncTypeOption
+                                },
+                                modifier = Modifier.padding(horizontal = 4.dp).width(80.dp),
+                                shape = SegmentedButtonDefaults.itemShape(
+                                    index = (syncTypeOption.ordinal - 3),
+                                    count = MaimaiEnums.SyncType.entries.size / 2
+                                ),
+                                colors = ButtonDefaults.buttonColors(
+                                    getButtonSelectedColor(fullSyncType == syncTypeOption)
+                                )
+                            ) {
+                                var color = getTitleFontColor()
+                                if (fullSyncType == syncTypeOption) color = Color.White
+                                Text(syncTypeOption.typeName2, color = color)
                             }
                         }
                     }

@@ -303,10 +303,22 @@ fun getDescFontColor() : Color {
 }
 
 @Composable
-fun getLazyColumnColor() : Color {
+fun getButtonSelectedColor(selected: Boolean) : Color {
     val darkTheme = isSystemInDarkTheme()
     return when {
-        darkTheme -> darkScheme.surfaceContainerHighest
-        else -> lightScheme.surfaceContainerHighest
+        selected -> {
+            if (darkTheme) {
+                darkScheme.primary
+            } else {
+                lightScheme.primary
+            }
+        }
+        else -> {
+            if (darkTheme) {
+                darkScheme.surfaceContainerHighest
+            } else {
+                lightScheme.outlineVariant
+            }
+        }
     }
 }

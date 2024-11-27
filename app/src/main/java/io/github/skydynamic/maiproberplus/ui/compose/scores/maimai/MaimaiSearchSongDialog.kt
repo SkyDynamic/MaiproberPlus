@@ -13,11 +13,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,6 +79,17 @@ fun MaimaiSearchSongDialog(
                         searchText = it
                     },
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    trailingIcon = {
+                        if (!searchText.isEmpty()) {
+                            IconButton(
+                                onClick = {
+                                    searchText = ""
+                                }
+                            ) {
+                                Icon(Icons.Default.Clear, null)
+                            }
+                        }
+                    },
                     label = {
                         Text("搜索歌曲")
                     }

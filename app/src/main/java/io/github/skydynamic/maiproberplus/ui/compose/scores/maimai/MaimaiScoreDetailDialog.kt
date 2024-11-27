@@ -1,5 +1,6 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores.maimai
 
+import android.icu.text.DecimalFormat
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -205,7 +206,7 @@ fun MaimaiScoreDetailDialog(
                             color = Color(118, 115, 115, 255)
                         )
                         Text(
-                            text = "${scoreDetail.achievement}%",
+                            text = "${DecimalFormat("#." + "0".repeat(4)).format(scoreDetail.achievement)}%",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )

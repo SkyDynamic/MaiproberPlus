@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.symbol.processing)
 }
 
-val appVersion: String = "1.1.5"
+val appVersion: String = "1.1.7"
 
 android {
     namespace = "io.github.skydynamic.maiproberplus"
@@ -38,12 +38,16 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        create("snapshot") {
+            initWith(getByName("release"))
         }
     }
 

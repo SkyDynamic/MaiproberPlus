@@ -3,6 +3,8 @@ package io.github.skydynamic.maiproberplus.core.prober
 import android.util.Log
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.writeChuniScoreCache
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.writeMaimaiScoreCache
 
 class LocalProberUtil : IProberUtil {
     override suspend fun uploadMaimaiProberData(importToken: String, authUrl: String) {

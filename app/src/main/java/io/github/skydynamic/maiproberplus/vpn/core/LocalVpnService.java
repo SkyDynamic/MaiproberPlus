@@ -26,8 +26,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.github.skydynamic.maiproberplus.GlobalViewModel;
-import io.github.skydynamic.maiproberplus.R;
 import io.github.skydynamic.maiproberplus.MainActivity;
+import io.github.skydynamic.maiproberplus.R;
 import io.github.skydynamic.maiproberplus.vpn.dns.DnsPacket;
 import io.github.skydynamic.maiproberplus.vpn.tcpip.CommonMethods;
 import io.github.skydynamic.maiproberplus.vpn.tcpip.IPHeader;

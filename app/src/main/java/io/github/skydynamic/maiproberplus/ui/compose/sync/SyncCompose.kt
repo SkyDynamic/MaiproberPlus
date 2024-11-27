@@ -1,6 +1,7 @@
 package io.github.skydynamic.maiproberplus.ui.compose.sync
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -34,10 +35,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.writeChuniScoreCache
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.writeMaimaiScoreCache
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
-import io.github.skydynamic.maiproberplus.core.prober.writeChuniScoreCache
-import io.github.skydynamic.maiproberplus.core.prober.writeMaimaiScoreCache
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServer
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.DownloadDialog
@@ -73,7 +74,7 @@ fun SyncCompose() {
     when {
         openAskIsOverwriteScoresDialog -> {
             ConfirmDialog(
-                info = "同步成绩到本地会覆盖所有的成绩缓存，你确定同步吗",
+                info = "确认同步数据并添加到数据库吗?",
                 onRequest = {
                     val token = when (globalViewModel.proberPlatform) {
                         ProberPlatform.DIVING_FISH ->
@@ -147,20 +148,19 @@ fun SyncCompose() {
                 modifier = Modifier
                     .padding(16.dp),
                 onClick = {
-                    if (!context.filesDir.resolve("maimai_song_list.json").exists() ||
-                        !context.filesDir.resolve("chuni_song_list.json").exists()
-                    ) {
+                    if (!checkResourceComplate(context)) {
                         SyncViewModel.openInitDialog = true
-                    }
-                    if (!globalViewModel.isVpnServiceRunning) {
-                        val intent = VpnService.prepare(context)
-                        if (intent != null) {
-                            vpnRequestLauncher.launch(intent)
-                        } else {
-                            startVpnService(context as Activity)
-                        }
                     } else {
-                        stopVpnService(context as Activity)
+                        if (!globalViewModel.isVpnServiceRunning) {
+                            val intent = VpnService.prepare(context)
+                            if (intent != null) {
+                                vpnRequestLauncher.launch(intent)
+                            } else {
+                                startVpnService(context as Activity)
+                            }
+                        } else {
+                            stopVpnService(context as Activity)
+                        }
                     }
                 }
             ) {
@@ -261,7 +261,11 @@ fun SyncCompose() {
                 .padding(15.dp)
                 .size(300.dp, 50.dp),
             onClick = {
-                openAskIsOverwriteScoresDialog = true
+                if (!checkResourceComplate(context)) {
+                    SyncViewModel.openInitDialog = true
+                } else {
+                    openAskIsOverwriteScoresDialog = true
+                }
             },
             enabled = globalViewModel.proberPlatform != ProberPlatform.LOCAL
         ) {
@@ -278,4 +282,8 @@ private fun startVpnService(activity: Activity) {
 private fun stopVpnService(activity: Activity) {
     val intent = Intent(activity, LocalVpnService::class.java).apply { action = LocalVpnService.DISCONNECT_INTENT }
     activity.startService(intent)
+}
+
+private fun checkResourceComplate(context: Context): Boolean {
+    return context.filesDir.resolve("maimai_song_list.json").exists() || context.filesDir.resolve("chuni_song_list.json").exists()
 }

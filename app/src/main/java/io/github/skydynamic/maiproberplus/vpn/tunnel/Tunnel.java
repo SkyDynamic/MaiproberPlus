@@ -1,7 +1,6 @@
 package io.github.skydynamic.maiproberplus.vpn.tunnel;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -10,9 +9,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-import io.github.skydynamic.maiproberplus.vpn.core.Constant;
 import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService;
-import io.github.skydynamic.maiproberplus.vpn.core.ProxyConfig;
 
 public abstract class Tunnel {
 

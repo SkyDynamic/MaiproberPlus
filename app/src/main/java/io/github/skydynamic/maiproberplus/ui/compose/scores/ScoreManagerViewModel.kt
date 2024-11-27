@@ -8,21 +8,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
+import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
+import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
 object ScoreManagerViewModel : ViewModel() {
-    val maimaiLoadedScores = mutableStateListOf<MaimaiData.MusicDetail>()
-    val maimaiSearchScores = mutableStateListOf<MaimaiData.MusicDetail>()
+    val maimaiLoadedScores = mutableStateListOf<MaimaiScoreEntity>()
+    val maimaiSearchScores = mutableStateListOf<MaimaiScoreEntity>()
     val maimaiSearchText = mutableStateOf("")
-    val chuniLoadedScores = mutableStateListOf<ChuniData.MusicDetail>()
-    val chuniSearchScores = mutableStateListOf<ChuniData.MusicDetail>()
+    val chuniLoadedScores = mutableStateListOf<ChuniScoreEntity>()
+    val chuniSearchScores = mutableStateListOf<ChuniScoreEntity>()
     val chuniSearchText = mutableStateOf("")
 
-    var maimaiScoreSelection: MaimaiData.MusicDetail? by mutableStateOf(null)
-    var chuniScoreSelection: ChuniData.MusicDetail? by mutableStateOf(null)
+    var maimaiScoreSelection: MaimaiScoreEntity? by mutableStateOf(null)
+    var chuniScoreSelection: ChuniScoreEntity? by mutableStateOf(null)
 
     var showMaimaiScoreSelectionDialog by mutableStateOf(false)
     var showChuniScoreSelectionDialog by mutableStateOf(false)
@@ -30,7 +32,7 @@ object ScoreManagerViewModel : ViewModel() {
     private val chuniAliasMap: Map<Int, List<String>> by lazy {
         ChuniData.CHUNI_SONG_ALIASES.associateBy({ it.songId }, { it.aliases })
     }
-    private val chuniSearchCache = mutableMapOf<String, List<ChuniData.MusicDetail>>()
+    val chuniSearchCache = mutableMapOf<String, List<ChuniScoreEntity>>()
 
     fun searchChuniScore(text: String) {
         if (text.isEmpty()) {
@@ -43,12 +45,12 @@ object ScoreManagerViewModel : ViewModel() {
             } else {
                 ScoreManagerViewModel.viewModelScope.launch(Dispatchers.IO) {
                     val searchResult = chuniLoadedScores.filter { musicDetail ->
-                        musicDetail.name.contains(text, ignoreCase = true) ||
+                        musicDetail.title.contains(text, ignoreCase = true) ||
                                 chuniAliasMap[
-                                    if (musicDetail.id == -1)
-                                        ChuniData.getSongIdFromTitle(musicDetail.name)
+                                    if (musicDetail.songId == -1)
+                                        ChuniData.getSongIdFromTitle(musicDetail.title)
                                     else
-                                        musicDetail.id
+                                        musicDetail.songId
                                 ]?.any { alias ->
                                     alias.contains(text, ignoreCase = true)
                                 } == true
@@ -66,7 +68,7 @@ object ScoreManagerViewModel : ViewModel() {
     private val maimaiAliasMap: Map<Int, List<String>> by lazy {
         MaimaiData.MAIMAI_SONG_ALIASES.associateBy({ it.songId }, { it.aliases })
     }
-    private val maimaiSearchCache = mutableMapOf<String, List<MaimaiData.MusicDetail>>()
+    val maimaiSearchCache = mutableMapOf<String, List<MaimaiScoreEntity>>()
 
     fun searchMaimaiScore(text: String) {
         if (text.isEmpty()) {
@@ -79,12 +81,12 @@ object ScoreManagerViewModel : ViewModel() {
             } else {
                 ScoreManagerViewModel.viewModelScope.launch(Dispatchers.IO) {
                     val searchResult = maimaiLoadedScores.filter { musicDetail ->
-                        musicDetail.name.contains(text, ignoreCase = true) ||
+                        musicDetail.title.contains(text, ignoreCase = true) ||
                                 maimaiAliasMap[
-                                    if (musicDetail.id == -1)
-                                        MaimaiData.getSongIdFromTitle(musicDetail.name)
+                                    if (musicDetail.scoreId == -1)
+                                        MaimaiData.getSongIdFromTitle(musicDetail.title)
                                     else
-                                        musicDetail.id
+                                        musicDetail.scoreId
                                 ]?.any { alias ->
                                     alias.contains(text, ignoreCase = true)
                                 } == true

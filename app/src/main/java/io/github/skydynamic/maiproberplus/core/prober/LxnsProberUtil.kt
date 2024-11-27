@@ -5,8 +5,12 @@ import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.writeChuniScoreCache
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.writeMaimaiScoreCache
+import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
+import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.get
@@ -148,9 +152,9 @@ class LxnsProberUtil : IProberUtil {
 
         val postScores = scores.map {
             LxnsMaimaiScoreBody(
-                id = MaimaiData.getSongIdFromTitle(it.name),
+                id = MaimaiData.getSongIdFromTitle(it.title),
                 levelIndex = it.diff.diffIndex,
-                achievements = it.score,
+                achievements = it.achievement,
                 fc = it.fullComboType.typeName,
                 fs = it.syncType.syncName,
                 dxScore = it.dxScore.toInt(),
@@ -202,7 +206,7 @@ class LxnsProberUtil : IProberUtil {
 
         val postScores = scores.map {
             LxnsChuniScoreBody(
-                id = it.id,
+                id = it.songId,
                 levelIndex = it.diff.diffIndex,
                 score = it.score,
                 clear = it.clearType.type,
@@ -242,24 +246,24 @@ class LxnsProberUtil : IProberUtil {
         }
     }
 
-    override suspend fun getMaimaiProberData(importToken: String): List<MaimaiData.MusicDetail> {
+    override suspend fun getMaimaiProberData(importToken: String): List<MaimaiScoreEntity> {
         try {
             val response = client.get("$baseApiUrl/api/v0/user/maimai/player/scores") {
                 header("X-User-Token", importToken)
             }
             val body = response.body<LxnsGetMaimaiScoreResponse>()
-            val parseList = arrayListOf<MaimaiData.MusicDetail>()
+            val parseList = arrayListOf<MaimaiScoreEntity>()
             body.data.forEach {
                 val type = MaimaiEnums.SongType.getSongTypeByName(it.type)
                 val diff = MaimaiEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
                 val levelValue = MaimaiData.getLevelValue(it.songName, diff, type)
                 val version = MaimaiData.getChartVersion(it.songName, diff, type)
                 parseList.add(
-                    MaimaiData.MusicDetail(
-                        id = MaimaiData.getSongIdFromTitle(it.songName),
-                        name = it.songName,
+                    MaimaiScoreEntity(
+                        songId = MaimaiData.getSongIdFromTitle(it.songName),
+                        title = it.songName,
                         level = levelValue,
-                        score = it.achievements,
+                        achievement = it.achievements,
                         dxScore = it.dxScore,
                         rating = floor(it.dxRating).toInt(),
                         version = version,
@@ -279,21 +283,21 @@ class LxnsProberUtil : IProberUtil {
         }
     }
 
-    override suspend fun getChuniProberData(importToken: String): List<ChuniData.MusicDetail> {
+    override suspend fun getChuniProberData(importToken: String): List<ChuniScoreEntity> {
         try {
             val response = client.get("$baseApiUrl/api/v0/user/chunithm/player/scores") {
                 header("X-User-Token", importToken)
             }
             val body = response.body<LxnsGetChuniScoreResponse>()
-            val parseList = arrayListOf<ChuniData.MusicDetail>()
+            val parseList = arrayListOf<ChuniScoreEntity>()
             body.data.forEach {
                 val diff = ChuniEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
                 val levelValue = ChuniData.getLevelValue(it.songName, diff)
                 val version = ChuniData.getChartVersion(it.songName, diff)
                 parseList.add(
-                    ChuniData.MusicDetail(
-                        id = it.id,
-                        name = it.songName,
+                    ChuniScoreEntity(
+                        songId = it.id,
+                        title = it.songName,
                         level = levelValue,
                         score = it.score,
                         rating = it.rating,

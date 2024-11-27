@@ -14,20 +14,47 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.deleteAllScore
+import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 
 @Composable
 fun MaimaiScoreList(gridState: LazyGridState) {
+    var openDeleteConfirmDialog by remember { mutableStateOf(false) }
+
+    when {
+        openDeleteConfirmDialog -> {
+            ConfirmDialog(
+                info = "你确定要删除所有成绩吗？\n该操纵不可逆!",
+                onDismiss = {
+                    openDeleteConfirmDialog = false
+                },
+                onRequest = {
+                    deleteAllScore()
+                    ScoreManagerViewModel.searchMaimaiScore("")
+                    ScoreManagerViewModel.maimaiSearchCache.clear()
+                }
+            )
+        }
+    }
+
     LazyVerticalGrid(
         modifier = Modifier
             .fillMaxSize()
@@ -42,6 +69,7 @@ fun MaimaiScoreList(gridState: LazyGridState) {
         ) {
             Spacer(Modifier.height(64.dp))
         }
+
         item(
             span = {
                 GridItemSpan(maxLineSpan)
@@ -90,6 +118,32 @@ fun MaimaiScoreList(gridState: LazyGridState) {
                 }
             }
         }
+
+        item(
+            span = {
+                GridItemSpan(maxLineSpan)
+            }
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Button(
+                    modifier = Modifier.padding(8.dp).weight(1f),
+                    onClick = {
+                        openDeleteConfirmDialog = true
+                    },
+                    colors = ButtonDefaults.buttonColors(Color.Red)
+                ) {
+                    Icon(Icons.Default.Delete, null, tint = Color.White)
+                    Text("删除所有成绩", color = Color.White)
+                }
+            }
+        }
+
         items(
             if (ScoreManagerViewModel.maimaiSearchText.value.isNotEmpty()) {
                 ScoreManagerViewModel.maimaiSearchScores

@@ -1,6 +1,7 @@
 package io.github.skydynamic.maiproberplus.core.proxy;
 
 import android.util.Log;
+
 import java.io.IOException;
 
 import fi.iki.elonen.NanoHTTPD;

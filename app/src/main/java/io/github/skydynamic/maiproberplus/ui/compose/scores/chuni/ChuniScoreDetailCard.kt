@@ -29,22 +29,23 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
+import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
 import io.github.skydynamic.maiproberplus.ui.compose.scores.common.LevelBox
 import java.text.NumberFormat
 
 @Composable
 fun ChuniScoreDetailCard(
     modifier: Modifier,
-    scoreDetail: ChuniData.MusicDetail
+    scoreDetail: ChuniScoreEntity
 ) {
-    val title = scoreDetail.name
+    val title = scoreDetail.title
     val level = scoreDetail.level
     val color = scoreDetail.diff.color
     val rating = scoreDetail.rating
-    val id = if (scoreDetail.id == -1) {
+    val id = if (scoreDetail.songId == -1) {
         ChuniData.getSongIdFromTitle(title)
     } else {
-        scoreDetail.id
+        scoreDetail.songId
     }
 
     Card (

@@ -62,17 +62,6 @@ class MaimaiData {
     )
 
     @Serializable
-    data class MusicDetail(
-        val id: Int = -1,
-        val name: String, val level: Float,
-        val score: Float, val dxScore: Int,
-        val rating: Int, val version: Int,
-        val type: MaimaiEnums.SongType, val diff: MaimaiEnums.Difficulty,
-        val rankType: MaimaiEnums.RankType, val syncType: MaimaiEnums.SyncType,
-        val fullComboType: MaimaiEnums.FullComboType
-    )
-
-    @Serializable
     data class LxnsSongListResponse(val songs: List<SongInfo>)
 
     companion object {

@@ -3,10 +3,12 @@ package io.github.skydynamic.maiproberplus.core.prober
 import android.util.Log
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
-import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
-import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.writeChuniScoreCache
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.writeMaimaiScoreCache
+import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
+import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.github.skydynamic.maiproberplus.core.utils.ParseScorePageUtil
 import io.github.skydynamic.maiproberplus.core.utils.WechatRequestUtil.WX_WINDOWS_UA
 import io.ktor.client.HttpClient
@@ -31,10 +33,6 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
-import kotlinx.serialization.json.encodeToStream
 
 val client = HttpClient(CIO) {
     install(ContentNegotiation) {
@@ -65,8 +63,8 @@ fun sendMessageToUi(message: String) {
      }
 }
 
-suspend fun getMaimaiScoreData(authUrl: String) : List<MaimaiData.MusicDetail> {
-    val scores = mutableListOf<MaimaiData.MusicDetail>()
+suspend fun getMaimaiScoreData(authUrl: String) : List<MaimaiScoreEntity> {
+    val scores = mutableListOf<MaimaiScoreEntity>()
     fetchMaimaiScorePage(authUrl) { diff, body ->
         scores.addAll(ParseScorePageUtil.parseMaimai(body, diff))
     }
@@ -115,8 +113,8 @@ suspend fun fetchMaimaiScorePage(
     }
 }
 
-suspend fun getChuniScoreData(authUrl: String) : List<ChuniData.MusicDetail> {
-    val scores = mutableListOf<ChuniData.MusicDetail>()
+suspend fun getChuniScoreData(authUrl: String) : List<ChuniScoreEntity> {
+    val scores = mutableListOf<ChuniScoreEntity>()
     fetchChuniScores(authUrl) { diff, body ->
         scores.addAll(ParseScorePageUtil.parseChuni(body, diff))
     }
@@ -168,38 +166,6 @@ suspend fun fetchChuniScores(
         } catch (e: Exception) {
             Log.e("ProberUtil", "抓取${difficulty.diffName}成绩失败: ${e.message}")
         }
-    }
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-fun writeMaimaiScoreCache(data: List<MaimaiData.MusicDetail>) {
-    val outputStream = application.getFilesDirOutputStream("maimai_score_cache.json")
-    Json.encodeToStream(data, outputStream)
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-fun writeChuniScoreCache(data: List<ChuniData.MusicDetail>) {
-    val outputStream = application.getFilesDirOutputStream("chuni_score_cache.json")
-    Json.encodeToStream(data, outputStream)
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-fun getMaimaiScoreCache(): List<MaimaiData.MusicDetail> {
-    if (application.checkFilesDirPathExist("maimai_score_cache.json")) {
-        val inputStream = application.getFilesDirInputStream("maimai_score_cache.json")
-        return Json.decodeFromStream<List<MaimaiData.MusicDetail>>(inputStream)
-    } else {
-        return emptyList()
-    }
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-fun getChuniScoreCache(): List<ChuniData.MusicDetail> {
-    if (application.checkFilesDirPathExist("chuni_score_cache.json")) {
-        val inputStream = application.getFilesDirInputStream("chuni_score_cache.json")
-        return Json.decodeFromStream<List<ChuniData.MusicDetail>>(inputStream)
-    } else {
-        return emptyList()
     }
 }
 

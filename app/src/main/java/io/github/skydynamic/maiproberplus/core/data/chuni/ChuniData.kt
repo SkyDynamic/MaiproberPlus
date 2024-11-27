@@ -48,17 +48,6 @@ class ChuniData {
     )
 
     @Serializable
-    data class MusicDetail(
-        val id: Int = -1,
-        val name: String, val level: Float,
-        val score: Int, val rating: Float,
-        val version: Int, val playTime: String = "",
-        val rankType: ChuniEnums.RankType, val diff: ChuniEnums.Difficulty,
-        val fullComboType: ChuniEnums.FullComboType, val clearType: ChuniEnums.ClearType,
-        val fullChainType: ChuniEnums.FullChainType
-    )
-
-    @Serializable
     data class LxnsSongListResponse(val songs: List<SongInfo>)
 
     companion object {

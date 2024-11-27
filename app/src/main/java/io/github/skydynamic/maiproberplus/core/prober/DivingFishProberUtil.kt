@@ -5,8 +5,12 @@ import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.writeChuniScoreCache
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.writeMaimaiScoreCache
+import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
+import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.github.skydynamic.maiproberplus.core.utils.ParseScorePageUtil
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -83,7 +87,7 @@ class DivingFishProberUtil : IProberUtil {
         authUrl: String
     ) {
         val isCache = application.configManager.config.localConfig.cacheScore
-        val scores = mutableListOf<MaimaiData.MusicDetail>()
+        val scores = mutableListOf<MaimaiScoreEntity>()
 
         application.sendNotification("水鱼查分器", "正在进行查分")
         sendMessageToUi("开始获取舞萌DX数据并上传到水鱼查分器")
@@ -114,11 +118,11 @@ class DivingFishProberUtil : IProberUtil {
                                 res.difficulties.standard[score.levelIndex].version
                                 level = res.difficulties.standard[score.levelIndex].levelValue
                             }
-                            scores.add(MaimaiData.MusicDetail(
-                                id = res.id,
-                                name = score.title,
+                            scores.add(MaimaiScoreEntity(
+                                songId = res.id,
+                                title = score.title,
                                 level = score.ds,
-                                score = score.achievements,
+                                achievement = score.achievements,
                                 dxScore = score.dxScore,
                                 rating = score.ra,
                                 version = version,
@@ -159,7 +163,7 @@ class DivingFishProberUtil : IProberUtil {
         authUrl: String
     ) {
         val isCache = application.configManager.config.localConfig.cacheScore
-        val scores = mutableListOf<ChuniData.MusicDetail>()
+        val scores = mutableListOf<ChuniScoreEntity>()
 
         application.sendNotification("水鱼查分器", "正在进行查分")
         sendMessageToUi("开始获取中二节奏数据并上传到水鱼查分器")
@@ -194,7 +198,7 @@ class DivingFishProberUtil : IProberUtil {
         }
     }
 
-    override suspend fun getMaimaiProberData(importToken: String): List<MaimaiData.MusicDetail> {
+    override suspend fun getMaimaiProberData(importToken: String): List<MaimaiScoreEntity> {
         try {
             val result = client.get("$baseApiUrl/maimaidxprober/player/records") {
                 headers {
@@ -202,18 +206,18 @@ class DivingFishProberUtil : IProberUtil {
                 }
             }
             val body = result.body<DivingFishGetMaimaiScoresResponse>()
-            val scores = mutableListOf<MaimaiData.MusicDetail>()
+            val scores = mutableListOf<MaimaiScoreEntity>()
             body.records.forEach {
                 val type = MaimaiEnums.SongType.getSongTypeByName(it.type)
                 val diff = MaimaiEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
                 val levelValue = MaimaiData.getLevelValue(it.title, diff, type)
                 val version = MaimaiData.getChartVersion(it.title, diff, type)
                 scores.add(
-                    MaimaiData.MusicDetail(
-                        id = MaimaiData.getSongIdFromTitle(it.title),
-                        name = it.title,
+                    MaimaiScoreEntity(
+                        songId = MaimaiData.getSongIdFromTitle(it.title),
+                        title = it.title,
                         level = levelValue,
-                        score = it.achievements,
+                        achievement = it.achievements,
                         dxScore = it.dxScore,
                         rating = it.ra,
                         version = version,
@@ -233,7 +237,7 @@ class DivingFishProberUtil : IProberUtil {
         }
     }
 
-    override suspend fun getChuniProberData(importToken: String): List<ChuniData.MusicDetail> {
+    override suspend fun getChuniProberData(importToken: String): List<ChuniScoreEntity> {
         try {
             val result = client.get("$baseApiUrl/chunithmprober/player/records") {
                 headers {
@@ -241,14 +245,14 @@ class DivingFishProberUtil : IProberUtil {
                 }
             }
             val body = result.body<DivingFishGetChuniSCoreResponse>()
-            val scores = arrayListOf<ChuniData.MusicDetail>()
+            val scores = arrayListOf<ChuniScoreEntity>()
             body.records.best.forEach {
                 val diff = ChuniEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
                 val version = ChuniData.getChartVersion(it.title, diff)
                 scores.add(
-                    ChuniData.MusicDetail(
-                        id = ChuniData.getSongIdFromTitle(it.title),
-                        name = it.title,
+                    ChuniScoreEntity(
+                        songId = ChuniData.getSongIdFromTitle(it.title),
+                        title = it.title,
                         level = it.ds,
                         score = it.score,
                         rating = it.ra,

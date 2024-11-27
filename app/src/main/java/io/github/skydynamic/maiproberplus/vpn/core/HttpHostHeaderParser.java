@@ -1,7 +1,5 @@
 package io.github.skydynamic.maiproberplus.vpn.core;
 
-import android.util.Log;
-
 import java.util.Locale;
 
 import io.github.skydynamic.maiproberplus.vpn.tcpip.CommonMethods;

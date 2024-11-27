@@ -24,10 +24,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +43,8 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
-import io.github.skydynamic.maiproberplus.core.prober.writeMaimaiScoreCache
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.deleteScore
+import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 import io.github.skydynamic.maiproberplus.ui.compose.scores.common.ColorLevelBox
@@ -52,12 +53,12 @@ import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun MaimaiScoreDetailDialog(
-    scoreDetail: MaimaiData.MusicDetail,
+    scoreDetail: MaimaiScoreEntity,
     onDismissRequest: () -> Unit
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
 
-    val title = scoreDetail.name
+    val title = scoreDetail.title
     val dxScore = scoreDetail.dxScore
     val noteTotal = MaimaiData.getNoteTotal(title, scoreDetail.diff, scoreDetail.type)
     val dxSatrs = MaimaiData.getDxStar(noteTotal, dxScore)
@@ -70,11 +71,11 @@ fun MaimaiScoreDetailDialog(
                     openDeleteConfirmDialog = false
                 },
                 onRequest = {
-                    ScoreManagerViewModel.maimaiLoadedScores.remove(scoreDetail)
-                    ScoreManagerViewModel.maimaiSearchScores.remove(scoreDetail)
-                    writeMaimaiScoreCache(ScoreManagerViewModel.maimaiLoadedScores)
+                    deleteScore(scoreDetail)
                     ScoreManagerViewModel.showMaimaiScoreSelectionDialog = false
                     ScoreManagerViewModel.maimaiScoreSelection = null
+                    ScoreManagerViewModel.maimaiSearchScores.remove(scoreDetail)
+                    ScoreManagerViewModel.maimaiSearchCache.clear()
                 }
             )
         }
@@ -204,7 +205,7 @@ fun MaimaiScoreDetailDialog(
                             color = Color(118, 115, 115, 255)
                         )
                         Text(
-                            text = "${scoreDetail.score}%",
+                            text = "${scoreDetail.achievement}%",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )

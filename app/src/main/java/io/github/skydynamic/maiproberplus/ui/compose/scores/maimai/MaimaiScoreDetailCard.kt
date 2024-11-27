@@ -28,15 +28,16 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
+import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.github.skydynamic.maiproberplus.ui.compose.scores.common.LevelBox
 
 @Composable
 fun MaimaiScoreDetailCard(
     modifier: Modifier,
-    scoreDetail: MaimaiData.MusicDetail,
+    scoreDetail: MaimaiScoreEntity,
     onClick: () -> Unit,
 ) {
-    val title = scoreDetail.name
+    val title = scoreDetail.title
     val level = scoreDetail.level
     val color = scoreDetail.diff.color
     val rating = scoreDetail.rating
@@ -111,7 +112,7 @@ fun MaimaiScoreDetailCard(
                 ) {
                     Column {
                         Text(
-                            text = "${scoreDetail.score}%",
+                            text = "${scoreDetail.achievement}%",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White

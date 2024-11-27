@@ -24,9 +24,11 @@ import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.room.Room
 import io.github.skydynamic.maiproberplus.core.ProberContext
 import io.github.skydynamic.maiproberplus.core.config.ConfigManager
 import io.github.skydynamic.maiproberplus.core.config.ConfigStorage
+import io.github.skydynamic.maiproberplus.core.database.AppDatabase
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServerService
 import io.github.skydynamic.maiproberplus.ui.compose.GameType
@@ -53,6 +55,7 @@ class Application : Application() {
     lateinit var configManager: ConfigManager
     lateinit var proberContext: ProberContext
     lateinit var assetsManager: AssetsManager
+    lateinit var db: AppDatabase
 
     override fun onCreate() {
         super.onCreate()
@@ -60,6 +63,7 @@ class Application : Application() {
         application = this
         configManager = ConfigManager(this)
         assetsManager = AssetsManager(this)
+        db = Room.databaseBuilder(this, AppDatabase::class.java, "maiproberplus").build()
         startService(Intent(this, HttpServerService::class.java))
         this.initProberContext()
     }

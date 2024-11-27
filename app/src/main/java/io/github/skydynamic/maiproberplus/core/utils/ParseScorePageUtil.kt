@@ -5,6 +5,8 @@ import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
+import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
+import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Entities
 import java.time.ZonedDateTime
@@ -69,11 +71,11 @@ object ParseScorePageUtil {
     fun parseMaimai(
         html: String,
         difficulty: MaimaiEnums.Difficulty
-    ): List<MaimaiData.MusicDetail> {
+    ): List<MaimaiScoreEntity> {
         if (html.isEmpty()) {
             return emptyList()
         }
-        val musicList = ArrayList<MaimaiData.MusicDetail>()
+        val musicList = ArrayList<MaimaiScoreEntity>()
 
         val document = Jsoup.parse(html)
         document.outputSettings().prettyPrint(false)
@@ -143,14 +145,19 @@ object ParseScorePageUtil {
                 }
             }
             musicList.add(
-                MaimaiData.MusicDetail(
-                    res.id,
-                    musicName, musicLevel,
-                    musicScoreNum, musicDxScoreNum ?: 0,
-                    musicRating, musicVersion,
-                    musicType, difficulty,
-                    musicRankType, musicSyncType,
-                    musicFullComboType
+                MaimaiScoreEntity(
+                    songId = res.id,
+                    title = musicName,
+                    level = musicLevel,
+                    achievement = musicScoreNum,
+                    dxScore = musicDxScoreNum ?: 0,
+                    rating = musicRating,
+                    version = musicVersion,
+                    type = musicType,
+                    diff = difficulty,
+                    rankType = musicRankType,
+                    syncType = musicSyncType,
+                    fullComboType = musicFullComboType
                 )
             )
         }
@@ -160,11 +167,11 @@ object ParseScorePageUtil {
     fun parseChuni(
         html: String,
         difficulty: ChuniEnums.Difficulty
-    ): List<ChuniData.MusicDetail> {
+    ): List<ChuniScoreEntity> {
         if (html.isEmpty()) {
             return emptyList()
         }
-        val musicList = ArrayList<ChuniData.MusicDetail>()
+        val musicList = ArrayList<ChuniScoreEntity>()
 
         val document = Jsoup.parse(html)
         document.outputSettings().prettyPrint(false)
@@ -242,9 +249,9 @@ object ParseScorePageUtil {
                         }
                     }
                 }
-                musicList.add(ChuniData.MusicDetail(
-                    id = res.id,
-                    name = musicName,
+                musicList.add(ChuniScoreEntity(
+                    songId = res.id,
+                    title = musicName,
                     level = musicLevel,
                     score = musicScoreNum,
                     rating = musicRating,

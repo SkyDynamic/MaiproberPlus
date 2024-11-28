@@ -1,7 +1,6 @@
 package io.github.skydynamic.maiproberplus.core.data.chuni
 
 import androidx.lifecycle.viewModelScope
-import io.github.skydynamic.maiproberplus.Application
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
@@ -12,13 +11,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 object ChuniScoreManager {
-    fun writeChuniScoreCache(data: List<ChuniScoreEntity>) {
-        GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
-            val dao = Application.application.db.chuniScoreDao()
-            data.forEach {
-                if (!dao.exists(it.score)) {
-                    dao.insert(it)
-                }
+    suspend fun writeChuniScoreCache(data: List<ChuniScoreEntity>) {
+        val dao = application.db.chuniScoreDao()
+        data.forEach {
+            if (!dao.exists(it.score)) {
+                dao.insert(it)
             }
         }
     }
@@ -27,7 +24,7 @@ object ChuniScoreManager {
         var scores: List<ChuniScoreEntity> = emptyList()
         runBlocking {
             GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
-                val dao = Application.application.db.chuniScoreDao()
+                val dao = application.db.chuniScoreDao()
                 scores = dao.getAllHighestMusicScore()
             }.join()
         }

@@ -10,21 +10,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 object MaimaiScoreManager {
-    fun writeMaimaiScoreCache(data: List<MaimaiScoreEntity>) {
-        GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
-            val dao = application.db.maimaiScoreDao()
+    suspend fun writeMaimaiScoreCache(data: List<MaimaiScoreEntity>) {
+        val dao = application.db.maimaiScoreDao()
+        if (dao.getMusicScoreCount() == 0) {
+            dao.insertAll(data)
+        } else {
             data.forEach {
-                if (!dao.exists(it.achievement, it.dxScore)) {
+                if (!dao.exists(it.title, it.type, it.achievement, it.dxScore)) {
                     dao.insert(it)
+                } else {
+                    return@forEach
                 }
             }
         }
+        refreshMaimaiScore()
     }
 
     fun createMaimaiScore(score: MaimaiScoreEntity) {
         GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
             val dao = application.db.maimaiScoreDao()
-            if (!dao.exists(score.achievement, score.dxScore)) {
+            if (!dao.exists(score.title, score.type, score.achievement, score.dxScore)) {
                 dao.insert(score)
                 refreshMaimaiScore()
             }

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 
 @Dao
@@ -58,6 +59,11 @@ interface MaimaiScoreDao {
     @Query("SELECT * FROM maimai_score_entity WHERE rowid = :scoreId")
     suspend fun getMusicScoreByScoreId(scoreId: Int): MaimaiScoreEntity?
 
-    @Query("SELECT EXISTS(SELECT 1 FROM maimai_score_entity WHERE achievement = :achievement AND dxScore = :dxScore)")
-    suspend fun exists(achievement: Float, dxScore: Int): Boolean
+    @Query("""
+        SELECT 
+        EXISTS(
+            SELECT 1 FROM maimai_score_entity WHERE title = :title AND type = :type AND achievement = :achievement AND dxScore = :dxScore
+        )
+    """)
+    suspend fun exists(title: String, type: MaimaiEnums.SongType, achievement: Float, dxScore: Int): Boolean
 }

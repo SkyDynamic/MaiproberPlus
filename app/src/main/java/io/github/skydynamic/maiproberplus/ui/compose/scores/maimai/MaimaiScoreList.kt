@@ -1,5 +1,6 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores.maimai
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -189,6 +190,7 @@ fun MaimaiScoreList(
             if (ScoreManagerViewModel.maimaiSearchText.value.isNotEmpty()) {
                 ScoreManagerViewModel.maimaiSearchScores
             } else {
+                Log.d("MaimaiScoreList", "${ScoreManagerViewModel.maimaiLoadedScores.size}")
                 ScoreManagerViewModel.maimaiLoadedScores
             }
         ) {

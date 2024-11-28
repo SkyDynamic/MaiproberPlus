@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
@@ -98,15 +101,16 @@ fun ConfirmDialog(
     Dialog(onDismissRequest = { onRequest() }) {
         Card(
             modifier = Modifier
-                .height(200.dp)
                 .width(300.dp)
+                .wrapContentHeight()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(getCardColor())
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .sizeIn(minHeight = 150.dp)
+                    .wrapContentSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

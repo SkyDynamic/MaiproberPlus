@@ -1,10 +1,14 @@
 package io.github.skydynamic.maiproberplus.ui.compose.setting
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -115,15 +119,21 @@ fun PasswordTextFiled(
 
 @Composable
 fun TextButtonItem(
+    modifier: Modifier = Modifier,
     title: String,
     description: String = "",
     onClick: () -> Unit
 ) {
-    TextButton(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick
+    Box(
+        modifier = modifier
+            .clickable(
+                onClick = onClick
+            )
     ) {
-        BaseTextItem(title = title, description = description)
+        BaseTextItem(
+            title = title,
+            description = description
+        )
     }
 
     horizontalDivider()
@@ -141,7 +151,8 @@ fun SwitchSettingItem(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
+        modifier = Modifier
+            .padding(start = 15.dp, top = 8.dp, end = 8.dp, bottom = 5.dp)
     ) {
         BaseTextItem(
             modifier = Modifier.weight(3f),

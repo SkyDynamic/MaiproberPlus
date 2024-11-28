@@ -33,6 +33,7 @@ import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServerService
 import io.github.skydynamic.maiproberplus.ui.compose.GameType
 import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService
+import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
@@ -136,12 +137,63 @@ class Application : Application() {
         return this.openFileOutput(fileName, MODE_PRIVATE)
     }
 
-    fun getJacketUri(songId: Int): Uri {
-        return filesDir.resolve("jacket").resolve("${songId}.png").toUri()
+    private fun getCacheSize(): Long {
+        val cacheDir = cacheDir
+        val externalCacheDir = externalCacheDir
+
+        var totalSize = 0L
+
+        totalSize += calculateDirectorySize(cacheDir)
+        if (externalCacheDir != null) {
+            totalSize += calculateDirectorySize(externalCacheDir)
+        }
+
+        return totalSize
     }
 
-    fun checkFilesDirPathExist(path: String): Boolean {
-        return filesDir.resolve(path).exists()
+    private fun calculateDirectorySize(directory: File?): Long {
+        if (directory == null || !directory.exists()) {
+            return 0
+        }
+
+        var size = 0L
+        for (file in directory.listFiles() ?: emptyArray()) {
+            size += if (file.isDirectory) {
+                calculateDirectorySize(file)
+            } else {
+                file.length()
+            }
+        }
+        return size
+    }
+
+    fun clearCache(): Long {
+        val cacheDir = cacheDir
+        val externalCacheDir = externalCacheDir
+
+        val totalSize = getCacheSize()
+
+        deleteDirectory(cacheDir)
+        if (externalCacheDir != null) {
+            deleteDirectory(externalCacheDir)
+        }
+
+        return totalSize
+    }
+
+    fun deleteDirectory(directory: File?) {
+        if (directory == null || !directory.exists()) {
+            return
+        }
+
+        for (file in directory.listFiles() ?: emptyArray()) {
+            if (file.isDirectory) {
+                deleteDirectory(file)
+            } else {
+                file.delete()
+            }
+        }
+        directory.delete()
     }
 
     fun startWechat() {

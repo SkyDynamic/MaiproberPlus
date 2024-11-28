@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,11 +30,15 @@ import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.BuildConfig
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
+import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
+import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.DiffChooseDialog
+import io.github.skydynamic.maiproberplus.ui.compose.DownloadDialog
+import io.github.skydynamic.maiproberplus.ui.compose.scores.resources
 
 @Composable
 fun SettingCompose() {
-    var divingfishToken by remember { mutableStateOf(Application.application.configManager.config.divingfishToken) }
+    var divingfishToken by remember { mutableStateOf(application.configManager.config.divingfishToken) }
     var lxnsToken by remember { mutableStateOf(application.configManager.config.lxnsToken) }
 
     var divingfishTokenHidden by remember { mutableStateOf(true) }
@@ -41,6 +46,9 @@ fun SettingCompose() {
 
     var showChooseMaimaiDiffDialog by remember { mutableStateOf(false) }
     var showChooseChuniDiffDialog by remember { mutableStateOf(false) }
+
+    var showConfirmUpdateSongResourceDialog by remember { mutableStateOf(false) }
+    var showUpdateSongResourceDialog by remember { mutableStateOf(false) }
 
     when {
         showChooseMaimaiDiffDialog -> {
@@ -68,6 +76,25 @@ fun SettingCompose() {
                 defaultList = ChuniEnums.Difficulty.entries.map { it.diffName },
                 currentChoiceList = application.configManager.config.syncConfig.chuniSyncDifficulty,
             )
+        }
+        showConfirmUpdateSongResourceDialog -> {
+            ConfirmDialog(
+                info = "是否确认更新资源",
+                onRequest = {
+                    showUpdateSongResourceDialog = true
+                },
+                onDismiss = {
+                    showConfirmUpdateSongResourceDialog = false
+                }
+            )
+        }
+        showUpdateSongResourceDialog -> {
+            DownloadDialog(
+                resources
+            ) {
+                showUpdateSongResourceDialog = false
+                sendMessageToUi("更新完成")
+            }
         }
     }
 
@@ -116,6 +143,10 @@ fun SettingCompose() {
             title = "成绩抓取设置"
         ) {
             TextButtonItem(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
                 title = "同步舞萌DX成绩的难度",
                 description = "选择后将只同步选择的难度的成绩"
             ) {
@@ -123,6 +154,10 @@ fun SettingCompose() {
             }
 
             TextButtonItem(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
                 title = "同步中二节奏成绩的难度",
                 description = "选择后将只同步选择的难度的成绩"
             ) {
@@ -134,6 +169,17 @@ fun SettingCompose() {
             modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
             title = "本地设置"
         ) {
+            TextButtonItem(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                title = "更新歌曲信息与别名",
+                description = "会从Lxns的API获取舞萌和中二歌曲信息与别名并覆盖本地文件"
+            ) {
+                showConfirmUpdateSongResourceDialog = true
+            }
+
             SwitchSettingItem(
                 title = "成绩缓存本地",
                 description = "开启后, 抓取成绩并上传到查分器时会缓存此次查分成绩到本地",
@@ -147,12 +193,32 @@ fun SettingCompose() {
 
         SettingItemGroup(
             modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            title = "其他"
+        ) {
+            TextButtonItem(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                title = "清除缓存",
+                description = "清除APP产生的缓存"
+            ) {
+                val clearSize = application.clearCache()
+                sendMessageToUi(
+                    "清除缓存成功, 释放了${clearSize / 1024 / 1024}MB缓存",
+                )
+            }
+        }
+
+        SettingItemGroup(
+            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
             title = "关于"
         ) {
             Text(
                 "App版本: ${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}",
                 fontSize = 12.sp,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier
+                    .padding(15.dp, top = 0.dp, bottom = 0.dp)
             )
 
             HorizontalDivider(
@@ -163,6 +229,10 @@ fun SettingCompose() {
             )
 
             TextButtonItem(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
                 title = "项目仓库",
                 description = "项目的GitHub仓库"
             ) {
@@ -173,9 +243,14 @@ fun SettingCompose() {
             }
 
             Text(
-                "本项目遵循Apache LICENSE 2.0协议",
+                """
+                    特别感谢Lxns提供的API与优秀的成绩管理页面设计
+                    也特别感谢愿意给此项目贡献的开发者与参与APP测试的朋友们
+                    本项目遵循Apache LICENSE 2.0协议
+                """.trimIndent(),
                 fontSize = 12.sp,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier
+                    .padding(15.dp, top = 0.dp, bottom = 0.dp)
             )
         }
     }

@@ -1,6 +1,7 @@
 package io.github.skydynamic.maiproberplus.core.data.chuni
 
 import androidx.compose.ui.graphics.Color
+import io.github.skydynamic.maiproberplus.R
 import kotlinx.serialization.Serializable
 
 class ChuniEnums {
@@ -64,11 +65,11 @@ class ChuniEnums {
     }
 
     @Serializable
-    enum class FullComboType(val type: String) {
+    enum class FullComboType(val type: String, val imageId:Int = 0) {
         NULL(""),
-        AJC("alljusticecritical"),
-        AJ("alljustice"),
-        FC("fullcombo");
+        AJC("alljusticecritical", R.drawable.ic_chuni_ajc),
+        AJ("alljustice", R.drawable.ic_chuni_aj),
+        FC("fullcombo", R.drawable.ic_chuni_full_combo);
 
         companion object {
             @JvmStatic
@@ -84,10 +85,10 @@ class ChuniEnums {
     }
 
     @Serializable
-    enum class FullChainType(val type: String) {
+    enum class FullChainType(val type: String,val imageId:Int = 0) {
         NULL(""),
-        FC("fullchain"),
-        GFC("fullchain2");
+        FC("fullchain", R.drawable.ic_chuni_full_chain_1),
+        GFC("fullchain2", R.drawable.ic_chuni_full_chain_2);
 
         companion object {
             @JvmStatic
@@ -106,21 +107,22 @@ class ChuniEnums {
     enum class RankType(
         val rank: String,
         private val intRange: IntRange,
+        val imageId:Int
     ) {
-        D("d", 0..499999),
-        C("c", 500000..599999),
-        B("b", 600000..699999),
-        BB("bb", 700000..799999),
-        BBB("bbb", 800000..899999),
-        A("a", 900000..924999),
-        AA("aa", 925000..949999),
-        AAA("aaa", 950000..974999),
-        S("s", 975000..989999),
-        SP("sp", 990000..999999),
-        SS("ss", 1000000..1004999),
-        SSP("ssp", 1005000..1007499),
-        SSS("sss", 1007500..1008999),
-        SSSP("sssp", 1009000..1010000);
+        D("d", 0..499999, R.drawable.ic_chuni_result_d),
+        C("c", 500000..599999, R.drawable.ic_chuni_result_c),
+        B("b", 600000..699999, R.drawable.ic_chuni_result_b),
+        BB("bb", 700000..799999, R.drawable.ic_chuni_result_bb),
+        BBB("bbb", 800000..899999, R.drawable.ic_chuni_result_bbb),
+        A("a", 900000..924999, R.drawable.ic_chuni_result_a),
+        AA("aa", 925000..949999, R.drawable.ic_chuni_result_aa),
+        AAA("aaa", 950000..974999, R.drawable.ic_chuni_result_aaa),
+        S("s", 975000..989999, R.drawable.ic_chuni_result_s),
+        SP("sp", 990000..999999, R.drawable.ic_chuni_result_sp),
+        SS("ss", 1000000..1004999, R.drawable.ic_chuni_result_ss),
+        SSP("ssp", 1005000..1007499, R.drawable.ic_chuni_result_ssp),
+        SSS("sss", 1007500..1008999, R.drawable.ic_chuni_result_sss),
+        SSSP("sssp", 1009000..1010000, R.drawable.ic_chuni_result_sssp);
 
         companion object {
             @JvmStatic

@@ -163,13 +163,13 @@ fun MaimaiScoreDetailDialog(
 
                         Row {
                             AsyncImage(
-                                model = scoreDetail.fullComboType.getIcoBitmap(),
+                                model = scoreDetail.fullComboType.imageId,
                                 contentDescription = null,
                                 modifier = Modifier.height(25.dp).width(25.dp),
                             )
 
                             AsyncImage(
-                                model = scoreDetail.syncType.getIcoBitmap(),
+                                model = scoreDetail.syncType.imageId,
                                 contentDescription = null,
                                 modifier = Modifier.height(25.dp).width(25.dp),
                             )
@@ -192,7 +192,7 @@ fun MaimaiScoreDetailDialog(
                     modifier = Modifier.padding(start = 12.dp).fillMaxWidth().height(60.dp)
                 ) {
                     AsyncImage(
-                        model = scoreDetail.rankType.getIcoBitmap(),
+                        model = scoreDetail.rankType.imageId,
                         contentDescription = null,
                         modifier = Modifier.align(Alignment.CenterVertically).weight(0.3f)
                     )
@@ -256,7 +256,7 @@ fun MaimaiScoreDetailDialog(
 
                                 if (dxSatrs > 0) {
                                     AsyncImage(
-                                        model = MaimaiData.getDxStarBitmap(dxSatrs),
+                                        model = MaimaiData.getDxStarBitmap(dxSatrs)!!,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .height(24.dp)

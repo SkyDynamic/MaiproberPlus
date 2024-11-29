@@ -65,7 +65,7 @@ class ChuniEnums {
     }
 
     @Serializable
-    enum class FullComboType(val type: String, val imageId:Int = 0) {
+    enum class FullComboType(val type: String, val imageId: Int = 0) {
         NULL(""),
         AJC("alljusticecritical", R.drawable.ic_chuni_ajc),
         AJ("alljustice", R.drawable.ic_chuni_aj),
@@ -85,7 +85,7 @@ class ChuniEnums {
     }
 
     @Serializable
-    enum class FullChainType(val type: String,val imageId:Int = 0) {
+    enum class FullChainType(val type: String, val imageId: Int = 0) {
         NULL(""),
         FC("fullchain", R.drawable.ic_chuni_full_chain_1),
         GFC("fullchain2", R.drawable.ic_chuni_full_chain_2);
@@ -107,7 +107,7 @@ class ChuniEnums {
     enum class RankType(
         val rank: String,
         private val intRange: IntRange,
-        val imageId:Int
+        val imageId: Int
     ) {
         D("d", 0..499999, R.drawable.ic_chuni_result_d),
         C("c", 500000..599999, R.drawable.ic_chuni_result_c),

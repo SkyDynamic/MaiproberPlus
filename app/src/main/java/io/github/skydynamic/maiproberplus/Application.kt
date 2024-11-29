@@ -55,7 +55,6 @@ object GlobalViewModel : ViewModel() {
 class Application : Application() {
     lateinit var configManager: ConfigManager
     lateinit var proberContext: ProberContext
-    lateinit var assetsManager: AssetsManager
     lateinit var db: AppDatabase
 
     override fun onCreate() {
@@ -63,7 +62,6 @@ class Application : Application() {
         createNotificationChannel()
         application = this
         configManager = ConfigManager(this)
-        assetsManager = AssetsManager(this)
         db = Room.databaseBuilder(this, AppDatabase::class.java, "maiproberplus").build()
         startService(Intent(this, HttpServerService::class.java))
         this.initProberContext()

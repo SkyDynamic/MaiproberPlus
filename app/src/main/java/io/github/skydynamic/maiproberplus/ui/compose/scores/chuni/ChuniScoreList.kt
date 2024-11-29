@@ -66,6 +66,16 @@ fun ChuniScoreList(
                 }
             )
         }
+        ScoreManagerViewModel.showChuniScoreSelectionDialog -> {
+            if (ScoreManagerViewModel.chuniScoreSelection == null) {
+                ScoreManagerViewModel.showChuniScoreSelectionDialog = false
+            } else {
+                ChuniScoreDetailDialog(ScoreManagerViewModel.chuniScoreSelection!!) {
+                    ScoreManagerViewModel.showChuniScoreSelectionDialog = false
+                    ScoreManagerViewModel.chuniScoreSelection = null
+                }
+            }
+        }
     }
 
     LazyVerticalGrid(
@@ -169,7 +179,11 @@ fun ChuniScoreList(
                     .height(80.dp)
 //                    .fillMaxWidth()
                     .padding(4.dp),
-                scoreDetail = it
+                scoreDetail = it,
+                onClick = {
+                    ScoreManagerViewModel.showChuniScoreSelectionDialog = true
+                    ScoreManagerViewModel.chuniScoreSelection = it
+                }
             )
         }
     }

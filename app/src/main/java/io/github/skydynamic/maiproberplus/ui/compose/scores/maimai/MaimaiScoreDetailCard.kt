@@ -36,14 +36,14 @@ import io.github.skydynamic.maiproberplus.ui.compose.scores.common.LevelBox
 fun MaimaiScoreDetailCard(
     modifier: Modifier,
     scoreDetail: MaimaiScoreEntity,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     val title = scoreDetail.title
     val level = scoreDetail.level
     val color = scoreDetail.diff.color
     val rating = scoreDetail.rating
 
-    ElevatedCard (
+    ElevatedCard(
         modifier = modifier
             .fillMaxSize(),
         onClick = onClick

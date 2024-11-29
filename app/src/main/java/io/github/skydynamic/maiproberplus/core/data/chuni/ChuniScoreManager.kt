@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
-import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.github.skydynamic.maiproberplus.ui.compose.scores.chuni.refreshChuniScore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +30,7 @@ object ChuniScoreManager {
         return scores
     }
 
-    fun deleteScore(score: MaimaiScoreEntity) {
+    fun deleteScore(score: ChuniScoreEntity) {
         GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
             val dao = application.db.chuniScoreDao()
             dao.deleteWithScoreId(score.scoreId)

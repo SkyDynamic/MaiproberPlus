@@ -1,6 +1,5 @@
-package io.github.skydynamic.maiproberplus.ui.compose.scores.maimai
+package io.github.skydynamic.maiproberplus.ui.compose.scores.chuni
 
-import android.icu.text.DecimalFormat
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,26 +42,26 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
-import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.deleteScore
-import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
+import io.github.skydynamic.maiproberplus.R
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.deleteScore
+import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 import io.github.skydynamic.maiproberplus.ui.compose.scores.common.ColorLevelBox
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
+import java.text.NumberFormat
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun MaimaiScoreDetailDialog(
-    scoreDetail: MaimaiScoreEntity,
+fun ChuniScoreDetailDialog(
+    scoreDetail: ChuniScoreEntity,
     onDismissRequest: () -> Unit
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
 
     val title = scoreDetail.title
-    val dxScore = scoreDetail.dxScore
-    val noteTotal = MaimaiData.getNoteTotal(title, scoreDetail.diff, scoreDetail.type)
-    val dxSatrs = MaimaiData.getDxStar(noteTotal, dxScore)
 
     when {
         openDeleteConfirmDialog -> {
@@ -73,10 +72,10 @@ fun MaimaiScoreDetailDialog(
                 },
                 onRequest = {
                     deleteScore(scoreDetail)
-                    ScoreManagerViewModel.showMaimaiScoreSelectionDialog = false
-                    ScoreManagerViewModel.maimaiScoreSelection = null
-                    ScoreManagerViewModel.maimaiSearchScores.remove(scoreDetail)
-                    ScoreManagerViewModel.maimaiSearchCache.clear()
+                    ScoreManagerViewModel.showChuniScoreSelectionDialog = false
+                    ScoreManagerViewModel.chuniScoreSelection = null
+                    ScoreManagerViewModel.chuniSearchScores.remove(scoreDetail)
+                    ScoreManagerViewModel.chuniSearchCache.clear()
                 }
             )
         }
@@ -113,7 +112,6 @@ fun MaimaiScoreDetailDialog(
                     }
                 }
 
-                // Song Info
                 Row(
                     modifier = Modifier
                         .padding(start = 12.dp, end = 12.dp, top = 12.dp)
@@ -122,7 +120,9 @@ fun MaimaiScoreDetailDialog(
                 ) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data("https://assets2.lxns.net/maimai/jacket/${MaimaiData.getSongIdFromTitle(title)}.png")
+                            .data(
+                                "https://assets2.lxns.net/chunithm/jacket/${scoreDetail.songId}.png"
+                            )
                             .crossfade(true)
                             .memoryCachePolicy(CachePolicy.ENABLED)
                             .diskCachePolicy(CachePolicy.ENABLED)
@@ -131,22 +131,14 @@ fun MaimaiScoreDetailDialog(
                         onError = { error ->
                             Log.e("Image", "Error loading image", error.result.throwable)
                         },
-                        modifier = Modifier.height(95.dp).width(95.dp).clip(RoundedCornerShape(8.dp)),
+                        modifier = Modifier.height(95.dp).width(95.dp)
+                            .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop
                     )
 
                     Column(
                         modifier = Modifier.weight(0.7f).padding(start = 12.dp)
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth().height(25.dp)
-                        ) {
-                            MaimaiSongTypeIco(
-                                type = scoreDetail.type,
-                                modifier = Modifier.align(Alignment.CenterStart),
-                            )
-                        }
-
                         Text(
                             text = title,
                             fontSize = 18.sp,
@@ -156,20 +148,22 @@ fun MaimaiScoreDetailDialog(
                         )
 
                         Text(
-                            text = "曲目 ID: ${MaimaiData.getSongIdFromTitle(title)}",
+                            text = "曲目 ID: ${ChuniData.getSongIdFromTitle(title)}",
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium,
                         )
 
-                        Row {
+                        if (scoreDetail.fullComboType != ChuniEnums.FullComboType.NULL) {
                             AsyncImage(
                                 model = scoreDetail.fullComboType.imageId,
                                 contentDescription = null,
                                 modifier = Modifier.height(25.dp).width(25.dp),
                             )
+                        }
 
+                        if (scoreDetail.fullChainType != ChuniEnums.FullChainType.NULL) {
                             AsyncImage(
-                                model = scoreDetail.syncType.imageId,
+                                model = scoreDetail.fullChainType.imageId,
                                 contentDescription = null,
                                 modifier = Modifier.height(25.dp).width(25.dp),
                             )
@@ -180,40 +174,58 @@ fun MaimaiScoreDetailDialog(
                         modifier = Modifier.fillMaxHeight().weight(0.3f)
                     ) {
                         ColorLevelBox(
-                            level = MaimaiData.getLevelValue(title, scoreDetail.diff, scoreDetail.type),
+                            level = ChuniData.getLevelValue(title, scoreDetail.diff),
                             modifier = Modifier.align(Alignment.CenterEnd),
                             color = scoreDetail.diff.color,
                         )
                     }
                 }
 
-                // achievement
                 Row(
                     modifier = Modifier.padding(start = 12.dp).fillMaxWidth().height(60.dp)
                 ) {
-                    AsyncImage(
-                        model = scoreDetail.rankType.imageId,
-                        contentDescription = null,
-                        modifier = Modifier.align(Alignment.CenterVertically).weight(0.3f)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .weight(0.3f)
+                    ) {
+                        AsyncImage(
+                            model = scoreDetail.rankType.imageId,
+                            contentDescription = null,
+                            modifier = Modifier.height(30.dp).align(Alignment.CenterHorizontally)
+                        )
+
+                        val clearImageId = if (
+                            scoreDetail.clearType != ChuniEnums.ClearType.FAILED
+                        ) {
+                            R.drawable.ic_chuni_clear
+                        } else {
+                            R.drawable.ic_chuni_failed
+                        }
+
+                        AsyncImage(
+                            model = clearImageId,
+                            contentDescription = null,
+                            modifier = Modifier.height(30.dp).align(Alignment.CenterHorizontally)
+                        )
+                    }
 
                     Column(
                         modifier = Modifier.weight(0.7f).padding(start = 12.dp)
                     ) {
                         Text(
-                            text = "达成率",
+                            text = "成绩",
                             fontSize = 10.sp,
                             color = Color(118, 115, 115, 255)
                         )
                         Text(
-                            text = "${DecimalFormat("#." + "0".repeat(4)).format(scoreDetail.achievement)}%",
+                            text = "${NumberFormat.getNumberInstance().format(scoreDetail.score)}%",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
-                // Rating and DxScore
                 Row(
                     modifier = Modifier
                         .padding(start = 12.dp, end = 12.dp)
@@ -227,7 +239,7 @@ fun MaimaiScoreDetailDialog(
                             modifier = Modifier.fillMaxSize().padding(start = 8.dp)
                         ) {
                             Text(
-                                text = "DX Rating",
+                                text = "Rating",
                                 fontSize = 10.sp,
                                 color = Color(118, 115, 115, 255),
                                 fontWeight = FontWeight.Light,
@@ -247,24 +259,14 @@ fun MaimaiScoreDetailDialog(
                         ) {
                             Row {
                                 Text(
-                                    text = "DX 分数",
+                                    text = "Over Power",
                                     fontSize = 10.sp,
                                     color = Color(118, 115, 115, 255),
                                     fontWeight = FontWeight.Light,
                                 )
-
-                                if (dxSatrs > 0) {
-                                    AsyncImage(
-                                        model = MaimaiData.getDxStarBitmap(dxSatrs)!!,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .height(24.dp)
-                                            .width(24.dp)
-                                    )
-                                }
                             }
                             Text(
-                                text = "$dxScore / ${noteTotal * 3}",
+                                text = "${ChuniData.calcOverPower(scoreDetail)}",
                                 fontSize = 14.sp,
                             )
                         }

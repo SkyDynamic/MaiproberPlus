@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +36,8 @@ import java.text.NumberFormat
 @Composable
 fun ChuniScoreDetailCard(
     modifier: Modifier,
-    scoreDetail: ChuniScoreEntity
+    scoreDetail: ChuniScoreEntity,
+    onClick: () -> Unit
 ) {
     val title = scoreDetail.title
     val level = scoreDetail.level
@@ -48,9 +49,10 @@ fun ChuniScoreDetailCard(
         scoreDetail.songId
     }
 
-    Card (
+    ElevatedCard(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxSize(),
+        onClick = onClick
     ) {
         Box(
             modifier = Modifier

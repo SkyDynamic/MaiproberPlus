@@ -51,7 +51,6 @@ fun MaimaiScoreList(
     coroutineScope: CoroutineScope
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
-    var openCreateScoreDialog by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
 
     when {
@@ -68,10 +67,10 @@ fun MaimaiScoreList(
                 }
             )
         }
-        openCreateScoreDialog -> {
+        ScoreManagerViewModel.openMaimaiCreateScoreDialog -> {
             MaimaiCreateScoreDialog(
                 onDismissRequest = {
-                    openCreateScoreDialog = false
+                    ScoreManagerViewModel.openMaimaiCreateScoreDialog = false
                 }
             )
         }
@@ -166,7 +165,7 @@ fun MaimaiScoreList(
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        openCreateScoreDialog = true
+                        ScoreManagerViewModel.openMaimaiCreateScoreDialog = true
                     }
                 ) {
                     Icon(Icons.Default.Add, null)

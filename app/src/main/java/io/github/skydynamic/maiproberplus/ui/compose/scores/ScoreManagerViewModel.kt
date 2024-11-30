@@ -3,6 +3,7 @@ package io.github.skydynamic.maiproberplus.ui.compose.scores
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,6 +23,9 @@ object ScoreManagerViewModel : ViewModel() {
     val chuniLoadedScores = mutableStateListOf<ChuniScoreEntity>()
     val chuniSearchScores = mutableStateListOf<ChuniScoreEntity>()
     val chuniSearchText = mutableStateOf("")
+
+    var openMaimaiCreateScoreDialog by mutableStateOf(false)
+    var openChuniCreateScoreDialog by mutableStateOf(false)
 
     var maimaiScoreSelection: MaimaiScoreEntity? by mutableStateOf(null)
     var chuniScoreSelection: ChuniScoreEntity? by mutableStateOf(null)

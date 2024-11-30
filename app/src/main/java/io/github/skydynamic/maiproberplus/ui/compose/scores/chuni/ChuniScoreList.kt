@@ -50,7 +50,7 @@ fun ChuniScoreList(
     coroutineScope: CoroutineScope
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
-    var openCreateScoreDialog by remember { mutableStateOf(false) }
+
     val gridState = rememberLazyGridState()
 
     when {
@@ -67,10 +67,10 @@ fun ChuniScoreList(
                 }
             )
         }
-        openCreateScoreDialog -> {
+        ScoreManagerViewModel.openChuniCreateScoreDialog -> {
             ChuniCreateScoreDialog(
                 onDismissRequest = {
-                    openCreateScoreDialog = false
+                    ScoreManagerViewModel.openChuniCreateScoreDialog = false
                 }
             )
         }
@@ -165,7 +165,7 @@ fun ChuniScoreList(
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        openCreateScoreDialog = true
+                        ScoreManagerViewModel.openChuniCreateScoreDialog = true
                     }
                 ) {
                     Icon(Icons.Default.Add, null)

@@ -271,15 +271,28 @@ fun MaimaiScoreDetailDialog(
                     }
                 }
 
-                Button(
-                    modifier = Modifier.padding(8.dp).align(Alignment.CenterHorizontally),
-                    onClick = {
-                        openDeleteConfirmDialog = true
-                    },
-                    colors = ButtonDefaults.buttonColors(Color.Red)
+                Row(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
                 ) {
-                    Icon(Icons.Default.Delete, null, tint = Color.White)
-                    Text("删除该成绩", color = Color.White)
+                    Button(
+                        modifier = Modifier.padding(4.dp).weight(1f),
+                        onClick = {
+
+                        }
+                    ) { }
+
+                    Button(
+                        modifier = Modifier.padding(4.dp).weight(1f),
+                        onClick = {
+                            openDeleteConfirmDialog = true
+                        },
+                        colors = ButtonDefaults.buttonColors(Color.Red)
+                    ) {
+                        Icon(Icons.Default.Delete, null, tint = Color.White)
+                        Text("删除该成绩", color = Color.White)
+                    }
                 }
             }
         }

@@ -60,7 +60,6 @@ import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.createChuniScore
-import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.createMaimaiScore
 import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
 import io.github.skydynamic.maiproberplus.core.utils.calcChuniRating
@@ -110,7 +109,7 @@ fun ChuniCreateScoreDialog(
         onDismissRequest = onDismissRequest,
         modifier = Modifier
             .fillMaxWidth()
-            .height(630.dp)
+            .height(480.dp)
             .padding(start = 16.dp, end = 16.dp),
     ) {
 
@@ -402,7 +401,7 @@ fun ChuniCreateScoreDialog(
                     modifier = Modifier
                         .padding(start = 12.dp, end = 12.dp, top = 12.dp)
                         .fillMaxWidth()
-                        .height(110.dp)
+                        .height(60.dp)
                 ) {
                     Text("Full Chain", fontSize = 12.sp)
                     SingleChoiceSegmentedButtonRow(

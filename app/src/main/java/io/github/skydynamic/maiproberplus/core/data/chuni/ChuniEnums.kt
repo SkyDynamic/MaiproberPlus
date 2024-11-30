@@ -65,17 +65,17 @@ class ChuniEnums {
     }
 
     @Serializable
-    enum class FullComboType(val type: String, val imageId: Int = 0) {
-        NULL(""),
-        AJC("alljusticecritical", R.drawable.ic_chuni_ajc),
-        AJ("alljustice", R.drawable.ic_chuni_aj),
-        FC("fullcombo", R.drawable.ic_chuni_full_combo);
+    enum class FullComboType(val typeName: String, val typeName2: String, val imageId: Int = 0) {
+        NULL("", "无"),
+        AJC("alljusticecritical", "AJC", R.drawable.ic_chuni_ajc),
+        AJ("alljustice", "AJ", R.drawable.ic_chuni_aj),
+        FC("fullcombo", "FC", R.drawable.ic_chuni_full_combo);
 
         companion object {
             @JvmStatic
             fun getFullComboTypeWithName(typeName: String): FullComboType {
                 for (type in FullComboType.entries) {
-                    if (type.type.lowercase() == typeName.lowercase()) {
+                    if (type.typeName.lowercase() == typeName.lowercase()) {
                         return type
                     }
                 }
@@ -85,16 +85,16 @@ class ChuniEnums {
     }
 
     @Serializable
-    enum class FullChainType(val type: String, val imageId: Int = 0) {
-        NULL(""),
-        FC("fullchain", R.drawable.ic_chuni_full_chain_1),
-        GFC("fullchain2", R.drawable.ic_chuni_full_chain_2);
+    enum class FullChainType(val typeName: String, val typeName2: String, val imageId: Int = 0) {
+        NULL("", "无"),
+        FC("fullchain", "金", R.drawable.ic_chuni_full_chain_1),
+        GFC("fullchain2", "铂", R.drawable.ic_chuni_full_chain_2);
 
         companion object {
             @JvmStatic
             fun getFullChainTypeWithName(typeName: String): FullChainType {
                 for (type in FullChainType.entries) {
-                    if (type.type.lowercase() == typeName.lowercase()) {
+                    if (type.typeName.lowercase() == typeName.lowercase()) {
                         return type
                     }
                 }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
@@ -49,7 +50,7 @@ fun ChuniScoreList(
     coroutineScope: CoroutineScope
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
-
+    var openCreateScoreDialog by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
 
     when {
@@ -63,6 +64,13 @@ fun ChuniScoreList(
                     deleteAllScore()
                     ScoreManagerViewModel.searchChuniScore("")
                     ScoreManagerViewModel.chuniSearchCache.clear()
+                }
+            )
+        }
+        openCreateScoreDialog -> {
+            ChuniCreateScoreDialog(
+                onDismissRequest = {
+                    openCreateScoreDialog = false
                 }
             )
         }
@@ -149,13 +157,23 @@ fun ChuniScoreList(
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(4.dp)
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Button(
-                    modifier = Modifier.padding(8.dp).weight(1f),
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        openCreateScoreDialog = true
+                    }
+                ) {
+                    Icon(Icons.Default.Add, null)
+                    Text("新增成绩")
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         openDeleteConfirmDialog = true
                     },

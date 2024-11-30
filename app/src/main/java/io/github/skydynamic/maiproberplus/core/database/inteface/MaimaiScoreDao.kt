@@ -62,8 +62,14 @@ interface MaimaiScoreDao {
     @Query("""
         SELECT 
         EXISTS(
-            SELECT 1 FROM maimai_score_entity WHERE title = :title AND type = :type AND achievement = :achievement AND dxScore = :dxScore
+            SELECT 1 FROM maimai_score_entity WHERE title = :title AND diff = :difficulty AND type = :type AND achievement = :achievement AND dxScore = :dxScore
         )
     """)
-    suspend fun exists(title: String, type: MaimaiEnums.SongType, achievement: Float, dxScore: Int): Boolean
+    suspend fun exists(
+        title: String,
+        difficulty: MaimaiEnums.Difficulty,
+        type: MaimaiEnums.SongType,
+        achievement: Float,
+        dxScore: Int
+    ): Boolean
 }

@@ -1,4 +1,4 @@
-package io.github.skydynamic.maiproberplus.ui.compose.scores.maimai
+package io.github.skydynamic.maiproberplus.ui.compose.scores.chuni
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -36,6 +36,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,72 +51,61 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewModelScope
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.GlobalViewModel
-import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
-import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.createChuniScore
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.createMaimaiScore
-import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
+import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
-import io.github.skydynamic.maiproberplus.core.utils.calcMaimaiRating
+import io.github.skydynamic.maiproberplus.core.utils.calcChuniRating
 import io.github.skydynamic.maiproberplus.ui.theme.getButtonSelectedColor
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
-import io.github.skydynamic.maiproberplus.ui.theme.getTitleFontColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun MaimaiCreateScoreDialog(
+fun ChuniCreateScoreDialog(
     onDismissRequest: () -> Unit
 ) {
     var openSearchSongDialog by remember { mutableStateOf(false) }
 
+    var songInfo: ChuniData.SongInfo? by remember { mutableStateOf(null) }
     var title by remember { mutableStateOf("") }
-    var songInfo: MaimaiData.SongInfo? by remember { mutableStateOf(null) }
-    var type: MaimaiEnums.SongType? by remember { mutableStateOf(null) }
-    var selectionDiff: MaimaiEnums.Difficulty? by remember { mutableStateOf(null) }
+    var selectionDiff: ChuniEnums.Difficulty? by remember { mutableStateOf(null) }
     var diffLevel by remember { mutableStateOf("") }
-    var difficulties: List<MaimaiData.SongDiffculty> by remember { mutableStateOf(emptyList()) }
-    var achievement: String by remember { mutableStateOf("") }
-    var fullComboType: MaimaiEnums.FullComboType? by remember { mutableStateOf(null) }
-    var fullSyncType: MaimaiEnums.SyncType? by remember { mutableStateOf(null) }
-    var dxScore: String by remember { mutableStateOf("") }
+    var difficulties: List<ChuniData.SongDifficulty> by remember { mutableStateOf(emptyList()) }
+    var levelValue: Float by remember { mutableFloatStateOf(0F) }
+    var score: String by remember { mutableStateOf("") }
+    var clearType: ChuniEnums.ClearType? by remember { mutableStateOf(null) }
+    var fullComboType: ChuniEnums.FullComboType? by remember { mutableStateOf(null) }
+    var fullChainType: ChuniEnums.FullChainType? by remember { mutableStateOf(null) }
 
-    var expanded by remember { mutableStateOf(false)}
+    var clearExpanded by remember { mutableStateOf(false) }
+    var diffExpanded by remember { mutableStateOf(false)}
     var isOutOfRange by remember { mutableStateOf(false) }
 
     when {
         openSearchSongDialog -> {
-            MaimaiSearchSongDialog(
+            ChuniSearchSongDialog(
                 onConfirm = {
                     songInfo = it
-                    title = songInfo!!.title
+                    title = it.title
+                    difficulties = it.difficulties
                 },
                 onDismissRequest = {
                     openSearchSongDialog = false
                 }
             )
         }
-
-        type == MaimaiEnums.SongType.STANDARD -> {
-            diffLevel = ""
-            selectionDiff = null
-            difficulties = songInfo!!.difficulties.standard
-        }
-
-        type == MaimaiEnums.SongType.DX -> {
-            diffLevel = ""
-            selectionDiff = null
-            difficulties = songInfo!!.difficulties.dx
-        }
     }
-
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
         modifier = Modifier
@@ -123,6 +113,7 @@ fun MaimaiCreateScoreDialog(
             .height(630.dp)
             .padding(start = 16.dp, end = 16.dp),
     ) {
+
         Card(
             modifier = Modifier
                 .fillMaxSize(),
@@ -145,10 +136,12 @@ fun MaimaiCreateScoreDialog(
                     ) {
                         Text(
                             text = "创建成绩",
-                            modifier = Modifier.align(Alignment.CenterStart)
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
                         )
                         IconButton(
-                            modifier = Modifier.align(Alignment.CenterEnd),
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd),
                             onClick = onDismissRequest
                         ) {
                             Icon(Icons.Default.Close, null)
@@ -174,8 +167,8 @@ fun MaimaiCreateScoreDialog(
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
                                     .data(
-                                        "https://assets2.lxns.net/maimai/jacket/${
-                                            MaimaiData.getSongIdFromTitle(
+                                        "https://assets2.lxns.net/chunithm/jacket/${
+                                            ChuniData.getSongIdFromTitle(
                                                 title
                                             )
                                         }.png"
@@ -224,26 +217,59 @@ fun MaimaiCreateScoreDialog(
                             )
                         }
 
-                        Text("谱面类型", fontSize = 12.sp)
-                        SingleChoiceSegmentedButtonRow(
+                        Text("难度", fontSize = 12.sp)
+                        Button(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(35.dp),
-                        ) {
-                            MaimaiEnums.SongType.entries.forEach {
-                                SegmentedButton(
-                                    shape = SegmentedButtonDefaults.itemShape(
-                                        index = it.ordinal,
-                                        count = MaimaiEnums.SongType.entries.size,
-                                    ),
-                                    selected = type == it,
-                                    onClick = {
-                                        type = it
-                                    },
-                                    enabled = MaimaiData.songHasTypeDifficulty(title, it)
-                                ) {
-                                    Text(it.type2)
+                                .fillMaxWidth(),
+                            onClick = {
+                                diffExpanded = true
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                if (selectionDiff != null) {
+                                    selectionDiff!!.color
+                                } else {
+                                    Color.Unspecified
                                 }
+                            ),
+                            enabled = songInfo != null
+                        ) {
+                            if (diffLevel.isEmpty()) {
+                                Text("请选择难度")
+                            } else {
+                                Text(
+                                    "${selectionDiff!!.name} $diffLevel",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = diffExpanded,
+                            onDismissRequest = { diffExpanded = false },
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .wrapContentHeight()
+                        ) {
+                            difficulties.forEachIndexed { index, diff ->
+                                val difficulty = ChuniEnums.Difficulty
+                                    .getDifficultyWithIndex(diff.difficulty)
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            "${difficulty.name} ${diff.level}",
+                                            modifier = Modifier
+                                                .padding(start = 8.dp)
+                                        )
+                                    },
+                                    onClick = {
+                                        selectionDiff = difficulty
+                                        diffLevel = diff.level
+                                        levelValue = diff.levelValue
+                                        diffExpanded = false
+                                    }
+                                )
                             }
                         }
                     }
@@ -258,88 +284,22 @@ fun MaimaiCreateScoreDialog(
                     Column(
                         modifier = Modifier
                             .weight(0.5f)
-                            .padding(end = 8.dp)
                     ) {
-                        Text("难度", fontSize = 12.sp)
-                        Button(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            onClick = {
-                                expanded = true
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                if (selectionDiff != null) {
-                                    selectionDiff!!.color
-                                } else {
-                                    Color.Unspecified
-                                }
-                            ),
-                            enabled = type != null
-                        ) {
-                            if (type == null || diffLevel.isEmpty()) {
-                                Text("请选择难度")
-                            } else {
-                                Text(
-                                    "${selectionDiff!!.name} $diffLevel",
-                                    fontSize = 11.5.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                            }
-                        }
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .wrapContentHeight()
-                        ) {
-                            difficulties.forEachIndexed { index, diff ->
-                                val difficulty = MaimaiEnums.Difficulty
-                                    .getDifficultyWithIndex(diff.difficulty)
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            "${difficulty.name} ${diff.level}",
-                                            modifier = Modifier
-                                                .padding(start = 8.dp)
-                                        )
-                                    },
-                                    onClick = {
-                                        selectionDiff = difficulty
-                                        diffLevel = diff.level
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .weight(0.5f)
-                    ) {
-                        Text("达成率", fontSize = 12.sp)
+                        Text("成绩", fontSize = 12.sp)
                         OutlinedTextField(
                             modifier = Modifier
                                 .height(56.dp),
-                            value = achievement,
+                            value = score,
                             onValueChange = { newValue ->
                                 val filteredValue = newValue.filter { it.isDigit() || it == '.' }
-                                val parsedValue = filteredValue.toDoubleOrNull()
+                                val parsedValue = filteredValue.toIntOrNull()
                                 if (newValue.isEmpty()) {
-                                    achievement = newValue
+                                    score = newValue
                                     isOutOfRange = true
                                 }
-                                if (parsedValue != null && parsedValue >= 0.0 && parsedValue <= 101.0) {
-                                    val decimalPlaces = filteredValue.split(".").getOrNull(1)?.length ?: 0
-                                    if (decimalPlaces <= 4) {
-                                        achievement = filteredValue
-                                        isOutOfRange = false
-                                    } else {
-                                        isOutOfRange = true
-                                    }
+                                if (parsedValue != null && parsedValue >= 0 && parsedValue <= 1010000) {
+                                    score = filteredValue
+                                    isOutOfRange = false
                                 } else {
                                     isOutOfRange = true
                                 }
@@ -349,6 +309,63 @@ fun MaimaiCreateScoreDialog(
                             visualTransformation = VisualTransformation.None,
                             isError = isOutOfRange
                         )
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .weight(0.5f)
+                    ) {
+                        Text("Clear", fontSize = 12.sp)
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            onClick = { clearExpanded = true }
+                        ) {
+                            if (clearType == null) {
+                                Text(
+                                    "请选择Clear类型",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            } else {
+                                Text(
+                                    clearType!!.type.replaceFirstChar {
+                                        if (it.isLowerCase()) {
+                                            it.titlecase(Locale.ROOT)
+                                        } else {
+                                            it.toString()
+                                        }
+                                    },
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = clearExpanded,
+                            onDismissRequest = { clearExpanded = false },
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .wrapContentHeight()
+                        ) {
+                            ChuniEnums.ClearType.entries.forEach { clear ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            clear.type,
+                                            modifier = Modifier
+                                               .padding(start = 8.dp)
+                                        )
+                                    },
+                                    onClick = {
+                                        clearType = clear
+                                        clearExpanded = false
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -364,11 +381,11 @@ fun MaimaiCreateScoreDialog(
                             .fillMaxWidth()
                             .height(35.dp),
                     ) {
-                        MaimaiEnums.FullComboType.entries.forEachIndexed { index, it ->
+                        ChuniEnums.FullComboType.entries.forEachIndexed { index, it ->
                             SegmentedButton(
                                 shape = SegmentedButtonDefaults.itemShape(
                                     index = it.ordinal,
-                                    count = MaimaiEnums.FullComboType.entries.size,
+                                    count = ChuniEnums.FullComboType.entries.size,
                                 ),
                                 selected = fullComboType == it,
                                 onClick = {
@@ -387,66 +404,24 @@ fun MaimaiCreateScoreDialog(
                         .fillMaxWidth()
                         .height(110.dp)
                 ) {
-                    Text("Full Sync", fontSize = 12.sp)
-
-                    val row1 = MaimaiEnums.SyncType.entries.take(MaimaiEnums.SyncType.entries.size / 2)
-                    val row2 = MaimaiEnums.SyncType.entries.drop(MaimaiEnums.SyncType.entries.size / 2)
-
-                    Row(
+                    Text("Full Chain", fontSize = 12.sp)
+                    SingleChoiceSegmentedButtonRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(35.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        row1.forEach { syncTypeOption ->
-                            Button(
-                                onClick = {
-                                    fullSyncType = syncTypeOption
-                                },
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .width(80.dp),
+                        ChuniEnums.FullChainType.entries.forEachIndexed { index, it ->
+                            SegmentedButton(
                                 shape = SegmentedButtonDefaults.itemShape(
-                                    index = syncTypeOption.ordinal,
-                                    count = MaimaiEnums.SyncType.entries.size / 2
+                                    index = it.ordinal,
+                                    count = ChuniEnums.FullChainType.entries.size,
                                 ),
-                                colors = ButtonDefaults.buttonColors(
-                                    getButtonSelectedColor(fullSyncType == syncTypeOption)
-                                )
-                            ) {
-                                var color = getTitleFontColor()
-                                if (fullSyncType == syncTypeOption) color = Color.White
-                                Text(syncTypeOption.typeName2, color = color)
-                            }
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .fillMaxWidth()
-                            .height(35.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        row2.forEach { syncTypeOption ->
-                            Button(
+                                selected = fullChainType == it,
                                 onClick = {
-                                    fullSyncType = syncTypeOption
-                                },
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .width(80.dp),
-                                shape = SegmentedButtonDefaults.itemShape(
-                                    index = (syncTypeOption.ordinal - 3),
-                                    count = MaimaiEnums.SyncType.entries.size / 2
-                                ),
-                                colors = ButtonDefaults.buttonColors(
-                                    getButtonSelectedColor(fullSyncType == syncTypeOption)
-                                )
+                                    fullChainType = it
+                                }
                             ) {
-                                var color = getTitleFontColor()
-                                if (fullSyncType == syncTypeOption) color = Color.White
-                                Text(syncTypeOption.typeName2, color = color)
+                                Text(it.typeName2)
                             }
                         }
                     }
@@ -457,29 +432,6 @@ fun MaimaiCreateScoreDialog(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     color = Color.LightGray,
                     thickness = 1.dp
-                )
-
-                Text(
-                    "DX分数(可选)",
-                    fontSize = 12.sp,
-                    modifier = Modifier
-                        .padding(start = 12.dp, top = 12.dp, end = 12.dp)
-                )
-                OutlinedTextField(
-                    modifier = Modifier
-                        .padding(start = 12.dp, end = 12.dp)
-                        .height(52.dp),
-                    value = dxScore,
-                    onValueChange = {
-                        if (it.isDigitsOnly() && it.length <= 4) {
-                            dxScore = it
-                        } else if (it.isEmpty()) {
-                            dxScore = ""
-                        }
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    visualTransformation = VisualTransformation.None,
                 )
 
                 Row(
@@ -505,25 +457,24 @@ fun MaimaiCreateScoreDialog(
                             if (
                                 songInfo != null &&
                                 selectionDiff != null &&
-                                type != null &&
+                                clearType != null &&
                                 fullComboType != null &&
-                                fullSyncType != null
+                                fullChainType != null
                             ) {
                                 GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
-                                    createMaimaiScore(
-                                        MaimaiScoreEntity(
+                                    createChuniScore(
+                                        ChuniScoreEntity(
                                             songId = songInfo!!.id,
                                             title = title,
-                                            level = difficulties[selectionDiff!!.diffIndex].levelValue,
-                                            achievement = achievement.toFloat(),
-                                            dxScore = if (dxScore.isNotEmpty()) dxScore.toInt() else 0,
-                                            rating = calcMaimaiRating(achievement, difficulties[selectionDiff!!.diffIndex].levelValue),
+                                            level = levelValue,
+                                            score = score.toInt(),
+                                            rating = calcChuniRating(score.toInt(), levelValue),
                                             version = difficulties[selectionDiff!!.diffIndex].version,
-                                            type = type!!,
+                                            rankType = ChuniEnums.RankType.getRankTypeByScore(score.toInt()),
                                             diff = selectionDiff!!,
-                                            rankType = MaimaiEnums.RankType.getRankTypeByScore(achievement.toFloat()),
-                                            syncType = fullSyncType!!,
-                                            fullComboType = fullComboType!!
+                                            fullComboType = fullComboType!!,
+                                            fullChainType = fullChainType!!,
+                                            clearType = clearType!!
                                         )
                                     )
                                 }

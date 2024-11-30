@@ -12,9 +12,25 @@ import kotlinx.coroutines.runBlocking
 object ChuniScoreManager {
     suspend fun writeChuniScoreCache(data: List<ChuniScoreEntity>) {
         val dao = application.db.chuniScoreDao()
-        data.forEach {
-            if (!dao.exists(it.score)) {
-                dao.insert(it)
+        if (dao.getMusicScoreCount() == 0) {
+            dao.insertAll(data)
+        } else {
+            data.forEach {
+                if (!dao.exists(it.title, it.diff, it.score)) {
+                    dao.insert(it)
+                } else {
+                    return@forEach
+                }
+            }
+        }
+    }
+
+    fun createChuniScore(score: ChuniScoreEntity) {
+        GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
+            val dao = application.db.chuniScoreDao()
+            if (!dao.exists(score.title, score.diff, score.score)) {
+                dao.insert(score)
+                refreshChuniScore()
             }
         }
     }

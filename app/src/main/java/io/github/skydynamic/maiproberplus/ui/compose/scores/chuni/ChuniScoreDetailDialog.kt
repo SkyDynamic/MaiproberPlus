@@ -1,5 +1,6 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores.chuni
 
+import android.icu.math.BigDecimal
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -157,7 +158,7 @@ fun ChuniScoreDetailDialog(
                             AsyncImage(
                                 model = scoreDetail.fullComboType.imageId,
                                 contentDescription = null,
-                                modifier = Modifier.height(25.dp).width(25.dp),
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
 
@@ -165,7 +166,7 @@ fun ChuniScoreDetailDialog(
                             AsyncImage(
                                 model = scoreDetail.fullChainType.imageId,
                                 contentDescription = null,
-                                modifier = Modifier.height(25.dp).width(25.dp),
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
                     }
@@ -219,7 +220,7 @@ fun ChuniScoreDetailDialog(
                             color = Color(118, 115, 115, 255)
                         )
                         Text(
-                            text = "${NumberFormat.getNumberInstance().format(scoreDetail.score)}%",
+                            text = "${NumberFormat.getNumberInstance().format(scoreDetail.score)}",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -245,7 +246,11 @@ fun ChuniScoreDetailDialog(
                                 fontWeight = FontWeight.Light,
                             )
                             Text(
-                                text = "${scoreDetail.rating}",
+                                text = "${
+                                    BigDecimal(scoreDetail.rating.toDouble())
+                                        .setScale(2, BigDecimal.ROUND_UP)
+                                        .toDouble()
+                                }",
                                 fontSize = 14.sp,
                             )
                         }

@@ -98,7 +98,9 @@ fun ConfirmDialog(
     onRequest: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = { onRequest() }) {
+    Dialog(
+        onDismissRequest = onDismiss
+    ) {
         Card(
             modifier = Modifier
                 .width(300.dp)

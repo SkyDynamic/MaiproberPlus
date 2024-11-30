@@ -190,7 +190,6 @@ fun MaimaiScoreList(
             if (ScoreManagerViewModel.maimaiSearchText.value.isNotEmpty()) {
                 ScoreManagerViewModel.maimaiSearchScores
             } else {
-                Log.d("MaimaiScoreList", "${ScoreManagerViewModel.maimaiLoadedScores.size}")
                 ScoreManagerViewModel.maimaiLoadedScores
             }
         ) {

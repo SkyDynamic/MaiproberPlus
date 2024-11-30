@@ -210,8 +210,8 @@ class LxnsProberUtil : IProberUtil {
                 levelIndex = it.diff.diffIndex,
                 score = it.score,
                 clear = it.clearType.type,
-                fullCombo = it.fullComboType.type,
-                fullChain = it.fullChainType.type
+                fullCombo = it.fullComboType.typeName,
+                fullChain = it.fullChainType.typeName
             )
         }
 

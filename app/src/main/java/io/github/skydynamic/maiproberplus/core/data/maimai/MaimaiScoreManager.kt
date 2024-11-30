@@ -16,7 +16,7 @@ object MaimaiScoreManager {
             dao.insertAll(data)
         } else {
             data.forEach {
-                if (!dao.exists(it.title, it.type, it.achievement, it.dxScore)) {
+                if (!dao.exists(it.title, it.diff, it.type, it.achievement, it.dxScore)) {
                     dao.insert(it)
                 } else {
                     return@forEach
@@ -29,7 +29,7 @@ object MaimaiScoreManager {
     fun createMaimaiScore(score: MaimaiScoreEntity) {
         GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
             val dao = application.db.maimaiScoreDao()
-            if (!dao.exists(score.title, score.type, score.achievement, score.dxScore)) {
+            if (!dao.exists(score.title, score.diff, score.type, score.achievement, score.dxScore)) {
                 dao.insert(score)
                 refreshMaimaiScore()
             }

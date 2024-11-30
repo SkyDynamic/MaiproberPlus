@@ -119,7 +119,7 @@ fun ChuniScoreDetailCard(
                         )
                         Text(
                             text = "Rating: ${
-                                BigDecimal(rating.toDouble()).setScale(2, BigDecimal.ROUND_DOWN).toDouble()
+                                BigDecimal(rating.toDouble()).setScale(2, BigDecimal.ROUND_UP).toDouble()
                             }",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White

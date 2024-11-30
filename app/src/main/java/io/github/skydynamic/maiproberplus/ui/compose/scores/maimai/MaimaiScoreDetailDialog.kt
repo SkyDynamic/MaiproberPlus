@@ -279,13 +279,6 @@ fun MaimaiScoreDetailDialog(
                     Button(
                         modifier = Modifier.padding(4.dp).weight(1f),
                         onClick = {
-
-                        }
-                    ) { }
-
-                    Button(
-                        modifier = Modifier.padding(4.dp).weight(1f),
-                        onClick = {
                             openDeleteConfirmDialog = true
                         },
                         colors = ButtonDefaults.buttonColors(Color.Red)

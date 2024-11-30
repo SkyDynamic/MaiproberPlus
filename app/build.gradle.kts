@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.symbol.processing)
 }
 
-val appVersion: String = "1.1.7"
+val appVersion: String = "1.1.8"
 
 android {
     namespace = "io.github.skydynamic.maiproberplus"

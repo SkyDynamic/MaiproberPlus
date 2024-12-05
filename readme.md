@@ -9,13 +9,13 @@
 - 水鱼API
     1. 打开水鱼查分器并登录, 点击 **"编辑个人资料"** 按钮
     2. 点击箭头指向的按键对成绩导入Token进行重置或生成 **(若你已有成绩导入Token, 请跳过此步)**
-    ![reset_token](https://github.com/user-attachments/assets/75e2bc15-a874-4981-af75-5efb28bb24df)
+    ![reset_token](./doc_images/reset_token.png)
     4. 点击 ***重置Token旁边的按钮*** 来 **复制该Token** 并打开MaiproberPlus
     5. 接下来请看通用步骤
 - 落雪API
     1. 打开落雪查分器并登录, 点击侧边栏中的 **"账号详情"** 按钮
     2. 点击箭头指向的按钮对个人API密钥进行重置或生成 **(若你已有个人API密钥, 请跳过此步)**
-    ![reset_token_lxns](https://github.com/user-attachments/assets/1749f9a7-ac73-4b4d-86be-97f7acbc7f12)
+    ![reset_token_lxns](./doc_images/reset_token_lxns.png)
     3. 点击 ***重置API密钥上面的按钮*** 来 **复制该密钥** 并打开MaiproberPlus
     4. 接下来请看通用步骤
 - 通用步骤
@@ -32,7 +32,7 @@
 或选择对应的查分器后, 点击 **"从选定的查分器获取数据"** 按钮, MaiproberPlus会自动从对应的查分器获取成绩
 ***这需要你设置好对应的 成绩导入Token / 个人API密钥 (重要!!)***
 
-![score](https://github.com/user-attachments/assets/4e8da447-7d0f-48f7-9669-80cf6bce00f3)
+![score](./doc_images/score.jpg)
 点击应用下方Dock栏的 **"成绩管理"** 按钮进入本地成绩管理页面, 这里以 ***舞萌DX*** 为例
 1. 搜索曲目--可根据 **曲目名称 / 曲目别名** 搜索你的成绩
 2. 新增成绩--可在你的 **本地数据库记录** 中新增一条成绩

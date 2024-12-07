@@ -28,10 +28,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +46,7 @@ import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.dele
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,8 +54,24 @@ fun ChuniScoreList(
     coroutineScope: CoroutineScope
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
-
     val gridState = rememberLazyGridState()
+    var loadedItemCount by remember { mutableIntStateOf(30) }
+
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.firstVisibleItemIndex * 2 }
+            .collect { lastVisibleIndex ->
+                val totalItemsCount = if (ScoreManagerViewModel.chuniSearchText.value.isNotEmpty()) {
+                    ScoreManagerViewModel.chuniSearchScores.size
+                } else {
+                    ScoreManagerViewModel.chuniLoadedScores.size
+                }
+
+                if (lastVisibleIndex >= loadedItemCount - 1 && loadedItemCount < totalItemsCount) {
+                    delay(1000)
+                    loadedItemCount += 20
+                }
+            }
+    }
 
     when {
         openDeleteConfirmDialog -> {
@@ -187,9 +207,9 @@ fun ChuniScoreList(
 
         items(
             if (ScoreManagerViewModel.chuniSearchText.value.isNotEmpty()) {
-                ScoreManagerViewModel.chuniSearchScores
+                ScoreManagerViewModel.chuniSearchScores.take(loadedItemCount)
             } else {
-                ScoreManagerViewModel.chuniLoadedScores
+                ScoreManagerViewModel.chuniLoadedScores.take(loadedItemCount)
             }
         ) {
             ChuniScoreDetailCard(

@@ -1,6 +1,5 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores.maimai
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,10 +28,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +46,7 @@ import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.de
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -52,6 +55,23 @@ fun MaimaiScoreList(
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
+    var loadedItemCount by remember { mutableIntStateOf(30) }
+
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.firstVisibleItemIndex * 2 }
+            .collect { lastVisibleIndex ->
+                val totalItemsCount = if (ScoreManagerViewModel.maimaiSearchText.value.isNotEmpty()) {
+                    ScoreManagerViewModel.maimaiSearchScores.size
+                } else {
+                    ScoreManagerViewModel.maimaiLoadedScores.size
+                }
+
+                if (lastVisibleIndex >= loadedItemCount - 1 && loadedItemCount < totalItemsCount) {
+                    delay(1000)
+                    loadedItemCount += 20
+                }
+            }
+    }
 
     when {
         openDeleteConfirmDialog -> {
@@ -142,6 +162,7 @@ fun MaimaiScoreList(
                     onClick = {
                         ScoreManagerViewModel.maimaiLoadedScores.clear()
                         ScoreManagerViewModel.maimaiSearchScores.clear()
+                        loadedItemCount = 30
                         refreshMaimaiScore()
                     }
                 ) {
@@ -187,9 +208,9 @@ fun MaimaiScoreList(
 
         items(
             if (ScoreManagerViewModel.maimaiSearchText.value.isNotEmpty()) {
-                ScoreManagerViewModel.maimaiSearchScores
+                ScoreManagerViewModel.maimaiSearchScores.take(loadedItemCount)
             } else {
-                ScoreManagerViewModel.maimaiLoadedScores
+                ScoreManagerViewModel.maimaiLoadedScores.take(loadedItemCount)
             }
         ) {
             MaimaiScoreDetailCard(

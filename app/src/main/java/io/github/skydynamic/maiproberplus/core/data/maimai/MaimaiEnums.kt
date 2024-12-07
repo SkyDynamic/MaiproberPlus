@@ -1,9 +1,9 @@
 package io.github.skydynamic.maiproberplus.core.data.maimai
 
 import androidx.compose.ui.graphics.Color
+import io.github.skydynamic.maiproberplus.R
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import io.github.skydynamic.maiproberplus.R
 
 class MaimaiEnums {
     @Serializable

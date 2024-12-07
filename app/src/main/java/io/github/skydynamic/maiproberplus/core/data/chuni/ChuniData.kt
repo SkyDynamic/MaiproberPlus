@@ -14,8 +14,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 val JSON = Json {
     ignoreUnknownKeys = true

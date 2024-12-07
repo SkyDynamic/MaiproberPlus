@@ -2,6 +2,7 @@ package io.github.skydynamic.maiproberplus.core.data.maimai
 
 import android.content.Context
 import io.github.skydynamic.maiproberplus.Application
+import io.github.skydynamic.maiproberplus.R
 import io.github.skydynamic.maiproberplus.core.prober.client
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -13,7 +14,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
-import io.github.skydynamic.maiproberplus.R
 
 val JSON = Json {
     ignoreUnknownKeys = true

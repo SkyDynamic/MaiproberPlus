@@ -53,15 +53,13 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewModelScope
 import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.createMaimaiScore
 import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
+import io.github.skydynamic.maiproberplus.core.utils.NetworkImageRequestUtil
 import io.github.skydynamic.maiproberplus.core.utils.calcMaimaiRating
 import io.github.skydynamic.maiproberplus.ui.theme.getButtonSelectedColor
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
@@ -172,18 +170,13 @@ fun MaimaiCreateScoreDialog(
                     ) {
                         if (title.isNotEmpty()) {
                             AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(
-                                        "https://assets2.lxns.net/maimai/jacket/${
-                                            MaimaiData.getSongIdFromTitle(
-                                                title
-                                            )
-                                        }.png"
-                                    )
-                                    .crossfade(true)
-                                    .memoryCachePolicy(CachePolicy.ENABLED)
-                                    .diskCachePolicy(CachePolicy.ENABLED)
-                                    .build(),
+                                model = NetworkImageRequestUtil.getImageRequest(
+                                    "https://assets2.lxns.net/maimai/jacket/${
+                                        MaimaiData.getSongIdFromTitle(
+                                            title
+                                        )
+                                    }.png"
+                                ),
                                 contentDescription = null,
                                 onError = { error ->
                                     Log.e("Image", "Error loading image", error.result.throwable)

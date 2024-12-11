@@ -99,7 +99,9 @@ fun SettingCompose() {
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
         SettingItemGroup(
             modifier = Modifier.padding(top = 15.dp).wrapContentSize(),

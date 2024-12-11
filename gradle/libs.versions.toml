@@ -1,4 +1,5 @@
 [versions]
+accompanistPhotoViewer = "0.28.0"
 agp = "8.7.2"
 coilCompose = "3.0.3"
 kotlin = "2.0.21"
@@ -21,6 +22,7 @@ roomKtx = "2.6.1"
 roomRuntime = "2.6.1"
 
 [libraries]
+accompanist-photo-viewer = { module = "com.google.accompanist:accompanist-photo-viewer", version.ref = "accompanistPhotoViewer" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
@@ -41,17 +43,13 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
-
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorVersion" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorVersion" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorVersion" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorVersion" }
-
 nanohttpd-nanohttpd = { module = "org.nanohttpd:nanohttpd", version.ref = "nanohttpdVersion" }
 
 [plugins]

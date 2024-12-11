@@ -11,6 +11,10 @@ import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Typeface
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -19,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -144,6 +149,10 @@ class Application : Application() {
             totalSize += calculateDirectorySize(externalCacheDir)
         }
 
+        if (filesDir.resolve("b50cache").exists()) {
+            totalSize += calculateDirectorySize(filesDir.resolve("b50cache"))
+        }
+
         return totalSize
     }
 
@@ -172,6 +181,10 @@ class Application : Application() {
         deleteDirectory(cacheDir)
         if (externalCacheDir != null) {
             deleteDirectory(externalCacheDir)
+        }
+
+        if (filesDir.resolve("b50cache").exists()) {
+            deleteDirectory(filesDir.resolve("b50cache"))
         }
 
         return totalSize
@@ -207,6 +220,30 @@ class Application : Application() {
         val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         clipboardManager.setPrimaryClip(ClipData.newPlainText("text", text))
         Toast.makeText(this, "已复制Hook链接到剪切板\n请开启劫持后复制到微信打开", Toast.LENGTH_SHORT).show()
+    }
+
+    fun getImageFromAssets(file: String): Bitmap? {
+        val inputStream = assets.open(file)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream.close()
+        return bitmap
+    }
+
+    fun getBitmapFromDrawable(id: Int): Bitmap {
+        val drawable = resources.getDrawable(id, null)
+        val bitmap = Bitmap.createBitmap(
+            drawable!!.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
+    fun getFont(fontId: Int): Typeface {
+        return ResourcesCompat.getFont(this, fontId) ?: Typeface.DEFAULT
     }
 
     companion object {

@@ -81,12 +81,17 @@ class MaimaiEnums {
     }
 
     @Serializable
-    enum class FullComboType(val typeName: String, val typeName2: String, val imageId: Int) {
-        @SerialName("") NULL("", "无", R.drawable.ic_maimai_back),
-        FC("fc", "FC", R.drawable.ic_maimai_fc),
-        FCP("fcp", "FC+", R.drawable.ic_maimai_fcp),
-        AP("ap", "AP", R.drawable.ic_maimai_ap),
-        APP("app", "AP+", R.drawable.ic_maimai_app);
+    enum class FullComboType(
+        val typeName: String,
+        val typeName2: String,
+        val imageId: Int,
+        val b50ImageId: Int?
+    ) {
+        @SerialName("") NULL("", "无", R.drawable.ic_maimai_back, null),
+        FC("fc", "FC", R.drawable.ic_maimai_fc, R.drawable.ic_maimai_b50_fc),
+        FCP("fcp", "FC+", R.drawable.ic_maimai_fcp, R.drawable.ic_maimai_b50_fcp),
+        AP("ap", "AP", R.drawable.ic_maimai_ap, R.drawable.ic_maimai_b50_ap),
+        APP("app", "AP+", R.drawable.ic_maimai_app, R.drawable.ic_maimai_b50_app);
 
         companion object {
             @JvmStatic
@@ -102,13 +107,18 @@ class MaimaiEnums {
     }
 
     @Serializable
-    enum class SyncType(val syncName: String, val typeName2: String, val imageId: Int) {
-        @SerialName("") NULL("", "无", R.drawable.ic_maimai_back),
-        SYNC("sync", "SYNC", R.drawable.ic_maimai_sync),
-        FS("fs", "FS", R.drawable.ic_maimai_fs),
-        FSP("fsp", "FS+", R.drawable.ic_maimai_fsp),
-        FDX("fsd", "FDX", R.drawable.ic_maimai_fsd),
-        FDXP("fsdp", "FDX+", R.drawable.ic_maimai_fsdp);
+    enum class SyncType(
+        val syncName: String,
+        val typeName2: String,
+        val imageId: Int,
+        val b50ImageId: Int?
+    ) {
+        @SerialName("") NULL("", "无", R.drawable.ic_maimai_back, null),
+        SYNC("sync", "SYNC", R.drawable.ic_maimai_sync, R.drawable.ic_maimai_b50_sync),
+        FS("fs", "FS", R.drawable.ic_maimai_fs, R.drawable.ic_maimai_b50_fs),
+        FSP("fsp", "FS+", R.drawable.ic_maimai_fsp, R.drawable.ic_maimai_b50_fsp),
+        FDX("fsd", "FDX", R.drawable.ic_maimai_fsd, R.drawable.ic_maimai_b50_fsd),
+        FDXP("fsdp", "FDX+", R.drawable.ic_maimai_fsdp, R.drawable.ic_maimai_b50_fsdp);
 
         companion object {
             @JvmStatic

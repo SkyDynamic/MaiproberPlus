@@ -25,11 +25,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
+import io.github.skydynamic.maiproberplus.core.utils.NetworkImageRequestUtil
 import io.github.skydynamic.maiproberplus.ui.compose.scores.common.LevelBox
 import java.text.NumberFormat
 
@@ -59,12 +57,9 @@ fun ChuniScoreDetailCard(
                 .fillMaxSize()
         ) {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://assets2.lxns.net/chunithm/jacket/$id.png")
-                    .crossfade(true)
-                    .memoryCachePolicy(CachePolicy.ENABLED)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .build(),
+                model = NetworkImageRequestUtil.getImageRequest(
+                    "https://assets2.lxns.net/chunithm/jacket/$id.png"
+                ),
                 contentDescription = null,
                 onError = { error ->
                     Log.e("Image", "Error loading image", error.result.throwable)

@@ -193,7 +193,7 @@ object ParseScorePageUtil {
 
             var musicPlayTime = ""
             val musicDifficulty = if (difficulty == ChuniEnums.Difficulty.RECENT) {
-                val cl = musicListBoxElement.attr("class")
+                val cl = musicListBoxElement.attr("maimai/class")
                 val regex = Regex("bg_(\\w+)")
                 val matchResult = regex.find(cl)?.groups?.get(1)?.value ?: ""
                 musicPlayTime = getCurrentUTCTimeFormatted()

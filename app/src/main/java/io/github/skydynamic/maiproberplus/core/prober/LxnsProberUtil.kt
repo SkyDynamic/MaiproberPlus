@@ -18,6 +18,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -250,6 +251,10 @@ class LxnsProberUtil : IProberUtil {
         try {
             val response = client.get("$baseApiUrl/api/v0/user/maimai/player/scores") {
                 header("X-User-Token", importToken)
+            }
+            if (response.status.value != 200) {
+                sendMessageToUi("获取舞萌数据失败, API返回体: ${response.bodyAsText()}")
+                return emptyList()
             }
             val body = response.body<LxnsGetMaimaiScoreResponse>()
             val parseList = arrayListOf<MaimaiScoreEntity>()

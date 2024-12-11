@@ -1,6 +1,5 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores
 
-import io.github.skydynamic.maiproberplus.Application
 import io.github.skydynamic.maiproberplus.ui.compose.GameType
 import io.github.skydynamic.maiproberplus.ui.compose.scores.chuni.refreshChuniScore
 import io.github.skydynamic.maiproberplus.ui.compose.scores.maimai.refreshMaimaiScore
@@ -36,12 +35,3 @@ fun refreshScore(gameType: GameType) {
     }
 }
 
-fun checkResourceComplete(): List<FileDownloadMeta> {
-    val returnList = arrayListOf<FileDownloadMeta>()
-    resources.forEach {
-        if (!Application.application.filesDir.resolve(it.fileSavePath).resolve(it.fileName).exists()) {
-            returnList.add(it)
-        }
-    }
-    return returnList
-}

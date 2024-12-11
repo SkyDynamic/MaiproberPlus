@@ -58,15 +58,16 @@ fun InfoDialog(info: String, onRequest: () -> Unit) {
     Dialog(onDismissRequest = { onRequest() }) {
         Card(
             modifier = Modifier
+                .sizeIn(maxWidth = 300.dp, minHeight = 200.dp)
                 .wrapContentSize()
-                .height(200.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(getCardColor())
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import io.github.skydynamic.maiproberplus.Application.Companion.application
+import java.nio.charset.StandardCharsets
 
 enum class TextAlign(val align: Paint.Align) {
     Left(Paint.Align.LEFT),
@@ -20,6 +21,26 @@ class TextOutline(
 
 fun Canvas.drawImage(bitmap: Bitmap, x: Float, y: Float) {
     this.drawBitmap(bitmap, x, y, null)
+}
+
+private fun truncateTextToFitWidth(text: String, maxWidth: Float, paint: Paint): String {
+    var truncatedText = text
+    var textWidth = paint.measureText(truncatedText)
+
+    while (textWidth > maxWidth && truncatedText.isNotEmpty()) {
+        truncatedText = truncatedText.dropLast(1)
+        textWidth = paint.measureText(truncatedText)
+    }
+
+    if (truncatedText.length < text.length) {
+        truncatedText += "..."
+        textWidth = paint.measureText(truncatedText)
+        if (textWidth > maxWidth) {
+            truncatedText = truncatedText.dropLast(2) + "..."
+        }
+    }
+
+    return truncatedText
 }
 
 fun Canvas.drawText(
@@ -53,11 +74,7 @@ fun Canvas.drawText(
         this.drawText(text, x, y, outlinePaint)
     }
 
-    var truncatedText = if (text.length > maxText) {
-        "${text.substring(0, maxText - 3)}..."
-    } else {
-        text
-    }
+    val truncatedText = truncateTextToFitWidth(text, maxText.toFloat(), paint)
 
     this.drawText(truncatedText, x, y, paint)
 }

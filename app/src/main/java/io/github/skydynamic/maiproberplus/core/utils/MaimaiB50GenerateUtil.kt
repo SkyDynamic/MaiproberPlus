@@ -130,7 +130,7 @@ object MaimaiB50GenerateUtil {
         val sumRating = scores.sumOf { it.rating }
 
         return RatingTableValue(
-            avgRating = DecimalFormat("#.#").format(sumRating / scores.size),
+            avgRating = if (sumRating != 0) DecimalFormat("#.#").format(sumRating / scores.size) else "-",
             sumRating = sumRating.toString(),
             maxRating = maxRating.toString(),
             minRating = if (scores.size == 1) "-" else minRating.toString(),
@@ -192,7 +192,7 @@ object MaimaiB50GenerateUtil {
         canvas.drawImage(typeIco, 19f, 66f)
         canvas.drawText(
             songInfo.title,
-            16f, 86f, 28f, 178,
+            16f, 86f, 28f, 172,
             font = R.font.source_han_sans_35,
             color = fontColor
         )
@@ -364,9 +364,9 @@ object MaimaiB50GenerateUtil {
         canvas.drawImage(playerNameBitmap, 178f, 87f)
         canvas.drawText(
             config.userInfo.name,
-            28f, 203f, 134f,
-            font = R.font.source_han_sans_37,
-            color = Color.BLACK,
+            28f, 203f, 134f, 160,
+            R.font.source_han_sans_37,
+            Color.BLACK,
         )
         canvas.drawImage(danBitmap, 437f, 98f)
         canvas.drawImage(shougouBitmap, 185f, 145f)

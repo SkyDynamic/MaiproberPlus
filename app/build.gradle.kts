@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.symbol.processing)
 }
 
-val appVersion: String = "1.1.8"
+val appVersion: String = "1.2.0"
 
 val gitCommitId: String = try {
     val stdout = ByteArrayOutputStream()
@@ -35,29 +35,6 @@ android {
         versionNameSuffix = "-$gitCommitId"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        ndk {
-            abiFilters += listOf("x86_64", "arm64-v8a")
-        }
-
-        splits {
-            abi {
-                isEnable = true
-                include(
-                    "arm64-v8a",
-                    "x86_64",
-                )
-                exclude(
-                    "armeabi-v7a",
-                    "x86",
-                    "riscv64",
-                    "mips",
-                    "mips64",
-                    "armeabi"
-                )
-                isUniversalApk = true
-            }
-        }
     }
 
     buildTypes {
@@ -90,25 +67,11 @@ android {
 
     applicationVariants.all {
         val variant = this
-        val versionCodes =
-            mapOf( "arm64-v8a" to 4, "x86_64" to 4, "universal" to 4)
-
-        variant.outputs
-            .map { it as com.android.build.gradle.internal.api.ApkVariantOutputImpl }
-            .forEach { output ->
-                val abi = if (output.getFilter("ABI") != null)
-                    output.getFilter("ABI")
-                else
-                    "universal"
-
-                output.outputFileName = "MaiProberPlus-${versionName}-${abi}-${variant.buildType.name}.apk"
-                if (versionCodes.containsKey(abi)) {
-                    output.versionCodeOverride =
-                        (1000000 * versionCodes[abi]!!).plus(variant.versionCode)
-                } else {
-                    return@forEach
-                }
+        variant.outputs.all {
+            if (this is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+                outputFileName = "MaiProberPlus-${versionName}-universal-${variant.buildType.name}.apk"
             }
+        }
     }
 
     buildFeatures {

@@ -4,9 +4,9 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.Typeface
 import io.github.skydynamic.maiproberplus.Application.Companion.application
-import java.nio.charset.StandardCharsets
 
 enum class TextAlign(val align: Paint.Align) {
     Left(Paint.Align.LEFT),
@@ -24,24 +24,28 @@ fun Canvas.drawImage(bitmap: Bitmap, x: Float, y: Float) {
 }
 
 private fun truncateTextToFitWidth(text: String, maxWidth: Float, paint: Paint): String {
+    val ellipsis = "..."
+    val ellipsisWidth = paint.measureText(ellipsis)
+
+    if (ellipsisWidth >= maxWidth) {
+        return if (ellipsisWidth == maxWidth) ellipsis else ""
+    }
+
     var truncatedText = text
     var textWidth = paint.measureText(truncatedText)
 
-    while (textWidth > maxWidth && truncatedText.isNotEmpty()) {
+    while (textWidth + ellipsisWidth > maxWidth && truncatedText.isNotEmpty()) {
         truncatedText = truncatedText.dropLast(1)
         textWidth = paint.measureText(truncatedText)
     }
 
     if (truncatedText.length < text.length) {
-        truncatedText += "..."
-        textWidth = paint.measureText(truncatedText)
-        if (textWidth > maxWidth) {
-            truncatedText = truncatedText.dropLast(2) + "..."
-        }
+        truncatedText += ellipsis
     }
 
     return truncatedText
 }
+
 
 fun Canvas.drawText(
     text: String,
@@ -77,4 +81,16 @@ fun Canvas.drawText(
     val truncatedText = truncateTextToFitWidth(text, maxText.toFloat(), paint)
 
     this.drawText(truncatedText, x, y, paint)
+}
+
+fun createScaledBitmapHighQuality(src: Bitmap, dstWidth: Int, dstHeight: Int): Bitmap {
+    val dst = Bitmap.createBitmap(dstWidth, dstHeight, src.config)
+    val canvas = Canvas(dst)
+    val paint = Paint()
+    paint.isAntiAlias = true
+    paint.isFilterBitmap = true
+    paint.isDither = true
+    canvas.drawBitmap(src,
+        Rect(0, 0, src.width, src.height), Rect(0, 0, dstWidth, dstHeight), paint)
+    return dst
 }

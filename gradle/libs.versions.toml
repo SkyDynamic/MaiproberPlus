@@ -1,7 +1,7 @@
 [versions]
-accompanistPhotoViewer = "0.28.0"
 agp = "8.7.2"
 coilCompose = "3.0.3"
+imageViewer = "1.1.0-alpha.5"
 kotlin = "2.0.21"
 coreKtx = "1.10.1"
 jsoup = "1.18.1"
@@ -9,9 +9,7 @@ junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.6.1"
-compose-latest = "1.7.5"
-activityCompose = "1.8.0"
-composeBom = "2024.04.01"
+composeBom = "2024.12.01"
 kotlinxCoroutinesCore = "1.9.0-RC"
 kotlinxSerializationJson = "1.7.0"
 ktorVersion = "3.0.1"
@@ -22,20 +20,21 @@ roomKtx = "2.6.1"
 roomRuntime = "2.6.1"
 
 [libraries]
-accompanist-photo-viewer = { module = "com.google.accompanist:accompanist-photo-viewer", version.ref = "accompanistPhotoViewer" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
+image-viewer = { module = "com.jvziyaoyao.scale:image-viewer", version.ref = "imageViewer" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-androidx-compose-animation-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose-latest" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose"}
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+androidx-compose-animation-graphics = { module = "androidx.compose.animation:animation-graphics", name = "animation-graphics" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }

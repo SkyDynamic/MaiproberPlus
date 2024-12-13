@@ -40,9 +40,9 @@ object MaimaiB50GenerateUtil {
     ).reversed()
 
     private fun getDanImage(dan: Int): Bitmap =
-        Bitmap.createScaledBitmap(
+        createScaledBitmapHighQuality(
             application.getImageFromAssets("maimai/dan/$dan.png")
-                ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8), 104, 48, false
+                ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8), 104, 48
         )
 
     private fun getRatingFrame(rating: Int): Bitmap {
@@ -60,10 +60,10 @@ object MaimaiB50GenerateUtil {
             in 15000..16999 -> "11"
             else -> "1"
         }
-        return Bitmap.createScaledBitmap(
+        return createScaledBitmapHighQuality(
             application.getImageFromAssets("maimai/rating/$index.png")
                 ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8),
-            225, 44, false
+            225, 44
         )
     }
 
@@ -80,18 +80,18 @@ object MaimaiB50GenerateUtil {
             MaimaiEnums.Difficulty.REMASTER ->
                 application.getBitmapFromDrawable(R.drawable.ic_maimai_frame_remaster)
         }
-        return Bitmap.createScaledBitmap(bitmap, 282, 120, false)
+        return createScaledBitmapHighQuality(bitmap, 282, 120)
     }
 
     private fun getShougouBitmap(color: String): Bitmap {
-        return Bitmap.createScaledBitmap(when (color.lowercase()) {
+        return createScaledBitmapHighQuality(when (color.lowercase()) {
             "normal" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_normal)
             "bronze" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_bronze)
             "sliver" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_silver)
             "gold" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_gold)
             "rainbow" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_rainbow)
             else -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_normal)
-        }, 368, 48, false)
+        }, 368, 48)
     }
 
     private fun getDxRating(b35: List<MaimaiScoreEntity>, b15: List<MaimaiScoreEntity>): Int {
@@ -101,8 +101,8 @@ object MaimaiB50GenerateUtil {
     private fun getDxRatingNumIcoList(rating: Int): List<Bitmap> {
         val ratingList = mutableListOf<Bitmap>()
         for (string in rating.toString()) {
-            ratingList += Bitmap.createScaledBitmap(application.getImageFromAssets("maimai/num/${string}.png")
-                ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8), 19, 22, false)
+            ratingList += createScaledBitmapHighQuality(application.getImageFromAssets("maimai/num/${string}.png")
+                ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8), 19, 22)
         }
         return ratingList.reversed()
     }
@@ -135,13 +135,13 @@ object MaimaiB50GenerateUtil {
             maxRating = maxRating.toString(),
             minRating = if (scores.size == 1) "-" else minRating.toString(),
             ssspMaxLevel = if (ssspMaxLevel < 1.0 || ssspMaxLevel > 15.0) "-" else ssspMaxLevel.toString(),
-            ssspMinLevel = if (scores.size == 1 &&(ssspMinLevel < 1.0 || ssspMinLevel > 15.0)) "-" else ssspMinLevel.toString(),
+            ssspMinLevel = if (ssspScore.size <= 1 || (ssspMinLevel < 1.0 || ssspMinLevel > 15.0)) "-" else ssspMinLevel.toString(),
             sssMaxLevel = if (sssMaxLevel < 1.0 || sssMaxLevel > 15.0) "-" else sssMaxLevel.toString(),
-            sssMinLevel = if (scores.size == 1 &&(ssspMinLevel < 1.0 || ssspMinLevel > 15.0)) "-" else sssMinLevel.toString(),
+            sssMinLevel = if (sssScore.size <= 1 || (ssspMinLevel < 1.0 || ssspMinLevel > 15.0)) "-" else sssMinLevel.toString(),
             sspMaxLevel = if (sspMaxLevel < 1.0 || sspMaxLevel > 15.0) "-" else sspMaxLevel.toString(),
-            sspMinLevel = if (scores.size == 1 &&(ssspMinLevel < 1.0 || ssspMinLevel > 15.0)) "-" else sspMinLevel.toString(),
+            sspMinLevel = if (sspScore.size <= 1 || (ssspMinLevel < 1.0 || ssspMinLevel > 15.0)) "-" else sspMinLevel.toString(),
             ssMaxLevel = if (ssMaxLevel < 1.0 || ssMaxLevel > 15.0) "-" else ssMaxLevel.toString(),
-            ssMinLevel = if (scores.size == 1 &&(ssspMinLevel < 1.0 || ssspMinLevel > 15.0)) "-" else ssMinLevel.toString(),
+            ssMinLevel = if (ssScore.size <= 1 || (ssspMinLevel < 1.0 || ssspMinLevel > 15.0)) "-" else ssMinLevel.toString(),
         )
     }
 
@@ -172,20 +172,20 @@ object MaimaiB50GenerateUtil {
         canvas.drawImage(frameBitmap, 0f, 0f)
 
         val icon = runBlocking {
-            Bitmap.createScaledBitmap(
+            createScaledBitmapHighQuality(
                 NetworkImageRequestUtil.getImageBitmap(
                     "https://assets2.lxns.net/maimai/jacket/${score.songId}.png"
                 ) ?: application.getBitmapFromDrawable(R.drawable.ic_maimai_jacket_default),
-                60, 60, false)
+                60, 60)
         }
 
         val typeIco = runBlocking {
-            Bitmap.createScaledBitmap(when (score.type) {
+            createScaledBitmapHighQuality(when (score.type) {
                 MaimaiEnums.SongType.STANDARD ->
                     application.getBitmapFromDrawable(R.drawable.ic_maimai_sd)
                 MaimaiEnums.SongType.DX ->
                     application.getBitmapFromDrawable(R.drawable.ic_maimai_dx)
-            }, 19, 9, false)
+            }, 19, 9)
         }
 
         canvas.drawImage(icon, 17f, 17f)
@@ -193,7 +193,7 @@ object MaimaiB50GenerateUtil {
         canvas.drawText(
             songInfo.title,
             16f, 86f, 28f, 172,
-            font = R.font.source_han_sans_35,
+            font = R.font.source_han_momo_hc_m,
             color = fontColor
         )
         canvas.drawText(
@@ -203,7 +203,7 @@ object MaimaiB50GenerateUtil {
             color = fontColor
         )
         canvas.drawText(
-            "${score.dxScore} / $totalNote",
+            "${score.dxScore} / ${totalNote * 3}",
             12f, 265f, 53f,
             font = R.font.fot_b,
             color = fontColor,
@@ -216,8 +216,8 @@ object MaimaiB50GenerateUtil {
             color = fontColor
         )
         canvas.drawImage(
-            Bitmap.createScaledBitmap(
-                application.getBitmapFromDrawable(score.rankType.imageId), 56, 25, false
+            createScaledBitmapHighQuality(
+                application.getBitmapFromDrawable(score.rankType.imageId), 56, 25
             ), 215f, 58f
         )
         canvas.drawText(
@@ -238,26 +238,26 @@ object MaimaiB50GenerateUtil {
         )
         if (dxSatrs > 0) {
             canvas.drawImage(
-                Bitmap.createScaledBitmap(
+                createScaledBitmapHighQuality(
                     application.getBitmapFromDrawable(MaimaiData.getDxStarBitmap(dxSatrs)!!),
-                    30, 18, false
+                    30, 18
                 ), 146f, 90f
             )
         }
         if (score.fullComboType != MaimaiEnums.FullComboType.NULL) {
             canvas.drawImage(
-                Bitmap.createScaledBitmap(
+                createScaledBitmapHighQuality(
                     application.getBitmapFromDrawable(score.fullComboType.b50ImageId!!),
-                    47, 24, false
+                    47, 24
                 ), 178f, 86f
             )
         }
 
         if (score.syncType != MaimaiEnums.SyncType.NULL) {
             canvas.drawImage(
-                Bitmap.createScaledBitmap(
+                createScaledBitmapHighQuality(
                     application.getBitmapFromDrawable(score.syncType.b50ImageId!!),
-                    47, 24, false
+                    47, 24
                 ), 225f, 86f
             )
         }
@@ -282,8 +282,8 @@ object MaimaiB50GenerateUtil {
 
         val dxRating = getDxRating(b35Score, b15Score)
 
-        val bgBitmap = Bitmap.createScaledBitmap(
-            application.getBitmapFromDrawable(R.drawable.ic_maimai_b50_bg), 1440, 1950, false)
+        val bgBitmap = createScaledBitmapHighQuality(
+            application.getBitmapFromDrawable(R.drawable.ic_maimai_b50_bg), 1440, 1950)
 
         val b50cacheDir = application.filesDir.resolve("b50cache")
         b50cacheDir.mkdirs()
@@ -301,21 +301,21 @@ object MaimaiB50GenerateUtil {
 
         // plate
         val plateBitmap = runBlocking {
-            Bitmap.createScaledBitmap(
+            createScaledBitmapHighQuality(
                 NetworkImageRequestUtil.getImageBitmap(
                     "https://assets2.lxns.net/maimai/plate/${config.userInfo.maimaiPlate}.png"
                 ) ?: application.getBitmapFromDrawable(R.drawable.ic_maimai_plate_default),
-                960, 155, false
+                960, 155
             )
         }
 
         // icon
         val iconBitmap = runBlocking {
-            Bitmap.createScaledBitmap(
+            createScaledBitmapHighQuality(
                 NetworkImageRequestUtil.getImageBitmap(
                     "https://assets2.lxns.net/maimai/icon/${config.userInfo.maimaiIcon}.png"
                 ) ?: application.getBitmapFromDrawable(R.drawable.ic_maimai_icon_default),
-                131, 131, false
+                131, 131
             )
         }
 
@@ -327,18 +327,18 @@ object MaimaiB50GenerateUtil {
 
         // class
         val classBitmap = runBlocking {
-            Bitmap.createScaledBitmap(
+            createScaledBitmapHighQuality(
                 application.getImageFromAssets("maimai/class/${config.userInfo.maimaiClass}.png")
                     ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8),
-                120, 72, false
+                120, 72
             )
         }
 
         // playerName
         val playerNameBitmap = runBlocking {
-            Bitmap.createScaledBitmap(
+            createScaledBitmapHighQuality(
                 application.getBitmapFromDrawable(R.drawable.ic_maimai_playername),
-                386, 78, false
+                386, 78
             )
         }
 
@@ -348,9 +348,9 @@ object MaimaiB50GenerateUtil {
 
         // Rating Table
         val ratingTable = runBlocking {
-            Bitmap.createScaledBitmap(
+            createScaledBitmapHighQuality(
                 application.getBitmapFromDrawable(R.drawable.ic_maimai_ratingtable),
-                814, 325, false
+                814, 325
             )
         }
 
@@ -364,7 +364,7 @@ object MaimaiB50GenerateUtil {
         canvas.drawImage(playerNameBitmap, 178f, 87f)
         canvas.drawText(
             config.userInfo.name,
-            28f, 203f, 134f, 160,
+            28f, 203f, 134f, 210,
             R.font.source_han_sans_37,
             Color.BLACK,
         )

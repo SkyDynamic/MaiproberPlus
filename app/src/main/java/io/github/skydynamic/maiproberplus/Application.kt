@@ -9,12 +9,15 @@ import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ComponentName
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Typeface
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -244,6 +247,21 @@ class Application : Application() {
 
     fun getFont(fontId: Int): Typeface {
         return ResourcesCompat.getFont(this, fontId) ?: Typeface.DEFAULT
+    }
+
+    fun saveImageToGallery(bitmap: Bitmap, fileName: String) {
+        val resolver = contentResolver
+        val values = ContentValues()
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        values.put(MediaStore.Images.Media.RELATIVE_PATH,
+            Environment.DIRECTORY_PICTURES + "/MaiProberPlus")
+
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        resolver.openOutputStream(uri!!).use {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it!!)
+            Toast.makeText(this, "已保存到相册", Toast.LENGTH_SHORT).show()
+        }
     }
 
     companion object {

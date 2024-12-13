@@ -87,7 +87,7 @@ object MaimaiB50GenerateUtil {
         return createScaledBitmapHighQuality(when (color.lowercase()) {
             "normal" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_normal)
             "bronze" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_bronze)
-            "sliver" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_silver)
+            "silver" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_silver)
             "gold" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_gold)
             "rainbow" -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_rainbow)
             else -> application.getBitmapFromDrawable(R.drawable.ic_maimai_shougou_normal)
@@ -363,7 +363,7 @@ object MaimaiB50GenerateUtil {
         canvas.drawImage(classBitmap, 430f, 24f)
         canvas.drawImage(playerNameBitmap, 178f, 87f)
         canvas.drawText(
-            config.userInfo.name,
+            config.userInfo.name.toHalfWidth(),
             28f, 203f, 134f, 210,
             R.font.source_han_sans_37,
             Color.BLACK,

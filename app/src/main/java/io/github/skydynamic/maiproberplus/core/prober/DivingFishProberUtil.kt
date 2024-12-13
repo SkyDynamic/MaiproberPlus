@@ -28,6 +28,12 @@ class DivingFishProberUtil : IProberUtil {
     private val baseApiUrl = "https://www.diving-fish.com/api"
 
     @Serializable
+    data class DivingFishPlayerProfile(
+        val username: String,
+        @SerialName("additional_rating") val additionalRating: Int
+    )
+
+    @Serializable
     data class DivingFishMaimaiScoreBody(
         @SerialName("song_id") val songId: Int? = null,
         val title: String,
@@ -81,6 +87,18 @@ class DivingFishProberUtil : IProberUtil {
         val username: String,
         val records: DivingFishChuniRecordsBody
     )
+
+    override suspend fun updateUserInfo(importToken: String) {
+        val resp = client.get("https://www.diving-fish.com/api/maimaidxprober/player/profile") {
+            headers {
+                append("Import-Token", importToken)
+            }
+        }
+        val data = resp.body<DivingFishPlayerProfile>()
+        application.configManager.config.userInfo.name = data.username
+        application.configManager.config.userInfo.maimaiDan = data.additionalRating
+        application.configManager.save()
+    }
 
     override suspend fun uploadMaimaiProberData(
         importToken: String,

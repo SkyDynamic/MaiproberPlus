@@ -94,3 +94,17 @@ fun createScaledBitmapHighQuality(src: Bitmap, dstWidth: Int, dstHeight: Int): B
         Rect(0, 0, src.width, src.height), Rect(0, 0, dstWidth, dstHeight), paint)
     return dst
 }
+
+fun String.toHalfWidth(): String {
+    return buildString {
+        for (char in this) {
+            var num = char.code
+            if (num == 0x3000) {
+                num = 32
+            } else if (num in 0xFF01..0xFF5E) {
+                num -= 0xFEE0
+            }
+            append(num.toChar())
+        }
+    }
+}

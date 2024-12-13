@@ -38,6 +38,11 @@ class LxnsProberUtil : IProberUtil {
     )
 
     @Serializable
+    data class LxnsUserInfoResponse(
+        val data: LxnsUserInfoBody
+    ) : LxnsResponse()
+
+    @Serializable
     data class LxnsMaimaiResponse(
         val data: List<LxnsMaimaiUploadReturnScoreBody> = listOf()
     ) : LxnsResponse()
@@ -132,10 +137,47 @@ class LxnsProberUtil : IProberUtil {
     )
 
     @Serializable
+    data class LxnsCollectionBody(
+        val id: Int = 0,
+        val name: String = "",
+        val color: String? = "",
+    )
+
+    @Serializable
+    data class LxnsUserInfoBody(
+        val name: String,
+        val trophy: LxnsCollectionBody,
+        val icon: LxnsCollectionBody,
+        @SerialName("name_plate") val namePlate: LxnsCollectionBody,
+        @SerialName("course_rank") val courseRank: Int,
+        @SerialName("class_rank") val classRank: Int
+    )
+
+    @Serializable
     data class LxnsMaimaiRequestBody(val scores: List<LxnsMaimaiScoreBody>)
 
     @Serializable
     data class LxnsChuniRequestBody(val scores: List<LxnsChuniScoreBody>)
+
+    override suspend fun updateUserInfo(importToken: String) {
+        val resp = client.get("https://maimai.lxns.net/api/v0/user/maimai/player") {
+            header("X-User-Token", importToken)
+        }
+        if (resp.status.value == 200) {
+            val data = resp.body<LxnsUserInfoResponse>().data
+            val info = application.configManager.config.userInfo
+            info.name = data.name
+            info.shougou = data.trophy.name
+            info.shougouColor = data.trophy.color?.lowercase() ?: "normal"
+            info.maimaiIcon = data.icon.id
+            info.maimaiPlate = data.namePlate.id
+            info.maimaiDan = data.courseRank
+            info.maimaiClass = data.classRank
+            application.configManager.save()
+        } else {
+            sendMessageToUi("同步用户信息失败: ${resp.bodyAsText()}")
+        }
+    }
 
     override suspend fun uploadMaimaiProberData(
         importToken: String,

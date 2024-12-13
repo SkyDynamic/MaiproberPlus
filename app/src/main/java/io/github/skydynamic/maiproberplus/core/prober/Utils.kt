@@ -33,10 +33,13 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 val client = HttpClient(CIO) {
     install(ContentNegotiation) {
-        json()
+        json(Json {
+            ignoreUnknownKeys = true
+        })
     }
     install(HttpTimeout) {
         requestTimeoutMillis = 30000

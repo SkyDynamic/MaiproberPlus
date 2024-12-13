@@ -15,9 +15,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.skydynamic.maiproberplus.Application
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.BuildConfig
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
@@ -38,8 +39,14 @@ import io.github.skydynamic.maiproberplus.ui.compose.scores.resources
 
 @Composable
 fun SettingCompose() {
-    var divingfishToken by remember { mutableStateOf(application.configManager.config.divingfishToken) }
-    var lxnsToken by remember { mutableStateOf(application.configManager.config.lxnsToken) }
+    val config = application.configManager.config
+    
+    var divingfishToken by remember { mutableStateOf(config.divingfishToken) }
+    var lxnsToken by remember { mutableStateOf(config.lxnsToken) }
+
+    var userName by remember { mutableStateOf(config.userInfo.name) }
+    var maimaiIcon by remember { mutableIntStateOf(config.userInfo.maimaiIcon) }
+    var maimaiPlate by remember { mutableIntStateOf(config.userInfo.maimaiPlate) }
 
     var divingfishTokenHidden by remember { mutableStateOf(true) }
     var lxnsTokenHidden by remember { mutableStateOf(true)}
@@ -54,27 +61,27 @@ fun SettingCompose() {
         showChooseMaimaiDiffDialog -> {
             DiffChooseDialog(
                 onRequest = {
-                    application.configManager.config.syncConfig.maimaiSyncDifficulty = it
+                    config.syncConfig.maimaiSyncDifficulty = it
                     application.configManager.save()
                 },
                 onDismissRequest = {
                     showChooseMaimaiDiffDialog = false
                 },
                 defaultList = MaimaiEnums.Difficulty.entries.map { it.diffName },
-                currentChoiceList = application.configManager.config.syncConfig.maimaiSyncDifficulty,
+                currentChoiceList = config.syncConfig.maimaiSyncDifficulty,
             )
         }
         showChooseChuniDiffDialog -> {
             DiffChooseDialog(
                 onRequest = {
-                    application.configManager.config.syncConfig.chuniSyncDifficulty = it
+                    config.syncConfig.chuniSyncDifficulty = it
                     application.configManager.save()
                 },
                 onDismissRequest = {
                     showChooseChuniDiffDialog = false
                 },
                 defaultList = ChuniEnums.Difficulty.entries.map { it.diffName },
-                currentChoiceList = application.configManager.config.syncConfig.chuniSyncDifficulty,
+                currentChoiceList = config.syncConfig.chuniSyncDifficulty,
             )
         }
         showConfirmUpdateSongResourceDialog -> {
@@ -118,7 +125,7 @@ fun SettingCompose() {
                 },
                 onValueChange = {
                     divingfishToken = it
-                    Application.application.configManager.config.divingfishToken = it
+                    config.divingfishToken = it
                     application.configManager.save()
                 }
             )
@@ -134,7 +141,7 @@ fun SettingCompose() {
                 },
                 onValueChange = {
                     lxnsToken = it
-                    application.configManager.config.lxnsToken = it
+                    config.lxnsToken = it
                     application.configManager.save()
                 }
             )
@@ -185,10 +192,60 @@ fun SettingCompose() {
             SwitchSettingItem(
                 title = "成绩缓存本地",
                 description = "开启后, 抓取成绩并上传到查分器时会缓存此次查分成绩到本地",
-                checked = application.configManager.config.localConfig.cacheScore,
+                checked = config.localConfig.cacheScore,
                 onCheckedChange = {
-                    application.configManager.config.localConfig.cacheScore = it
+                    config.localConfig.cacheScore = it
                     application.configManager.save()
+                }
+            )
+        }
+
+        SettingItemGroup(
+            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            title = "用户信息"
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth(),
+                value = userName,
+                onValueChange = {
+                    config.userInfo.name = it
+                    userName = it
+                    application.configManager.save()
+                },
+                label = { Text("用户名", fontSize = 12.sp) },
+            )
+
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth(),
+                value = maimaiIcon.toString(),
+                onValueChange = {
+                    config.userInfo.maimaiIcon = it.toInt()
+                    maimaiIcon = it.toInt()
+                    application.configManager.save()
+                },
+                label = { Text("舞萌DX头像", fontSize = 12.sp) },
+                supportingText = {
+                    Text("*不知道该参数的含义，请勿修改", color = Color.Red)
+                }
+            )
+
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth(),
+                value = maimaiPlate.toString(),
+                onValueChange = {
+                    config.userInfo.maimaiPlate = it.toInt()
+                    maimaiPlate = it.toInt()
+                    application.configManager.save()
+                },
+                label = { Text("舞萌DX姓名框", fontSize = 12.sp) },
+                supportingText = {
+                    Text("*不知道该参数的含义，请勿修改", color = Color.Red)
                 }
             )
         }

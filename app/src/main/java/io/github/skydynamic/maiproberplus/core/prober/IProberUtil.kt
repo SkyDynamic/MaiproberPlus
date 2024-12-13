@@ -4,7 +4,7 @@ import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
 import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 
 interface IProberUtil {
-    suspend fun updateAccountInfo(importToken: String) {}
+    suspend fun updateUserInfo(importToken: String) {}
     suspend fun uploadMaimaiProberData(importToken: String, authUrl: String) {}
     suspend fun uploadChunithmProberData(importToken: String, authUrl: String) {}
     suspend fun getMaimaiProberData(importToken: String): List<MaimaiScoreEntity> {

@@ -1,6 +1,7 @@
 package io.github.skydynamic.maiproberplus.ui.compose
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -30,12 +31,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.Bitmap
-import coil3.compose.AsyncImage
 import io.github.skydynamic.maiproberplus.R
 import kotlin.math.max
 import kotlin.math.min
@@ -73,7 +74,7 @@ fun ImagePreview(
                             onClick = {
                                 application.saveImageToGallery(
                                     image,
-                                    "B50_${System.currentTimeMillis()}.jpg"
+                                    "${System.currentTimeMillis()}.jpg"
                                 )
                             }
                         ) {
@@ -104,8 +105,8 @@ fun ImagePreview(
                             .fillMaxWidth()
                             .clip(RectangleShape)
                     ) {
-                        AsyncImage(
-                            model = image,
+                        Image(
+                            bitmap = image.asImageBitmap(),
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -129,23 +130,6 @@ fun ImagePreview(
 
                                         offset = Offset(newOffsetX, newOffsetY)
                                     }
-                                }
-                                .pointerInput(Unit) {
-                                    detectDragGestures { change, dragAmount ->
-                                        change.consume()
-
-                                        val scaledDragAmount = Offset(dragAmount.x * scale, dragAmount.y * scale)
-
-                                        val maxX = (maxWidth * (scale - 1)) / 2
-                                        val maxY = (maxHeight * (scale - 1)) / 2
-
-                                        offset = Offset(
-                                            x = min(max(offset.x + scaledDragAmount.x, -maxX), maxX),
-                                            y = min(max(offset.y + scaledDragAmount.y, -maxY), maxY)
-                                        )
-                                    }
-                                }
-                                .pointerInput(Unit) {
                                     detectTapGestures(
                                         onTap = {
                                             onDismiss()
@@ -163,6 +147,19 @@ fun ImagePreview(
                                             offset = Offset(centerX, centerY)
                                         }
                                     )
+                                    detectDragGestures { change, dragAmount ->
+                                        change.consume()
+
+                                        val scaledDragAmount = Offset(dragAmount.x * scale, dragAmount.y * scale)
+
+                                        val maxX = (maxWidth * (scale - 1)) / 2
+                                        val maxY = (maxHeight * (scale - 1)) / 2
+
+                                        offset = Offset(
+                                            x = min(max(offset.x + scaledDragAmount.x, -maxX), maxX),
+                                            y = min(max(offset.y + scaledDragAmount.y, -maxY), maxY)
+                                        )
+                                    }
                                 }
                         )
                     }

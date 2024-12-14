@@ -1,6 +1,7 @@
 package io.github.skydynamic.maiproberplus.core.utils
 
 import android.annotation.SuppressLint
+import io.github.skydynamic.maiproberplus.core.config.UserInfo
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
@@ -266,6 +267,46 @@ object ParseScorePageUtil {
             }
         }
         return musicList
+    }
+
+    fun parseMaimaiHomePage(html: String): UserInfo {
+        if (html.isEmpty()) {
+            return UserInfo()
+        }
+
+        val document = Jsoup.parse(html)
+        document.outputSettings().prettyPrint(false)
+
+        val tables = document.getElementsByClass("see_through_block")
+            .first()
+        val trophy = tables?.getElementsByClass("trophy_block")?.first()
+        val trophyClassNames = trophy?.className()
+        var color = "normal"
+        trophyClassNames?.split(" ")?.forEach { t ->
+            val regex = Regex("trophy_(\\w+)")
+            val match = regex.find(t)?.groups[1]
+            if (match?.value != "block" && match?.value != null) {
+                color = match.value.lowercase()
+            }
+        }
+        val trophyText = trophy?.tagName("span")?.text() ?: "Welcome to maimaiDX"
+        val name = tables?.getElementsByClass("name_block")?.text()
+        val courseImage = tables?.getElementsByClass("h_35 f_l")?.first()?.select("img")?.attr("src")
+        val classImage = tables?.getElementsByClass("p_l_10 h_35 f_l")?.last()?.select("img")?.attr("src")
+        val courseRegex = Regex("course_rank_(\\d{2})\\w+\\.png")
+        val classRegex = Regex("class_rank_s_(\\d{2})\\w+\\.png")
+        val courseMatch = courseRegex.find(courseImage ?: "")?.groups?.get(1)?.value
+        val classMatch = classRegex.find(classImage ?: "")?.groups?.get(1)?.value
+
+        return UserInfo(
+            name = name ?: "maimaiDX",
+            maimaiDan = courseMatch?.toInt() ?: 0,
+            maimaiIcon = 1,
+            maimaiPlate = 1,
+            maimaiClass = classMatch?.toInt() ?: 1,
+            shougou = trophyText,
+            shougouColor = color
+        )
     }
 }
 

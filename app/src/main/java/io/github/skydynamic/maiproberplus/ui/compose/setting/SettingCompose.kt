@@ -198,6 +198,16 @@ fun SettingCompose() {
                     application.configManager.save()
                 }
             )
+
+            SwitchSettingItem(
+                title = "解析舞萌DX用户信息",
+                description = "开启后, 抓取舞萌DX成绩时会解析用户信息并保存",
+                checked = config.localConfig.parseMaimaiUserInfo,
+                onCheckedChange = {
+                    config.localConfig.parseMaimaiUserInfo = it
+                    application.configManager.save()
+                }
+            )
         }
 
         SettingItemGroup(

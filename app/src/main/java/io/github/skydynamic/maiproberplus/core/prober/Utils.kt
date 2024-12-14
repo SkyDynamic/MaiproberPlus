@@ -114,6 +114,15 @@ suspend fun fetchMaimaiScorePage(
             Log.e("ProberUtil", "抓取${difficulty.diffName}成绩失败: ${e.message}")
         }
     }
+
+    if (application.configManager.config.localConfig.parseMaimaiUserInfo) {
+        val result = client.get("https://maimai.wahlap.com/maimai-mobile/home/")
+
+        val body = result.bodyAsText()
+        val userInfo = ParseScorePageUtil.parseMaimaiHomePage(body)
+        application.configManager.config.userInfo = userInfo
+        application.configManager.save()
+    }
 }
 
 suspend fun getChuniScoreData(authUrl: String) : List<ChuniScoreEntity> {

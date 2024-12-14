@@ -71,7 +71,8 @@ data class SyncConfig(
 
 @Serializable
 data class LocalConfig(
-    var cacheScore: Boolean = false
+    var cacheScore: Boolean = false,
+    var parseMaimaiUserInfo: Boolean = false
 )
 
 @Serializable

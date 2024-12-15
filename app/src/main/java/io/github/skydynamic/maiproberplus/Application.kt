@@ -69,7 +69,6 @@ class Application : Application() {
         application = this
         configManager = ConfigManager(this)
         db = Room.databaseBuilder(this, AppDatabase::class.java, "maiproberplus").build()
-        startService(Intent(this, HttpServerService::class.java))
         this.initProberContext()
     }
 
@@ -115,6 +114,18 @@ class Application : Application() {
             }
             notify(1, builder.build())
         }
+    }
+
+    fun startHttpServer() {
+        val intent = Intent(this, HttpServerService::class.java)
+        startService(intent)
+    }
+
+    fun stopHttpServer() {
+        val intent = Intent(this, HttpServerService::class.java).apply {
+            action = HttpServerService.STOP_HTTP_SERVICE_INTENT
+        }
+        startService(intent)
     }
 
     fun initProberContext() {

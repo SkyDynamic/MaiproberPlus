@@ -194,11 +194,14 @@ fun SyncCompose() {
                             } else {
                                 startVpnService(context as Activity)
                             }
+                            application.startHttpServer()
                         } else {
                             stopVpnService(context as Activity)
+                            application.stopHttpServer()
                         }
                     }
-                }
+                },
+                enabled = !GlobalViewModel.maimaiHooking || !GlobalViewModel.chuniHooking
             ) {
                 if (!globalViewModel.isVpnServiceRunning)
                     Text("开启劫持")
@@ -328,10 +331,13 @@ private fun startVpnService(activity: Activity) {
 }
 
 private fun stopVpnService(activity: Activity) {
-    val intent = Intent(activity, LocalVpnService::class.java).apply { action = LocalVpnService.DISCONNECT_INTENT }
+    val intent = Intent(activity, LocalVpnService::class.java).apply {
+        action = LocalVpnService.DISCONNECT_INTENT
+    }
     activity.startService(intent)
 }
 
 private fun checkResourceComplate(context: Context): Boolean {
-    return context.filesDir.resolve("maimai_song_list.json").exists() || context.filesDir.resolve("chuni_song_list.json").exists()
+    return context.filesDir.resolve("maimai_song_list.json").exists()
+            || context.filesDir.resolve("chuni_song_list.json").exists()
 }

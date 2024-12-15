@@ -302,6 +302,7 @@ class LxnsProberUtil : IProberUtil {
             val parseList = arrayListOf<MaimaiScoreEntity>()
             body.data.forEach {
                 val type = MaimaiEnums.SongType.getSongTypeByName(it.type)
+                if (type == MaimaiEnums.SongType.UTAGE) return@forEach
                 val diff = MaimaiEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
                 val levelValue = MaimaiData.getLevelValue(it.songName, diff, type)
                 val version = MaimaiData.getChartVersion(it.songName, diff, type)
@@ -324,7 +325,7 @@ class LxnsProberUtil : IProberUtil {
             }
             return parseList
         } catch (e: Exception) {
-            Log.d("LxnsProberUtil", "获取舞萌成绩失败: $e")
+            Log.d("LxnsProberUtil", "获取舞萌成绩失败: $e", e)
             sendMessageToUi("获取舞萌成绩失败: ${e.message}")
             return emptyList()
         }
@@ -359,7 +360,7 @@ class LxnsProberUtil : IProberUtil {
             }
             return parseList
         } catch (e: Exception) {
-            Log.d("LxnsProberUtil", "获取中二成绩失败: $e")
+            Log.d("LxnsProberUtil", "获取中二成绩失败: $e", e)
             sendMessageToUi("获取中二成绩失败: ${e.message}")
             return emptyList()
         }

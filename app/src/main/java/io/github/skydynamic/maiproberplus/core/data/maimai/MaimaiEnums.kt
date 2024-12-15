@@ -9,7 +9,8 @@ class MaimaiEnums {
     @Serializable
     enum class SongType(val type: String, val type2: String) {
         @SerialName("standard") STANDARD("standard", "SD"),
-        @SerialName("dx") DX("dx", "DX");
+        @SerialName("dx") DX("dx", "DX"),
+        @SerialName("utage") UTAGE("utage", "UTAGE");
 
         companion object {
             @JvmStatic

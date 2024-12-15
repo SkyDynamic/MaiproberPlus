@@ -86,11 +86,17 @@ suspend fun fetchMaimaiScorePage(
     }
 
     val result = client.get("https://maimai.wahlap.com/maimai-mobile/home/")
-
-    if (result.bodyAsText().contains("错误")) {
+    val homeBody = result.bodyAsText()
+    if (homeBody.contains("错误")) {
         sendMessageToUi("获取舞萌成绩失败: 登录失败")
         Log.e("ProberUtil", "登录失败, 抓取成绩停止")
         return
+    }
+
+    if (application.configManager.config.localConfig.parseMaimaiUserInfo) {
+        val userInfo = ParseScorePageUtil.parseMaimaiHomePage(homeBody)
+        application.configManager.config.userInfo = userInfo
+        application.configManager.save()
     }
 
     for (diff in application.configManager.config.syncConfig.maimaiSyncDifficulty) {
@@ -113,15 +119,6 @@ suspend fun fetchMaimaiScorePage(
         } catch (e: Exception) {
             Log.e("ProberUtil", "抓取${difficulty.diffName}成绩失败: ${e.message}")
         }
-    }
-
-    if (application.configManager.config.localConfig.parseMaimaiUserInfo) {
-        val result = client.get("https://maimai.wahlap.com/maimai-mobile/home/")
-
-        val body = result.bodyAsText()
-        val userInfo = ParseScorePageUtil.parseMaimaiHomePage(body)
-        application.configManager.config.userInfo = userInfo
-        application.configManager.save()
     }
 }
 

@@ -185,6 +185,7 @@ object MaimaiB50GenerateUtil {
                     application.getBitmapFromDrawable(R.drawable.ic_maimai_sd)
                 MaimaiEnums.SongType.DX ->
                     application.getBitmapFromDrawable(R.drawable.ic_maimai_dx)
+                else -> Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8)
             }, 19, 9)
         }
 

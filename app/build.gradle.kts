@@ -9,6 +9,7 @@ plugins {
 }
 
 val appVersion: String = "1.2.0"
+val appVersionCode: String = "000"
 
 val gitCommitId: String = try {
     val stdout = ByteArrayOutputStream()
@@ -30,7 +31,7 @@ android {
         minSdk = 31
         targetSdk = 34
         versionName = appVersion
-        versionCode = appVersion.replace(".", "").toInt()
+        versionCode = (appVersion + appVersionCode).replace(".", "").toInt()
 
         versionNameSuffix = "-$gitCommitId"
 

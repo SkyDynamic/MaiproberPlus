@@ -1,8 +1,8 @@
 package io.github.skydynamic.maiproberplus.core.data.maimai
 
 import android.content.Context
-import coil3.Bitmap
 import io.github.skydynamic.maiproberplus.Application
+import io.github.skydynamic.maiproberplus.R
 import io.github.skydynamic.maiproberplus.core.prober.client
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -166,10 +166,15 @@ class MaimaiData {
             }
         }
 
-        fun getDxStarBitmap(dxStar: Int): Bitmap? {
-            return Application.application
-                .assetsManager
-                .getMaimaiUIAssets("UI_GAM_Gauge_DXScoreIcon_0$dxStar.png")
+        fun getDxStarBitmap(dxStar: Int): Int? {
+            return when(dxStar) {
+                1 -> return R.drawable.ic_maimai_dxscore_01
+                2 -> return R.drawable.ic_maimai_dxscore_02
+                3 -> return R.drawable.ic_maimai_dxscore_03
+                4 -> return R.drawable.ic_maimai_dxscore_04
+                5 -> return R.drawable.ic_maimai_dxscore_05
+                else -> return null
+            }
         }
 
         fun songHasTypeDifficulty(title: String, type: MaimaiEnums.SongType): Boolean {

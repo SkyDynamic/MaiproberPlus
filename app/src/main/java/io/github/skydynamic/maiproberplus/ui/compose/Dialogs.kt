@@ -4,11 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
@@ -56,15 +57,16 @@ fun InfoDialog(info: String, onRequest: () -> Unit) {
     Dialog(onDismissRequest = { onRequest() }) {
         Card(
             modifier = Modifier
+                .sizeIn(maxWidth = 300.dp, minHeight = 200.dp)
                 .wrapContentSize()
-                .height(200.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(getCardColor())
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -95,18 +97,21 @@ fun ConfirmDialog(
     onRequest: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = { onRequest() }) {
+    Dialog(
+        onDismissRequest = onDismiss
+    ) {
         Card(
             modifier = Modifier
-                .height(200.dp)
                 .width(300.dp)
+                .wrapContentHeight()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(getCardColor())
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .sizeIn(minHeight = 150.dp)
+                    .wrapContentSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {

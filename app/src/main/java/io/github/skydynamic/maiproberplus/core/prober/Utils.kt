@@ -33,10 +33,13 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 val client = HttpClient(CIO) {
     install(ContentNegotiation) {
-        json()
+        json(Json {
+            ignoreUnknownKeys = true
+        })
     }
     install(HttpTimeout) {
         requestTimeoutMillis = 30000
@@ -83,11 +86,17 @@ suspend fun fetchMaimaiScorePage(
     }
 
     val result = client.get("https://maimai.wahlap.com/maimai-mobile/home/")
-
-    if (result.bodyAsText().contains("错误")) {
+    val homeBody = result.bodyAsText()
+    if (homeBody.contains("错误")) {
         sendMessageToUi("获取舞萌成绩失败: 登录失败")
         Log.e("ProberUtil", "登录失败, 抓取成绩停止")
         return
+    }
+
+    if (application.configManager.config.localConfig.parseMaimaiUserInfo) {
+        val userInfo = ParseScorePageUtil.parseMaimaiHomePage(homeBody)
+        application.configManager.config.userInfo = userInfo
+        application.configManager.save()
     }
 
     for (diff in application.configManager.config.syncConfig.maimaiSyncDifficulty) {

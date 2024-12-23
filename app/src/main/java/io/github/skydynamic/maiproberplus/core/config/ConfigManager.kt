@@ -50,7 +50,8 @@ data class ConfigStorage(
     var lxnsToken: String = "",
     var maimaiPresonalInfo: MaimaiProberUserInfo = MaimaiProberUserInfo(),
     var syncConfig: SyncConfig = SyncConfig(),
-    var localConfig: LocalConfig = LocalConfig()
+    var localConfig: LocalConfig = LocalConfig(),
+    var userInfo: UserInfo = UserInfo()
 )
 
 @Serializable
@@ -70,5 +71,17 @@ data class SyncConfig(
 
 @Serializable
 data class LocalConfig(
-    var cacheScore: Boolean = false
+    var cacheScore: Boolean = false,
+    var parseMaimaiUserInfo: Boolean = false
+)
+
+@Serializable
+data class UserInfo(
+    var name: String = "maimaiDX",
+    var maimaiDan: Int = 0,
+    var maimaiIcon: Int = 1,
+    var maimaiPlate: Int = 1,
+    var maimaiClass: Int = 0,
+    var shougou: String = "Welcome to maimaiDX",
+    var shougouColor: String = "normal"
 )

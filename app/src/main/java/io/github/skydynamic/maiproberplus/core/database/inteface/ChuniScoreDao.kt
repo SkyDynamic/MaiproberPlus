@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
 
 @Dao
@@ -51,6 +52,6 @@ interface ChuniScoreDao {
     @Query("SELECT * FROM chuni_score_entity WHERE song_id = :songId")
     suspend fun getMusicScoreBySongId(songId: Int): ChuniScoreEntity?
 
-    @Query("SELECT EXISTS(SELECT 1 FROM chuni_score_entity WHERE score = :score)")
-    suspend fun exists(score: Int): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM chuni_score_entity WHERE title = :title AND diff = :difficulty AND score = :score)")
+    suspend fun exists(title: String, difficulty: ChuniEnums.Difficulty, score: Int): Boolean
 }

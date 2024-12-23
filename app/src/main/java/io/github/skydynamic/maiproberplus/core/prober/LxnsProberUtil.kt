@@ -18,6 +18,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -35,6 +36,11 @@ class LxnsProberUtil : IProberUtil {
         val code: Int = 0,
         val message: String = ""
     )
+
+    @Serializable
+    data class LxnsUserInfoResponse(
+        val data: LxnsUserInfoBody
+    ) : LxnsResponse()
 
     @Serializable
     data class LxnsMaimaiResponse(
@@ -131,10 +137,47 @@ class LxnsProberUtil : IProberUtil {
     )
 
     @Serializable
+    data class LxnsCollectionBody(
+        val id: Int = 0,
+        val name: String = "",
+        val color: String? = "",
+    )
+
+    @Serializable
+    data class LxnsUserInfoBody(
+        val name: String,
+        val trophy: LxnsCollectionBody,
+        val icon: LxnsCollectionBody,
+        @SerialName("name_plate") val namePlate: LxnsCollectionBody,
+        @SerialName("course_rank") val courseRank: Int,
+        @SerialName("class_rank") val classRank: Int
+    )
+
+    @Serializable
     data class LxnsMaimaiRequestBody(val scores: List<LxnsMaimaiScoreBody>)
 
     @Serializable
     data class LxnsChuniRequestBody(val scores: List<LxnsChuniScoreBody>)
+
+    override suspend fun updateUserInfo(importToken: String) {
+        val resp = client.get("https://maimai.lxns.net/api/v0/user/maimai/player") {
+            header("X-User-Token", importToken)
+        }
+        if (resp.status.value == 200) {
+            val data = resp.body<LxnsUserInfoResponse>().data
+            val info = application.configManager.config.userInfo
+            info.name = data.name
+            info.shougou = data.trophy.name
+            info.shougouColor = data.trophy.color?.lowercase() ?: "normal"
+            info.maimaiIcon = data.icon.id
+            info.maimaiPlate = data.namePlate.id
+            info.maimaiDan = data.courseRank
+            info.maimaiClass = data.classRank
+            application.configManager.save()
+        } else {
+            sendMessageToUi("同步用户信息失败: ${resp.bodyAsText()}")
+        }
+    }
 
     override suspend fun uploadMaimaiProberData(
         importToken: String,
@@ -210,8 +253,8 @@ class LxnsProberUtil : IProberUtil {
                 levelIndex = it.diff.diffIndex,
                 score = it.score,
                 clear = it.clearType.type,
-                fullCombo = it.fullComboType.type,
-                fullChain = it.fullChainType.type
+                fullCombo = it.fullComboType.typeName,
+                fullChain = it.fullChainType.typeName
             )
         }
 
@@ -251,10 +294,15 @@ class LxnsProberUtil : IProberUtil {
             val response = client.get("$baseApiUrl/api/v0/user/maimai/player/scores") {
                 header("X-User-Token", importToken)
             }
+            if (response.status.value != 200) {
+                sendMessageToUi("获取舞萌数据失败, API返回体: ${response.bodyAsText()}")
+                return emptyList()
+            }
             val body = response.body<LxnsGetMaimaiScoreResponse>()
             val parseList = arrayListOf<MaimaiScoreEntity>()
             body.data.forEach {
                 val type = MaimaiEnums.SongType.getSongTypeByName(it.type)
+                if (type == MaimaiEnums.SongType.UTAGE) return@forEach
                 val diff = MaimaiEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
                 val levelValue = MaimaiData.getLevelValue(it.songName, diff, type)
                 val version = MaimaiData.getChartVersion(it.songName, diff, type)
@@ -277,7 +325,7 @@ class LxnsProberUtil : IProberUtil {
             }
             return parseList
         } catch (e: Exception) {
-            Log.d("LxnsProberUtil", "获取舞萌成绩失败: $e")
+            Log.d("LxnsProberUtil", "获取舞萌成绩失败: $e", e)
             sendMessageToUi("获取舞萌成绩失败: ${e.message}")
             return emptyList()
         }
@@ -312,7 +360,7 @@ class LxnsProberUtil : IProberUtil {
             }
             return parseList
         } catch (e: Exception) {
-            Log.d("LxnsProberUtil", "获取中二成绩失败: $e")
+            Log.d("LxnsProberUtil", "获取中二成绩失败: $e", e)
             sendMessageToUi("获取中二成绩失败: ${e.message}")
             return emptyList()
         }

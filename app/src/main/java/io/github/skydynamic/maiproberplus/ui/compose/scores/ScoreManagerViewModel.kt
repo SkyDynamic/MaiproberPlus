@@ -23,6 +23,9 @@ object ScoreManagerViewModel : ViewModel() {
     val chuniSearchScores = mutableStateListOf<ChuniScoreEntity>()
     val chuniSearchText = mutableStateOf("")
 
+    var openMaimaiCreateScoreDialog by mutableStateOf(false)
+    var openChuniCreateScoreDialog by mutableStateOf(false)
+
     var maimaiScoreSelection: MaimaiScoreEntity? by mutableStateOf(null)
     var chuniScoreSelection: ChuniScoreEntity? by mutableStateOf(null)
 

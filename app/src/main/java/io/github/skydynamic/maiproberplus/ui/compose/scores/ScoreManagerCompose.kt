@@ -20,12 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.skydynamic.maiproberplus.ui.compose.DownloadDialog
 import io.github.skydynamic.maiproberplus.ui.compose.GameType
+import io.github.skydynamic.maiproberplus.ui.compose.checkResourceComplete
 import io.github.skydynamic.maiproberplus.ui.compose.scores.chuni.ChuniScoreList
 import io.github.skydynamic.maiproberplus.ui.compose.scores.maimai.MaimaiScoreList
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ScoreManager() {
+fun ScoreManagerCompose() {
     var gameType by remember { mutableStateOf(GameType.MaimaiDX) }
     var openInitDownloadDialog by remember { mutableStateOf(false) }
     var canShow by remember { mutableStateOf(false) }

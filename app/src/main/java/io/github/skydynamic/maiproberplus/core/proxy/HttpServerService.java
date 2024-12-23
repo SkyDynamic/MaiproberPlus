@@ -6,8 +6,10 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class HttpServerService extends Service {
+    public static final String STOP_HTTP_SERVICE_INTENT = "io.github.skkydynamic.service.vpn.DISCONNECT";
     private static final String TAG = "HttpServerService";
     private HttpServer httpServer;
     private HttpRedirectServer httpRedirectServer;
@@ -34,7 +36,13 @@ public class HttpServerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        Log.d("HttpService", "Http service on start command");
+        if (Objects.equals(intent.getAction(), STOP_HTTP_SERVICE_INTENT)) {
+            this.httpServer.stop();
+            this.httpRedirectServer.stop();
+            Log.d(TAG, "Stop http service");
+            return START_NOT_STICKY;
+        }
+
         try {
             this.httpServer.start();
             this.httpRedirectServer.start();
@@ -49,5 +57,6 @@ public class HttpServerService extends Service {
         super.onDestroy();
         this.httpServer.stop();
         this.httpRedirectServer.stop();
+        Log.d(TAG, "Stop http service");
     }
 }

@@ -8,7 +8,19 @@ plugins {
     alias(libs.plugins.kotlin.symbol.processing)
 }
 
-val appVersion: String = "1.1.5"
+val appVersion: String = "1.2.0"
+val appVersionCode: String = "000"
+
+val gitCommitId: String = try {
+    val stdout = ByteArrayOutputStream()
+    exec {
+        commandLine("git", "rev-parse", "--short", "HEAD")
+        standardOutput = stdout
+    }
+    stdout.toString().trim()
+} catch (_: Exception) {
+    "0"
+}
 
 android {
     namespace = "io.github.skydynamic.maiproberplus"
@@ -19,18 +31,7 @@ android {
         minSdk = 31
         targetSdk = 34
         versionName = appVersion
-        versionCode = appVersion.replace(".", "").toInt()
-
-        val gitCommitId: String = try {
-            val stdout = ByteArrayOutputStream()
-            exec {
-                commandLine("git", "rev-parse", "--short", "HEAD")
-                standardOutput = stdout
-            }
-            stdout.toString().trim()
-        } catch (_: Exception) {
-            "0"
-        }
+        versionCode = (appVersion + appVersionCode).replace(".", "").toInt()
 
         versionNameSuffix = "-$gitCommitId"
 
@@ -38,12 +39,21 @@ android {
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        getByName("debug") {
+            isDebuggable = true
+        }
+
+        create("snapshot") {
+            initWith(getByName("release"))
         }
     }
 
@@ -76,8 +86,9 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.animation.graphics)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.animation.graphics)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)

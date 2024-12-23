@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
@@ -27,10 +28,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +46,7 @@ import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.dele
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -49,8 +54,24 @@ fun ChuniScoreList(
     coroutineScope: CoroutineScope
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
-
     val gridState = rememberLazyGridState()
+    var loadedItemCount by remember { mutableIntStateOf(30) }
+
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.firstVisibleItemIndex * 2 }
+            .collect { lastVisibleIndex ->
+                val totalItemsCount = if (ScoreManagerViewModel.chuniSearchText.value.isNotEmpty()) {
+                    ScoreManagerViewModel.chuniSearchScores.size
+                } else {
+                    ScoreManagerViewModel.chuniLoadedScores.size
+                }
+
+                if (lastVisibleIndex >= loadedItemCount - 1 && loadedItemCount < totalItemsCount) {
+                    delay(1000)
+                    loadedItemCount += 20
+                }
+            }
+    }
 
     when {
         openDeleteConfirmDialog -> {
@@ -65,6 +86,23 @@ fun ChuniScoreList(
                     ScoreManagerViewModel.chuniSearchCache.clear()
                 }
             )
+        }
+        ScoreManagerViewModel.openChuniCreateScoreDialog -> {
+            ChuniCreateScoreDialog(
+                onDismissRequest = {
+                    ScoreManagerViewModel.openChuniCreateScoreDialog = false
+                }
+            )
+        }
+        ScoreManagerViewModel.showChuniScoreSelectionDialog -> {
+            if (ScoreManagerViewModel.chuniScoreSelection == null) {
+                ScoreManagerViewModel.showChuniScoreSelectionDialog = false
+            } else {
+                ChuniScoreDetailDialog(ScoreManagerViewModel.chuniScoreSelection!!) {
+                    ScoreManagerViewModel.showChuniScoreSelectionDialog = false
+                    ScoreManagerViewModel.chuniScoreSelection = null
+                }
+            }
         }
     }
 
@@ -139,13 +177,23 @@ fun ChuniScoreList(
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(4.dp)
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Button(
-                    modifier = Modifier.padding(8.dp).weight(1f),
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        ScoreManagerViewModel.openChuniCreateScoreDialog = true
+                    }
+                ) {
+                    Icon(Icons.Default.Add, null)
+                    Text("新增成绩")
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         openDeleteConfirmDialog = true
                     },
@@ -159,9 +207,9 @@ fun ChuniScoreList(
 
         items(
             if (ScoreManagerViewModel.chuniSearchText.value.isNotEmpty()) {
-                ScoreManagerViewModel.chuniSearchScores
+                ScoreManagerViewModel.chuniSearchScores.take(loadedItemCount)
             } else {
-                ScoreManagerViewModel.chuniLoadedScores
+                ScoreManagerViewModel.chuniLoadedScores.take(loadedItemCount)
             }
         ) {
             ChuniScoreDetailCard(
@@ -169,7 +217,11 @@ fun ChuniScoreList(
                     .height(80.dp)
 //                    .fillMaxWidth()
                     .padding(4.dp),
-                scoreDetail = it
+                scoreDetail = it,
+                onClick = {
+                    ScoreManagerViewModel.showChuniScoreSelectionDialog = true
+                    ScoreManagerViewModel.chuniScoreSelection = it
+                }
             )
         }
     }

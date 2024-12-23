@@ -62,6 +62,7 @@ fun SyncCompose() {
     var lxnsToken by remember { mutableStateOf(application.configManager.config.lxnsToken) }
 
     var openAskIsOverwriteScoresDialog by remember { mutableStateOf(false) }
+    var openAskOverwriteUserInfo by remember { mutableStateOf(false) }
 
     val vpnRequestLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -72,14 +73,13 @@ fun SyncCompose() {
     }
 
     when {
-        openAskIsOverwriteScoresDialog -> {
+        openAskOverwriteUserInfo -> {
             ConfirmDialog(
-                info = "确认同步数据并添加到数据库吗?",
+                info = "是否获取个人信息并覆盖当前个人信息",
                 onRequest = {
                     val token = when (globalViewModel.proberPlatform) {
                         ProberPlatform.DIVING_FISH ->
                             application.configManager.config.divingfishToken
-
                         else ->
                             application.configManager.config.lxnsToken
                     }
@@ -93,7 +93,43 @@ fun SyncCompose() {
                         val proberUtil = globalViewModel.proberPlatform.factory
 
                         fun sendSyncSuccessMessageToUi() {
-                            sendMessageToUi("成功从${globalViewModel.proberPlatform.proberName}同步${globalViewModel.gameType.displayName}成绩")
+                            sendMessageToUi("成功从${
+                                globalViewModel.proberPlatform.proberName
+                            }同步${globalViewModel.gameType.displayName}玩家数据")
+                        }
+
+                        proberUtil.updateUserInfo(token)
+
+                        sendSyncSuccessMessageToUi()
+                    }
+                }
+            ) {
+                openAskOverwriteUserInfo = false
+            }
+        }
+        openAskIsOverwriteScoresDialog -> {
+            ConfirmDialog(
+                info = "确认同步数据并添加到数据库吗?",
+                onRequest = {
+                    val token = when (globalViewModel.proberPlatform) {
+                        ProberPlatform.DIVING_FISH ->
+                            application.configManager.config.divingfishToken
+                        else ->
+                            application.configManager.config.lxnsToken
+                    }
+
+                    if (token.isEmpty()) {
+                        sendMessageToUi("请先设置token")
+                        return@ConfirmDialog
+                    }
+
+                    viewModel.viewModelScope.launch(Dispatchers.IO) {
+                        val proberUtil = globalViewModel.proberPlatform.factory
+
+                        fun sendSyncSuccessMessageToUi() {
+                            sendMessageToUi("成功从${
+                                globalViewModel.proberPlatform.proberName
+                            }同步${globalViewModel.gameType.displayName}成绩")
                         }
 
                         when (globalViewModel.gameType) {
@@ -158,11 +194,14 @@ fun SyncCompose() {
                             } else {
                                 startVpnService(context as Activity)
                             }
+                            application.startHttpServer()
                         } else {
                             stopVpnService(context as Activity)
+                            application.stopHttpServer()
                         }
                     }
-                }
+                },
+                enabled = !GlobalViewModel.maimaiHooking || !GlobalViewModel.chuniHooking
             ) {
                 if (!globalViewModel.isVpnServiceRunning)
                     Text("开启劫持")
@@ -271,6 +310,18 @@ fun SyncCompose() {
         ) {
             Text("从选定的查分器获取 ${globalViewModel.gameType.displayName} 成绩")
         }
+
+        Button(
+            modifier = Modifier
+                .padding(15.dp)
+                .size(300.dp, 50.dp),
+            onClick = {
+                openAskOverwriteUserInfo = true
+            },
+            enabled = globalViewModel.proberPlatform != ProberPlatform.LOCAL
+        ) {
+            Text("从选定的查分器获取 ${globalViewModel.gameType.displayName} 个人信息")
+        }
     }
 }
 
@@ -280,10 +331,13 @@ private fun startVpnService(activity: Activity) {
 }
 
 private fun stopVpnService(activity: Activity) {
-    val intent = Intent(activity, LocalVpnService::class.java).apply { action = LocalVpnService.DISCONNECT_INTENT }
+    val intent = Intent(activity, LocalVpnService::class.java).apply {
+        action = LocalVpnService.DISCONNECT_INTENT
+    }
     activity.startService(intent)
 }
 
 private fun checkResourceComplate(context: Context): Boolean {
-    return context.filesDir.resolve("maimai_song_list.json").exists() || context.filesDir.resolve("chuni_song_list.json").exists()
+    return context.filesDir.resolve("maimai_song_list.json").exists()
+            || context.filesDir.resolve("chuni_song_list.json").exists()
 }

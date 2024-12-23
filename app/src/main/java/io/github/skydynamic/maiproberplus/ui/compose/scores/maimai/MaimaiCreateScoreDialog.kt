@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -48,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -55,16 +53,13 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewModelScope
 import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
-import coil3.request.crossfade
-import io.github.skydynamic.maiproberplus.Application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.createMaimaiScore
 import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
+import io.github.skydynamic.maiproberplus.core.utils.NetworkImageRequestUtil
 import io.github.skydynamic.maiproberplus.core.utils.calcMaimaiRating
 import io.github.skydynamic.maiproberplus.ui.theme.getButtonSelectedColor
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
@@ -121,21 +116,30 @@ fun MaimaiCreateScoreDialog(
 
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = Modifier.fillMaxWidth().height(630.dp).padding(start = 16.dp, end = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(630.dp)
+            .padding(start = 16.dp, end = 16.dp),
     ) {
         Card(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             colors = CardDefaults.cardColors(getCardColor())
         ) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
             ) {
                 Row(
-                    modifier = Modifier.padding(12.dp).fillMaxWidth().height(30.dp)
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth()
+                        .height(30.dp)
 
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
                     ) {
                         Text(
                             text = "创建成绩",
@@ -166,23 +170,20 @@ fun MaimaiCreateScoreDialog(
                     ) {
                         if (title.isNotEmpty()) {
                             AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(
-                                        "https://assets2.lxns.net/maimai/jacket/${
-                                            MaimaiData.getSongIdFromTitle(
-                                                title
-                                            )
-                                        }.png"
-                                    )
-                                    .crossfade(true)
-                                    .memoryCachePolicy(CachePolicy.ENABLED)
-                                    .diskCachePolicy(CachePolicy.ENABLED)
-                                    .build(),
+                                model = NetworkImageRequestUtil.getImageRequest(
+                                    "https://assets2.lxns.net/maimai/jacket/${
+                                        MaimaiData.getSongIdFromTitle(
+                                            title
+                                        )
+                                    }.png"
+                                ),
                                 contentDescription = null,
                                 onError = { error ->
                                     Log.e("Image", "Error loading image", error.result.throwable)
                                 },
-                                modifier = Modifier.height(100.dp).width(100.dp)
+                                modifier = Modifier
+                                    .height(100.dp)
+                                    .width(100.dp)
                                     .clip(RoundedCornerShape(8.dp)),
                                 contentScale = ContentScale.Crop
                             )
@@ -190,19 +191,25 @@ fun MaimaiCreateScoreDialog(
                             Text(
                                 text = "请选择曲目",
                                 fontSize = 12.sp,
-                                modifier = Modifier.align(Alignment.Center)
+                                modifier = Modifier
+                                    .align(Alignment.Center)
                             )
                         }
                     }
 
                     Column(
-                        modifier = Modifier.fillMaxWidth().height(110.dp).padding(8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(110.dp)
+                            .padding(8.dp)
                     ) {
                         Button(
                             onClick = {
                                 openSearchSongDialog = true
                             },
-                            modifier = Modifier.fillMaxWidth().height(35.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(35.dp)
                         ) {
                             Icon(Icons.Default.Search, null)
                             Text(
@@ -212,7 +219,9 @@ fun MaimaiCreateScoreDialog(
 
                         Text("谱面类型", fontSize = 12.sp)
                         SingleChoiceSegmentedButtonRow(
-                            modifier = Modifier.fillMaxWidth().height(35.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(35.dp),
                         ) {
                             MaimaiEnums.SongType.entries.forEach {
                                 SegmentedButton(
@@ -240,11 +249,14 @@ fun MaimaiCreateScoreDialog(
                         .height(75.dp)
                 ) {
                     Column(
-                        modifier = Modifier.weight(0.5f).padding(end = 8.dp)
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .padding(end = 8.dp)
                     ) {
                         Text("难度", fontSize = 12.sp)
                         Button(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth(),
                             onClick = {
                                 expanded = true
                             },
@@ -260,21 +272,32 @@ fun MaimaiCreateScoreDialog(
                             if (type == null || diffLevel.isEmpty()) {
                                 Text("请选择难度")
                             } else {
-                                Text("${MaimaiEnums.Difficulty.BASIC.name} $diffLevel", color = Color.White)
+                                Text(
+                                    "${selectionDiff!!.name} $diffLevel",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
                             }
                         }
 
                         DropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false },
-                            modifier = Modifier.wrapContentWidth().wrapContentHeight()
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .wrapContentHeight()
                         ) {
                             difficulties.forEachIndexed { index, diff ->
                                 val difficulty = MaimaiEnums.Difficulty
                                     .getDifficultyWithIndex(diff.difficulty)
                                 DropdownMenuItem(
                                     text = {
-                                        Text("${difficulty.name} ${diff.level}", modifier = Modifier.padding(start = 8.dp))
+                                        Text(
+                                            "${difficulty.name} ${diff.level}",
+                                            modifier = Modifier
+                                                .padding(start = 8.dp)
+                                        )
                                     },
                                     onClick = {
                                         selectionDiff = difficulty
@@ -287,12 +310,14 @@ fun MaimaiCreateScoreDialog(
                     }
 
                     Column(
-                        modifier = Modifier.weight(0.5f)
+                        modifier = Modifier
+                            .weight(0.5f)
                     ) {
                         Text("达成率", fontSize = 12.sp)
                         OutlinedTextField(
-                            modifier = Modifier.height(56.dp),
-                            value = achievement.toString(),
+                            modifier = Modifier
+                                .height(56.dp),
+                            value = achievement,
                             onValueChange = { newValue ->
                                 val filteredValue = newValue.filter { it.isDigit() || it == '.' }
                                 val parsedValue = filteredValue.toDoubleOrNull()
@@ -371,7 +396,9 @@ fun MaimaiCreateScoreDialog(
                                 onClick = {
                                     fullSyncType = syncTypeOption
                                 },
-                                modifier = Modifier.padding(horizontal = 4.dp).width(80.dp),
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .width(80.dp),
                                 shape = SegmentedButtonDefaults.itemShape(
                                     index = syncTypeOption.ordinal,
                                     count = MaimaiEnums.SyncType.entries.size / 2
@@ -399,7 +426,9 @@ fun MaimaiCreateScoreDialog(
                                 onClick = {
                                     fullSyncType = syncTypeOption
                                 },
-                                modifier = Modifier.padding(horizontal = 4.dp).width(80.dp),
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .width(80.dp),
                                 shape = SegmentedButtonDefaults.itemShape(
                                     index = (syncTypeOption.ordinal - 3),
                                     count = MaimaiEnums.SyncType.entries.size / 2
@@ -417,7 +446,8 @@ fun MaimaiCreateScoreDialog(
                 }
 
                 HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     color = Color.LightGray,
                     thickness = 1.dp
                 )
@@ -425,10 +455,13 @@ fun MaimaiCreateScoreDialog(
                 Text(
                     "DX分数(可选)",
                     fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 12.dp)
+                    modifier = Modifier
+                        .padding(start = 12.dp, top = 12.dp, end = 12.dp)
                 )
                 OutlinedTextField(
-                    modifier = Modifier.padding(start = 12.dp, end = 12.dp).height(52.dp),
+                    modifier = Modifier
+                        .padding(start = 12.dp, end = 12.dp)
+                        .height(52.dp),
                     value = dxScore,
                     onValueChange = {
                         if (it.isDigitsOnly() && it.length <= 4) {
@@ -449,7 +482,8 @@ fun MaimaiCreateScoreDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     Button(
-                        modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                        modifier = Modifier
+                            .padding(start = 8.dp, end = 8.dp),
                         onClick = {
                             onDismissRequest()
                         }
@@ -458,7 +492,8 @@ fun MaimaiCreateScoreDialog(
                     }
 
                     Button(
-                        modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+                        modifier = Modifier
+                            .padding(start = 8.dp, end = 8.dp),
                         onClick = {
                             if (
                                 songInfo != null &&

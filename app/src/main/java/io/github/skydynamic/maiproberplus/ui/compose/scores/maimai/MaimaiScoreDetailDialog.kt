@@ -1,5 +1,6 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores.maimai
 
+import android.icu.text.DecimalFormat
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -162,13 +163,13 @@ fun MaimaiScoreDetailDialog(
 
                         Row {
                             AsyncImage(
-                                model = scoreDetail.fullComboType.getIcoBitmap(),
+                                model = scoreDetail.fullComboType.imageId,
                                 contentDescription = null,
                                 modifier = Modifier.height(25.dp).width(25.dp),
                             )
 
                             AsyncImage(
-                                model = scoreDetail.syncType.getIcoBitmap(),
+                                model = scoreDetail.syncType.imageId,
                                 contentDescription = null,
                                 modifier = Modifier.height(25.dp).width(25.dp),
                             )
@@ -191,7 +192,7 @@ fun MaimaiScoreDetailDialog(
                     modifier = Modifier.padding(start = 12.dp).fillMaxWidth().height(60.dp)
                 ) {
                     AsyncImage(
-                        model = scoreDetail.rankType.getIcoBitmap(),
+                        model = scoreDetail.rankType.imageId,
                         contentDescription = null,
                         modifier = Modifier.align(Alignment.CenterVertically).weight(0.3f)
                     )
@@ -205,13 +206,12 @@ fun MaimaiScoreDetailDialog(
                             color = Color(118, 115, 115, 255)
                         )
                         Text(
-                            text = "${scoreDetail.achievement}%",
+                            text = "${DecimalFormat("#." + "0".repeat(4)).format(scoreDetail.achievement)}%",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
-
 
                 // Rating and DxScore
                 Row(
@@ -255,7 +255,7 @@ fun MaimaiScoreDetailDialog(
 
                                 if (dxSatrs > 0) {
                                     AsyncImage(
-                                        model = MaimaiData.getDxStarBitmap(dxSatrs),
+                                        model = MaimaiData.getDxStarBitmap(dxSatrs)!!,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .height(24.dp)
@@ -271,15 +271,21 @@ fun MaimaiScoreDetailDialog(
                     }
                 }
 
-                Button(
-                    modifier = Modifier.padding(8.dp).align(Alignment.CenterHorizontally),
-                    onClick = {
-                        openDeleteConfirmDialog = true
-                    },
-                    colors = ButtonDefaults.buttonColors(Color.Red)
+                Row(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
                 ) {
-                    Icon(Icons.Default.Delete, null, tint = Color.White)
-                    Text("删除该成绩", color = Color.White)
+                    Button(
+                        modifier = Modifier.padding(4.dp).weight(1f),
+                        onClick = {
+                            openDeleteConfirmDialog = true
+                        },
+                        colors = ButtonDefaults.buttonColors(Color.Red)
+                    ) {
+                        Icon(Icons.Default.Delete, null, tint = Color.White)
+                        Text("删除该成绩", color = Color.White)
+                    }
                 }
             }
         }

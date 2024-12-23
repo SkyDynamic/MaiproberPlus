@@ -2,6 +2,7 @@ package io.github.skydynamic.maiproberplus.core.data.chuni
 
 import android.content.Context
 import io.github.skydynamic.maiproberplus.Application
+import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
 import io.github.skydynamic.maiproberplus.core.prober.client
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -104,6 +105,54 @@ class ChuniData {
                 ?.difficulties[difficulty.diffIndex]
                 ?.version
             return version ?: 0
+        }
+
+        fun calcOverPower(score: ChuniScoreEntity): Int {
+            val playScore = score.score
+            val level = getLevelValue(score.title, score.diff)
+            val isFullCombo = score.fullComboType == ChuniEnums.FullComboType.FC
+            val isAJ = score.fullComboType == ChuniEnums.FullComboType.AJ
+                    || score.fullComboType == ChuniEnums.FullComboType.AJC
+            val isAJC = score.fullComboType == ChuniEnums.FullComboType.AJC
+
+            var overPower = 0F
+
+            when {
+                playScore >= 1007500 -> {
+                    overPower = (level + 2) * 5 + (playScore - 1007500) * 0.0015F
+                    when {
+                        isFullCombo -> overPower += 0.5F
+                        isAJ -> overPower += 1.0F
+                        isAJC -> overPower += 1.25F
+                    }
+                }
+                playScore >= 975000 -> {
+                    overPower = raCalculate(level, playScore) * 5
+                }
+                else -> {
+                    overPower = 0F
+                }
+            }
+
+            return overPower.toInt()
+        }
+
+        private fun raCalculate(ds: Float, score: Int): Float {
+            var result = 0F
+
+            result = when {
+                score >= 1009000 -> ds + 2.15F
+                score >= 1007500 -> ds + 2 + ((score - 1007500) / 100).toInt() * 0.01F
+                score >= 1005000 -> ds + 1.5F + ((score - 1005000) / 500).toInt() * 0.1F
+                score >= 1000000 -> ds + 1 + ((score - 1000000) / 1000).toInt() * 0.1F
+                score >= 975000 -> ds + ((score - 975000) / 2500).toInt() * 0.1F
+                score >= 925000 -> ds - 3F
+                score >= 900000 -> ds - 5F
+                score >= 800000 -> (ds - 5) / 2F
+                else -> 0F
+            }
+
+            return result
         }
     }
 }

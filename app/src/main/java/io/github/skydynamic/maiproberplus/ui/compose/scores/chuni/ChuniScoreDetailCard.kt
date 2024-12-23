@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,18 +25,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
+import io.github.skydynamic.maiproberplus.core.utils.NetworkImageRequestUtil
 import io.github.skydynamic.maiproberplus.ui.compose.scores.common.LevelBox
 import java.text.NumberFormat
 
 @Composable
 fun ChuniScoreDetailCard(
     modifier: Modifier,
-    scoreDetail: ChuniScoreEntity
+    scoreDetail: ChuniScoreEntity,
+    onClick: () -> Unit
 ) {
     val title = scoreDetail.title
     val level = scoreDetail.level
@@ -48,21 +47,19 @@ fun ChuniScoreDetailCard(
         scoreDetail.songId
     }
 
-    Card (
+    ElevatedCard(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxSize(),
+        onClick = onClick
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://assets2.lxns.net/chunithm/jacket/$id.png")
-                    .crossfade(true)
-                    .memoryCachePolicy(CachePolicy.ENABLED)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .build(),
+                model = NetworkImageRequestUtil.getImageRequest(
+                    "https://assets2.lxns.net/chunithm/jacket/$id.png"
+                ),
                 contentDescription = null,
                 onError = { error ->
                     Log.e("Image", "Error loading image", error.result.throwable)
@@ -117,7 +114,7 @@ fun ChuniScoreDetailCard(
                         )
                         Text(
                             text = "Rating: ${
-                                BigDecimal(rating.toDouble()).setScale(2, BigDecimal.ROUND_DOWN).toDouble()
+                                BigDecimal(rating.toDouble()).setScale(2, BigDecimal.ROUND_UP).toDouble()
                             }",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White

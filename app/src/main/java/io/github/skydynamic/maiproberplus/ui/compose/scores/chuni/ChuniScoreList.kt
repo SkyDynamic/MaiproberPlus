@@ -60,9 +60,13 @@ fun ChuniScoreList(
     var loadedItemCount by remember { mutableIntStateOf(30) }
     val scoreDisplayType = application.configManager.config.scoreDisplayType
     val scoreColorOverlayType = application.configManager.config.scoreStyleType
+    val gridColumnsNumber = when (scoreDisplayType) {
+        ScoreDisplayType.Large -> 1
+        else -> 2
+    }
 
     LaunchedEffect(gridState) {
-        snapshotFlow { gridState.firstVisibleItemIndex * 2 }
+        snapshotFlow { gridState.firstVisibleItemIndex * gridColumnsNumber }
             .collect { lastVisibleIndex ->
                 val totalItemsCount = if (ScoreManagerViewModel.chuniSearchText.value.isNotEmpty()) {
                     ScoreManagerViewModel.chuniSearchScores.size
@@ -114,12 +118,7 @@ fun ChuniScoreList(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 8.dp),
-        columns = GridCells.Fixed(
-            when (scoreDisplayType) {
-                ScoreDisplayType.Large -> 1
-                else -> 2
-            }
-        ),
+        columns = GridCells.Fixed(gridColumnsNumber),
         state = gridState
     ) {
         item(

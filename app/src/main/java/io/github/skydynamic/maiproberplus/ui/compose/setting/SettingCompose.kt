@@ -240,15 +240,10 @@ fun SettingCompose() {
                     ) {
                         Text(
                             ScoreDisplayType.Small.displayName,
-                            modifier = Modifier.padding(start = 16.dp)
                         )
                         RadioButton(
                             selected = scoreDisplayType == ScoreDisplayType.Small,
-                            onClick = {
-                                scoreDisplayType = ScoreDisplayType.Small
-                                config.scoreDisplayType = ScoreDisplayType.Small
-                                application.configManager.save()
-                            }
+                            onClick = null
                         )
                     }
                 }
@@ -272,15 +267,10 @@ fun SettingCompose() {
                     ) {
                         Text(
                             ScoreDisplayType.Middle.displayName,
-                            modifier = Modifier.padding(start = 16.dp)
                         )
                         RadioButton(
                             selected = scoreDisplayType == ScoreDisplayType.Middle,
-                            onClick = {
-                                scoreDisplayType = ScoreDisplayType.Middle
-                                config.scoreDisplayType = ScoreDisplayType.Middle
-                                application.configManager.save()
-                            }
+                            onClick = null
                         )
                     }
                 }
@@ -304,15 +294,10 @@ fun SettingCompose() {
                     ) {
                         Text(
                             ScoreDisplayType.Large.displayName,
-                            modifier = Modifier.padding(start = 16.dp)
                         )
                         RadioButton(
                             selected = scoreDisplayType == ScoreDisplayType.Large,
-                            onClick = {
-                                scoreDisplayType = ScoreDisplayType.Large
-                                config.scoreDisplayType = ScoreDisplayType.Large
-                                application.configManager.save()
-                            }
+                            onClick = null
                         )
                     }
                 }
@@ -353,15 +338,10 @@ fun SettingCompose() {
                     ) {
                         Text(
                             ScoreStyleType.ColorOverlay.displayName,
-                            modifier = Modifier.padding(start = 16.dp)
                         )
                         RadioButton(
                             selected = scoreColorOverlayType == ScoreStyleType.ColorOverlay,
-                            onClick = {
-                                scoreColorOverlayType = ScoreStyleType.ColorOverlay
-                                config.scoreStyleType = ScoreStyleType.ColorOverlay
-                                application.configManager.save()
-                            }
+                            onClick = null
                         )
                     }
                 }
@@ -385,15 +365,10 @@ fun SettingCompose() {
                     ) {
                         Text(
                             ScoreStyleType.TextShadow.displayName,
-                            modifier = Modifier.padding(start = 16.dp)
                         )
                         RadioButton(
                             selected = scoreColorOverlayType == ScoreStyleType.TextShadow,
-                            onClick = {
-                                scoreColorOverlayType = ScoreStyleType.TextShadow
-                                config.scoreStyleType = ScoreStyleType.TextShadow
-                                application.configManager.save()
-                            }
+                            onClick = null
                         )
                     }
                 }

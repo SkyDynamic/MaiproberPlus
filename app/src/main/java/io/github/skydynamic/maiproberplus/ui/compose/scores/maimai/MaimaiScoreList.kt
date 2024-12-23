@@ -41,7 +41,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.R
+import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.deleteAllScore
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
@@ -56,6 +58,7 @@ fun MaimaiScoreList(
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
     var loadedItemCount by remember { mutableIntStateOf(30) }
+    val scoreDisplayType = application.configManager.config.scoreDisplayType
 
     LaunchedEffect(gridState) {
         snapshotFlow { gridState.firstVisibleItemIndex * 2 }
@@ -110,7 +113,12 @@ fun MaimaiScoreList(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 8.dp),
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(
+            when (scoreDisplayType) {
+                ScoreDisplayType.Large -> 1
+                else -> 2
+            }
+        ),
         state = gridState
     ) {
         item(
@@ -215,13 +223,13 @@ fun MaimaiScoreList(
         ) {
             MaimaiScoreDetailCard(
                 modifier = Modifier
-                    .height(80.dp)
                     .padding(4.dp),
+                scoreDisplayType = scoreDisplayType,
                 scoreDetail = it,
                 onClick = {
                     ScoreManagerViewModel.maimaiScoreSelection = it
                     ScoreManagerViewModel.showMaimaiScoreSelectionDialog = true
-                }
+                },
             )
         }
     }

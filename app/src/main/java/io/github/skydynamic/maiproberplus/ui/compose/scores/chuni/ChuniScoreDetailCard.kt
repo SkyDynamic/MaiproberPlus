@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,12 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
 import io.github.skydynamic.maiproberplus.core.utils.NetworkImageRequestUtil
@@ -34,6 +35,7 @@ import java.text.NumberFormat
 @Composable
 fun ChuniScoreDetailCard(
     modifier: Modifier,
+    scoreDisplayType: ScoreDisplayType,
     scoreDetail: ChuniScoreEntity,
     onClick: () -> Unit
 ) {
@@ -48,14 +50,21 @@ fun ChuniScoreDetailCard(
     }
 
     ElevatedCard(
+        onClick = onClick,
         modifier = modifier
-            .fillMaxSize(),
-        onClick = onClick
+            .fillMaxSize()
+            .aspectRatio(
+                when (scoreDisplayType) {
+                    ScoreDisplayType.Middle -> 1f
+                    else -> 2f
+                }
+            )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
+            // music cover
             AsyncImage(
                 model = NetworkImageRequestUtil.getImageRequest(
                     "https://assets2.lxns.net/chunithm/jacket/$id.png"
@@ -68,64 +77,64 @@ fun ChuniScoreDetailCard(
                 contentScale = ContentScale.Crop
             )
 
+            // color overlay
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color.copy(alpha = 0.4f))
             )
 
-            Column(
+            // title
+            Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .align(Alignment.TopCenter)
+                    .height(25.dp)
+                    .fillMaxWidth()
+                    .background(color.copy(alpha = 0.8f))
             ) {
-                Box(
+                Text(
+                    text = title,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier
-                        .height(25.dp)
-                        .fillMaxWidth()
-                        .background(color.copy(alpha = 0.8f))
-                ) {
+                        .align(Alignment.BottomStart)
+                        .padding(start = 5.dp, end = 40.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.White
+                )
+            }
+
+            // rating
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, bottom = 8.dp)
+                ,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
                     Text(
-                        text = title,
-                        fontSize = 12.sp,
+                        text = NumberFormat.getNumberInstance().format(scoreDetail.score),
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(start = 5.dp, end = 40.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Rating: ${
+                            BigDecimal(rating.toDouble()).setScale(2, BigDecimal.ROUND_UP).toDouble()
+                        }",
+                        style = MaterialTheme.typography.labelSmall,
                         color = Color.White
                     )
                 }
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(start = 8.dp)
-                    ,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = NumberFormat.getNumberInstance().format(scoreDetail.score),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "Rating: ${
-                                BigDecimal(rating.toDouble()).setScale(2, BigDecimal.ROUND_UP).toDouble()
-                            }",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White
-                        )
-                    }
-                    LevelBox(
-                        level,
-                        Modifier
-                            .padding(end = 8.dp)
-                    )
-                }
+                LevelBox(
+                    level,
+                    Modifier
+                        .padding(end = 8.dp)
+                )
             }
         }
     }

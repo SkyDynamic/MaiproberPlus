@@ -45,13 +45,21 @@ open class ConfigManager(context: Context) {
 }
 
 @Serializable
+enum class ScoreDisplayType(val displayName: String) {
+    Small(displayName = "小"),
+    Middle(displayName = "中"),
+    Large(displayName = "大"),;
+}
+
+@Serializable
 data class ConfigStorage(
     var divingfishToken: String = "",
     var lxnsToken: String = "",
-    var maimaiPresonalInfo: MaimaiProberUserInfo = MaimaiProberUserInfo(),
+    var maimaiPersonalInfo: MaimaiProberUserInfo = MaimaiProberUserInfo(),
     var syncConfig: SyncConfig = SyncConfig(),
     var localConfig: LocalConfig = LocalConfig(),
-    var userInfo: UserInfo = UserInfo()
+    var userInfo: UserInfo = UserInfo(),
+    var scoreDisplayType: ScoreDisplayType = ScoreDisplayType.Small,
 )
 
 @Serializable

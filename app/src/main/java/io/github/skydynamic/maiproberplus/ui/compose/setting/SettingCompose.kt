@@ -2,7 +2,10 @@ package io.github.skydynamic.maiproberplus.ui.compose.setting
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +18,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,12 +28,15 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.BuildConfig
+import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
@@ -36,6 +44,9 @@ import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.DiffChooseDialog
 import io.github.skydynamic.maiproberplus.ui.compose.DownloadDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.resources
+import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleLarge
+import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleMiddle
+import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleSmall
 
 @Composable
 fun SettingCompose() {
@@ -50,6 +61,8 @@ fun SettingCompose() {
 
     var divingfishTokenHidden by remember { mutableStateOf(true) }
     var lxnsTokenHidden by remember { mutableStateOf(true)}
+
+    var scoreDisplayType by remember { mutableStateOf(config.scoreDisplayType) }
 
     var showChooseMaimaiDiffDialog by remember { mutableStateOf(false) }
     var showChooseChuniDiffDialog by remember { mutableStateOf(false) }
@@ -111,11 +124,16 @@ fun SettingCompose() {
             .verticalScroll(rememberScrollState())
     ) {
         SettingItemGroup(
-            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            modifier = Modifier
+                .padding(top = 15.dp)
+                .wrapContentSize(),
             title = "查分Token设置"
         ) {
             PasswordTextFiled(
-                modifier = Modifier.padding(15.dp).fillMaxWidth().height(60.dp),
+                modifier = Modifier
+                    .padding(15.dp)
+                    .fillMaxWidth()
+                    .height(60.dp),
                 label = { Text("水鱼查分器Token") },
                 icon = { Icon(Icons.Filled.Lock, null) },
                 hidden = divingfishTokenHidden,
@@ -131,7 +149,10 @@ fun SettingCompose() {
             )
 
             PasswordTextFiled(
-                modifier = Modifier.padding(15.dp).fillMaxWidth().height(60.dp),
+                modifier = Modifier
+                    .padding(15.dp)
+                    .fillMaxWidth()
+                    .height(60.dp),
                 label = { Text("落雪查分器Token") },
                 icon = { Icon(Icons.Filled.Lock, null) },
                 hidden = lxnsTokenHidden,
@@ -148,7 +169,9 @@ fun SettingCompose() {
         }
 
         SettingItemGroup(
-            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            modifier = Modifier
+                .padding(top = 15.dp)
+                .wrapContentSize(),
             title = "成绩抓取设置"
         ) {
             TextButtonItem(
@@ -175,7 +198,122 @@ fun SettingCompose() {
         }
 
         SettingItemGroup(
-            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            modifier = Modifier
+                .padding(top = 15.dp)
+                .wrapContentSize(),
+            title = "成绩展示设置"
+        ) {
+            Row(
+                Modifier
+                    .fillMaxWidth(),
+                Arrangement.SpaceAround,
+                Alignment.CenterVertically,
+            ) {
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable {
+                            scoreDisplayType = ScoreDisplayType.Small
+                            config.scoreDisplayType = ScoreDisplayType.Small
+                            application.configManager.save()
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ScoreDisplayExampleSmall(
+                        Modifier
+                            .padding(4.dp)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            ScoreDisplayType.Small.displayName,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                        RadioButton(
+                            selected = scoreDisplayType == ScoreDisplayType.Small,
+                            onClick = {
+                                scoreDisplayType = ScoreDisplayType.Small
+                                config.scoreDisplayType = ScoreDisplayType.Small
+                                application.configManager.save()
+                            }
+                        )
+                    }
+                }
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable {
+                            scoreDisplayType = ScoreDisplayType.Middle
+                            config.scoreDisplayType = ScoreDisplayType.Middle
+                            application.configManager.save()
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ScoreDisplayExampleMiddle(
+                        Modifier
+                            .padding(4.dp)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            ScoreDisplayType.Middle.displayName,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                        RadioButton(
+                            selected = scoreDisplayType == ScoreDisplayType.Middle,
+                            onClick = {
+                                scoreDisplayType = ScoreDisplayType.Middle
+                                config.scoreDisplayType = ScoreDisplayType.Middle
+                                application.configManager.save()
+                            }
+                        )
+                    }
+                }
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable {
+                            scoreDisplayType = ScoreDisplayType.Large
+                            config.scoreDisplayType = ScoreDisplayType.Large
+                            application.configManager.save()
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ScoreDisplayExampleLarge(
+                        Modifier
+                            .padding(4.dp)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            ScoreDisplayType.Large.displayName,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                        RadioButton(
+                            selected = scoreDisplayType == ScoreDisplayType.Large,
+                            onClick = {
+                                scoreDisplayType = ScoreDisplayType.Large
+                                config.scoreDisplayType = ScoreDisplayType.Large
+                                application.configManager.save()
+                            }
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider()
+        }
+
+        SettingItemGroup(
+            modifier = Modifier
+                .padding(top = 15.dp)
+                .wrapContentSize(),
             title = "本地设置"
         ) {
             TextButtonItem(
@@ -211,7 +349,9 @@ fun SettingCompose() {
         }
 
         SettingItemGroup(
-            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            modifier = Modifier
+                .padding(top = 15.dp)
+                .wrapContentSize(),
             title = "用户信息"
         ) {
             OutlinedTextField(
@@ -261,7 +401,9 @@ fun SettingCompose() {
         }
 
         SettingItemGroup(
-            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            modifier = Modifier
+                .padding(top = 15.dp)
+                .wrapContentSize(),
             title = "其他"
         ) {
             TextButtonItem(
@@ -280,7 +422,9 @@ fun SettingCompose() {
         }
 
         SettingItemGroup(
-            modifier = Modifier.padding(top = 15.dp).wrapContentSize(),
+            modifier = Modifier
+                .padding(top = 15.dp)
+                .wrapContentSize(),
             title = "关于"
         ) {
             Text(

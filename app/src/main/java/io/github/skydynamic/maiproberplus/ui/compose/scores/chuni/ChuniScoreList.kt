@@ -41,7 +41,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.R
+import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.deleteAllScore
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
@@ -56,9 +58,15 @@ fun ChuniScoreList(
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
     var loadedItemCount by remember { mutableIntStateOf(30) }
+    val scoreDisplayType = application.configManager.config.scoreDisplayType
+    val scoreColorOverlayType = application.configManager.config.scoreStyleType
+    val gridColumnsNumber = when (scoreDisplayType) {
+        ScoreDisplayType.Large -> 1
+        else -> 2
+    }
 
     LaunchedEffect(gridState) {
-        snapshotFlow { gridState.firstVisibleItemIndex * 2 }
+        snapshotFlow { gridState.firstVisibleItemIndex * gridColumnsNumber }
             .collect { lastVisibleIndex ->
                 val totalItemsCount = if (ScoreManagerViewModel.chuniSearchText.value.isNotEmpty()) {
                     ScoreManagerViewModel.chuniSearchScores.size
@@ -110,7 +118,7 @@ fun ChuniScoreList(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 8.dp),
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(gridColumnsNumber),
         state = gridState
     ) {
         item(
@@ -214,9 +222,9 @@ fun ChuniScoreList(
         ) {
             ChuniScoreDetailCard(
                 modifier = Modifier
-                    .height(80.dp)
-//                    .fillMaxWidth()
                     .padding(4.dp),
+                scoreDisplayType = scoreDisplayType,
+                scoreStyleType = scoreColorOverlayType,
                 scoreDetail = it,
                 onClick = {
                     ScoreManagerViewModel.showChuniScoreSelectionDialog = true

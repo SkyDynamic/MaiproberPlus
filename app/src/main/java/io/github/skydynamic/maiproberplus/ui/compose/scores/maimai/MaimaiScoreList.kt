@@ -59,6 +59,7 @@ fun MaimaiScoreList(
     val gridState = rememberLazyGridState()
     var loadedItemCount by remember { mutableIntStateOf(30) }
     val scoreDisplayType = application.configManager.config.scoreDisplayType
+    val scoreColorOverlayType = application.configManager.config.scoreStyleType
 
     LaunchedEffect(gridState) {
         snapshotFlow { gridState.firstVisibleItemIndex * 2 }
@@ -225,6 +226,7 @@ fun MaimaiScoreList(
                 modifier = Modifier
                     .padding(4.dp),
                 scoreDisplayType = scoreDisplayType,
+                scoreStyleType = scoreColorOverlayType,
                 scoreDetail = it,
                 onClick = {
                     ScoreManagerViewModel.maimaiScoreSelection = it

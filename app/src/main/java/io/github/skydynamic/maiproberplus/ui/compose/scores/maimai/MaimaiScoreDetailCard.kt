@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
+import io.github.skydynamic.maiproberplus.core.config.ScoreStyleType
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
 import io.github.skydynamic.maiproberplus.core.utils.NetworkImageRequestUtil
@@ -35,6 +37,7 @@ import io.github.skydynamic.maiproberplus.ui.compose.scores.common.LevelBox
 fun MaimaiScoreDetailCard(
     modifier: Modifier,
     scoreDisplayType: ScoreDisplayType,
+    scoreStyleType: ScoreStyleType,
     scoreDetail: MaimaiScoreEntity,
     onClick: () -> Unit,
 ) {
@@ -74,11 +77,13 @@ fun MaimaiScoreDetailCard(
             )
 
             // color overlay
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color.copy(alpha = 0.4f))
-            )
+            if (scoreStyleType == ScoreStyleType.ColorOverlay) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color.copy(alpha = 0.4f))
+                )
+            }
 
             // title
             Box(
@@ -121,14 +126,32 @@ fun MaimaiScoreDetailCard(
                 Column {
                     Text(
                         text = "${DecimalFormat("#." + "0".repeat(4)).format(scoreDetail.achievement)}%",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            shadow = when (scoreStyleType) {
+                                ScoreStyleType.TextShadow ->
+                                    Shadow(
+                                        color = color,
+                                        blurRadius = 10f,
+                                    )
+                                else -> null
+                            }
+                        ),
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White,
                     )
                     Text(
                         text = "DX Rating: $rating",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            shadow = when (scoreStyleType) {
+                                ScoreStyleType.TextShadow ->
+                                    Shadow(
+                                        color = color,
+                                        blurRadius = 10f,
+                                    )
+                                else -> null
+                            }
+                        ),
+                        color = Color.White,
                     )
                 }
                 LevelBox(

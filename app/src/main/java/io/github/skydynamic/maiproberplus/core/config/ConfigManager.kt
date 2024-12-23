@@ -46,9 +46,15 @@ open class ConfigManager(context: Context) {
 
 @Serializable
 enum class ScoreDisplayType(val displayName: String) {
-    Small(displayName = "小"),
-    Middle(displayName = "中"),
-    Large(displayName = "大"),;
+    Small("小"),
+    Middle("中"),
+    Large("大"),
+}
+
+@Serializable
+enum class ScoreStyleType(val displayName: String) {
+    ColorOverlay("颜色覆盖"),
+    TextShadow("文本阴影"),
 }
 
 @Serializable
@@ -60,6 +66,7 @@ data class ConfigStorage(
     var localConfig: LocalConfig = LocalConfig(),
     var userInfo: UserInfo = UserInfo(),
     var scoreDisplayType: ScoreDisplayType = ScoreDisplayType.Small,
+    var scoreStyleType: ScoreStyleType = ScoreStyleType.ColorOverlay
 )
 
 @Serializable

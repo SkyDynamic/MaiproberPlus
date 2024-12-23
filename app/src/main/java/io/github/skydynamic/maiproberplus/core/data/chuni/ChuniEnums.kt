@@ -12,10 +12,10 @@ class ChuniEnums {
         val color: Color
     ) {
         BASIC("Basic", 0, Color(28, 133, 0)),
-        ADVANCED("Advanced", 1, Color(168, 137, 0, 255)),
+        ADVANCED("Advanced", 1, Color(168, 137, 0)),
         EXPERT("Expert", 2, Color(220, 40, 40)),
         MASTER("Master", 3, Color(165, 0, 235)),
-        ULTIMA("Ultima", 4, Color(33, 29, 29, 255)),
+        ULTIMA("Ultima", 4, Color(33, 29, 29)),
         WORLDSEND("World's End", 0, Color.Magenta),
         RECENT("Recent", 6, Color.White);
 

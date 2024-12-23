@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.BuildConfig
 import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
+import io.github.skydynamic.maiproberplus.core.config.ScoreStyleType
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
@@ -47,6 +48,8 @@ import io.github.skydynamic.maiproberplus.ui.compose.scores.resources
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleLarge
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleMiddle
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleSmall
+import io.github.skydynamic.maiproberplus.ui.compose.setting.components.SettingScoreStyleExampleColorOverlay
+import io.github.skydynamic.maiproberplus.ui.compose.setting.components.SettingScoreStyleExampleTextShadow
 
 @Composable
 fun SettingCompose() {
@@ -63,6 +66,7 @@ fun SettingCompose() {
     var lxnsTokenHidden by remember { mutableStateOf(true)}
 
     var scoreDisplayType by remember { mutableStateOf(config.scoreDisplayType) }
+    var scoreColorOverlayType by remember { mutableStateOf(config.scoreStyleType) }
 
     var showChooseMaimaiDiffDialog by remember { mutableStateOf(false) }
     var showChooseChuniDiffDialog by remember { mutableStateOf(false) }
@@ -203,9 +207,16 @@ fun SettingCompose() {
                 .wrapContentSize(),
             title = "成绩展示设置"
         ) {
+            BaseTextItem(
+                title = "成绩卡片排列",
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 8.dp)
+            )
+
             Row(
                 Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
                 Arrangement.SpaceAround,
                 Alignment.CenterVertically,
             ) {
@@ -307,7 +318,88 @@ fun SettingCompose() {
                 }
             }
 
-            HorizontalDivider()
+            horizontalDivider()
+
+            BaseTextItem(
+                title = "成绩卡片样式",
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 8.dp)
+            )
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                Arrangement.SpaceAround,
+                Alignment.CenterVertically,
+            ) {
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .clip(MaterialTheme.shapes.large)
+                        .clickable {
+                            scoreColorOverlayType = ScoreStyleType.ColorOverlay
+                            config.scoreStyleType = ScoreStyleType.ColorOverlay
+                            application.configManager.save()
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    SettingScoreStyleExampleColorOverlay(
+                        Modifier
+                            .padding(4.dp)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            ScoreStyleType.ColorOverlay.displayName,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                        RadioButton(
+                            selected = scoreColorOverlayType == ScoreStyleType.ColorOverlay,
+                            onClick = {
+                                scoreColorOverlayType = ScoreStyleType.ColorOverlay
+                                config.scoreStyleType = ScoreStyleType.ColorOverlay
+                                application.configManager.save()
+                            }
+                        )
+                    }
+                }
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .clip(MaterialTheme.shapes.large)
+                        .clickable {
+                            scoreColorOverlayType = ScoreStyleType.TextShadow
+                            config.scoreStyleType = ScoreStyleType.TextShadow
+                            application.configManager.save()
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    SettingScoreStyleExampleTextShadow(
+                        Modifier
+                            .padding(4.dp)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            ScoreStyleType.TextShadow.displayName,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                        RadioButton(
+                            selected = scoreColorOverlayType == ScoreStyleType.TextShadow,
+                            onClick = {
+                                scoreColorOverlayType = ScoreStyleType.TextShadow
+                                config.scoreStyleType = ScoreStyleType.TextShadow
+                                application.configManager.save()
+                            }
+                        )
+                    }
+                }
+            }
+
+            horizontalDivider()
         }
 
         SettingItemGroup(

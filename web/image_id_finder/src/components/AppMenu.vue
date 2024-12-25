@@ -1,9 +1,4 @@
 <template>
-  <div class="logo">
-    <el-text size="large" tag="bold">
-      资源ID寻找器
-    </el-text>
-  </div>
   <el-menu
       default-active="2"
       :collapse="props.isCollapse"
@@ -37,14 +32,6 @@ const handleClose = (key: string, keyPath: string[]) => {
 </script>
 
 <style>
-  .logo{
-    height: 50px;
-    background: #e1eaf4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
   .menu{
     min-height: calc(100vh - 50px);
   }

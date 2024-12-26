@@ -1,42 +1,34 @@
 <template>
-  <div class="common-layout">
-    <div class="logo">
-      <el-text size="large" tag="bold">
-        资源ID寻找器
-      </el-text>
-    </div>
-    <el-container class="container">
-      <el-aside class="aside">
-        <AppMenu/>
-      </el-aside>
-      <el-container>
-        <el-main class="main"><router-view/></el-main>
-      </el-container>
-    </el-container>
+  <div class="container-main w-full">
+    <div class="header-line flex justify-center items-center h-10 bg-blue-400 fixed top-0 left-0 w-full z-10">
+      <span class="text-white">资源ID寻找器</span>
+      <el-menu
+        background-color="rgb(96,165,250)"
+        text-color="#fff"
+        active-text-color="#fff"
+        router
+        class="el-menu-demo ml-auto h-10 pr-4 sm:hidden block"
+        mode="horizontal"
+        :ellipsis="false"
+      >
+        <el-menu-item index="maimai-icon">头像</el-menu-item>
+        <el-menu-item index="maimai-plate">姓名框</el-menu-item>
+      </el-menu>
+
+
+          </div>
+      <AppMenu/>
+    <div class="image-container sm:ml-48 sm:p-4 pt-10 mt-10">
+      <router-view/>
+      </div>
+
   </div>
 </template>
 
-<script lang="ts" setup >
-  import AppMenu from '@/components/AppMenu.vue';
+<script setup lang="ts">
+import AppMenu from '@/components/AppMenu.vue';
 </script>
 
-<style scoped lang="scss">
-  .logo{
-    height: 50px;
-    background: #e1eaf4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .aside {
-    width: 280px;
-    position: fixed;
-  }
-  .main {
-    margin-left: 280px;
-    margin-top: 50px;
-  }
-</style>
+
+
+

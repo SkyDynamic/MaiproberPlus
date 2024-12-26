@@ -51,12 +51,14 @@ fun BaseTextItem(
         modifier = modifier
     ) {
         Text(text = title, fontSize = 18.sp, color = getTitleFontColor())
-        Text(
-            text = description,
-            fontSize = 12.sp,
-            color = getDescFontColor(),
-            style = TextStyle.Default
-        )
+        if (description.isNotEmpty()) {
+            Text(
+                text = description,
+                fontSize = 12.sp,
+                color = getDescFontColor(),
+                style = TextStyle.Default
+            )
+        }
     }
 }
 

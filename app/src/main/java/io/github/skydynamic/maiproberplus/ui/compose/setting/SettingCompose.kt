@@ -24,7 +24,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.isDigitsOnly
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.BuildConfig
 import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
@@ -44,6 +44,7 @@ import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
 import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.DiffChooseDialog
 import io.github.skydynamic.maiproberplus.ui.compose.DownloadDialog
+import io.github.skydynamic.maiproberplus.ui.compose.MultiObjectSelectDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.resources
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleLarge
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleMiddle
@@ -53,14 +54,18 @@ import io.github.skydynamic.maiproberplus.ui.compose.setting.components.SettingS
 
 @Composable
 fun SettingCompose() {
+    val maimaiShougouColorList = listOf("normal", "bronze", "silver", "gold", "rainbow")
+
     val config = application.configManager.config
     
     var divingfishToken by remember { mutableStateOf(config.divingfishToken) }
     var lxnsToken by remember { mutableStateOf(config.lxnsToken) }
 
     var userName by remember { mutableStateOf(config.userInfo.name) }
-    var maimaiIcon by remember { mutableIntStateOf(config.userInfo.maimaiIcon) }
-    var maimaiPlate by remember { mutableIntStateOf(config.userInfo.maimaiPlate) }
+    var maimaiIcon by remember { mutableStateOf(config.userInfo.maimaiIcon.toString()) }
+    var maimaiPlate by remember { mutableStateOf(config.userInfo.maimaiPlate.toString()) }
+    var maimaiShougouText by remember { mutableStateOf(config.userInfo.shougou) }
+    var maimaiShougouColor by remember { mutableStateOf(config.userInfo.shougouColor) }
 
     var divingfishTokenHidden by remember { mutableStateOf(true) }
     var lxnsTokenHidden by remember { mutableStateOf(true)}
@@ -70,6 +75,7 @@ fun SettingCompose() {
 
     var showChooseMaimaiDiffDialog by remember { mutableStateOf(false) }
     var showChooseChuniDiffDialog by remember { mutableStateOf(false) }
+    var showSelectShougouColorDialog by remember { mutableStateOf(false) }
 
     var showConfirmUpdateSongResourceDialog by remember { mutableStateOf(false) }
     var showUpdateSongResourceDialog by remember { mutableStateOf(false) }
@@ -119,6 +125,19 @@ fun SettingCompose() {
                 showUpdateSongResourceDialog = false
                 sendMessageToUi("更新完成")
             }
+        }
+        showSelectShougouColorDialog -> {
+            MultiObjectSelectDialog(
+                onRequest = {
+                    maimaiShougouColor = it
+                    config.userInfo.shougouColor = it
+                    application.configManager.save()
+                },
+                onDismiss = {
+                    showSelectShougouColorDialog = false
+                },
+                objects = maimaiShougouColorList,
+            )
         }
     }
 
@@ -440,9 +459,15 @@ fun SettingCompose() {
                     .fillMaxWidth(),
                 value = maimaiIcon.toString(),
                 onValueChange = {
-                    config.userInfo.maimaiIcon = it.toInt()
-                    maimaiIcon = it.toInt()
-                    application.configManager.save()
+                    if (it.isDigitsOnly() && it.isNotEmpty()) {
+                        config.userInfo.maimaiIcon = it.toInt()
+                        application.configManager.save()
+                        maimaiIcon = it
+                    } else if (it.isEmpty()) {
+                        config.userInfo.maimaiIcon = 1
+                        application.configManager.save()
+                        maimaiIcon = it
+                    }
                 },
                 label = { Text("舞萌DX头像", fontSize = 12.sp) },
                 supportingText = {
@@ -456,13 +481,48 @@ fun SettingCompose() {
                     .fillMaxWidth(),
                 value = maimaiPlate.toString(),
                 onValueChange = {
-                    config.userInfo.maimaiPlate = it.toInt()
-                    maimaiPlate = it.toInt()
-                    application.configManager.save()
+                    if (it.isDigitsOnly() && it.isNotEmpty()) {
+                        config.userInfo.maimaiPlate = it.toInt()
+                        application.configManager.save()
+                        maimaiPlate = it
+                    } else if (it.isEmpty()) {
+                        config.userInfo.maimaiPlate = 1
+                        application.configManager.save()
+                        maimaiPlate = it
+                    }
                 },
                 label = { Text("舞萌DX姓名框", fontSize = 12.sp) },
                 supportingText = {
                     Text("*不知道该参数的含义，请勿修改", color = Color.Red)
+                }
+            )
+
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth(),
+                value = maimaiShougouText,
+                onValueChange = {
+                    config.userInfo.shougou = it
+                    maimaiShougouText = it
+                    application.configManager.save()
+                }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                color = Color.LightGray,
+                thickness = 1.dp
+            )
+
+            TextButtonItem(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                title = "选择称号框颜色 (当前: $maimaiShougouColor)",
+                onClick = {
+                    showSelectShougouColorDialog = true
                 }
             )
         }

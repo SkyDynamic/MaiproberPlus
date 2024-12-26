@@ -8,8 +8,8 @@ plugins {
     alias(libs.plugins.kotlin.symbol.processing)
 }
 
-val appVersion: String = "1.2.0"
-val appVersionCode: String = "000"
+val appVersion: String = "1.2.1"
+val appVersionCode: String = "002"
 
 val gitCommitId: String = try {
     val stdout = ByteArrayOutputStream()

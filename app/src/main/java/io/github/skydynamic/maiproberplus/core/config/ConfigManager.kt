@@ -61,21 +61,11 @@ enum class ScoreStyleType(val displayName: String) {
 data class ConfigStorage(
     var divingfishToken: String = "",
     var lxnsToken: String = "",
-    var maimaiPersonalInfo: MaimaiProberUserInfo = MaimaiProberUserInfo(),
     var syncConfig: SyncConfig = SyncConfig(),
     var localConfig: LocalConfig = LocalConfig(),
     var userInfo: UserInfo = UserInfo(),
     var scoreDisplayType: ScoreDisplayType = ScoreDisplayType.Small,
     var scoreStyleType: ScoreStyleType = ScoreStyleType.ColorOverlay
-)
-
-@Serializable
-data class MaimaiProberUserInfo(
-    var name: String = "",
-    var maimaiDan: Int = 0,
-    var maimaiIcon: Int = 1,
-    var maimaiPlate: Int = 1,
-    var maimaiTitle: String = ""
 )
 
 @Serializable

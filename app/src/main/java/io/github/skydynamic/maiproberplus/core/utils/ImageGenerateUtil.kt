@@ -69,16 +69,16 @@ fun Canvas.drawText(
         Typeface.DEFAULT_BOLD
     }
 
+    val truncatedText = truncateTextToFitWidth(text, maxText.toFloat(), paint)
+
     outline?.let {
         val outlinePaint = Paint(paint)
         outlinePaint.style = Paint.Style.STROKE
         outlinePaint.strokeWidth = it.weight
         outlinePaint.color = it.color
 
-        this.drawText(text, x, y, outlinePaint)
+        this.drawText(truncatedText, x, y, outlinePaint)
     }
-
-    val truncatedText = truncateTextToFitWidth(text, maxText.toFloat(), paint)
 
     this.drawText(truncatedText, x, y, paint)
 }

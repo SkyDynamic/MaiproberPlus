@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.skydynamic.maiproberplus.Application.Companion.application
+import io.github.skydynamic.maiproberplus.ui.compose.setting.TextButtonItem
 import io.github.skydynamic.maiproberplus.ui.compose.sync.FileDownloadMeta
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
 import io.ktor.client.HttpClient
@@ -283,6 +285,47 @@ fun DiffChooseDialog(
                     }
                 ) {
                     Text("取消")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun <T> MultiObjectSelectDialog(
+    onRequest: (T) -> Unit,
+    onDismiss: () -> Unit,
+    objects: List<T>,
+    objectNameList: List<String> = objects.map { it.toString() }
+) {
+    BasicAlertDialog(
+        modifier = Modifier.wrapContentSize(),
+        onDismissRequest = onDismiss,
+    ) {
+        Card(
+            modifier = Modifier.padding(8.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = getCardColor())
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text("选择要选择的项")
+                HorizontalDivider()
+                objectNameList.forEachIndexed { index, item ->
+                    TextButtonItem(
+                        modifier = Modifier.fillMaxWidth().height(30.dp),
+                        title = item,
+                        onClick = {
+                            onRequest(objects[index])
+                            onDismiss()
+                        }
+                    )
                 }
             }
         }

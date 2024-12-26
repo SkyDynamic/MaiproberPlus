@@ -5,6 +5,7 @@ import {ElMessage} from "element-plus";
 interface Props {
   src: string
   id: string
+  name:string
 }
 
 const props = defineProps<Props>()
@@ -19,12 +20,11 @@ function copyId() {
 <template>
     <div class="image-container pl-4">
         <el-image
-            class="plateImage w-24"
+            class="plateImage w-full pr-4"
             :src="src"
             :fit="'fill'"
             :lazy="true"
             :preview-src-list="[src]"
-
         >
           <template #error>
             <div class="image-slot">
@@ -32,42 +32,17 @@ function copyId() {
             </div>
           </template>
         </el-image>
-        <el-row :gutter="15" class="mt-2 bg-gray-200">
-          <el-col :span="80">
+        <el-row :gutter="15" class="mt-2 bg-gray-200 w-full">
+          <el-col :span="24" class="flex justify-center w-full">
+            <span class="text-center flex justify-center items-center">{{ name }}</span>
+          </el-col>
+          <el-col :span="18" class="flex flex-col">
             <el-text>ID: {{ id }}</el-text>
           </el-col>
-          <el-col :span="6">
-            <el-icon class="copyButton" @click="copyId"><CopyDocument /></el-icon>
+          <el-col :span="6" class="">
+            <el-icon class="copyButton cursor-pointer float-right hover:text-blue-500 mt-1" @click="copyId"><CopyDocument /></el-icon>
           </el-col>
         </el-row>
 
     </div>
 </template>
-
-<style scoped>
-  .image_container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem;
-    margin: 0.5rem;
-    min-width: 120px;
-    min-height: 120px;
-    border: #bababa 1px solid;
-    background: #e1eaf4;
-    border-radius: 0.5rem;
-  }
-
-  .plateImage {
-    padding-bottom: 0.5rem;
-  }
-
-  .copyButton {
-    cursor: pointer;
-  }
-
-  .copyButton:hover {
-    color: #409EFF;
-  }
-</style>

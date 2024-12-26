@@ -1,16 +1,11 @@
 <template>
   <el-menu
-      default-active="2"
-      :collapse="props.isCollapse"
-      :collapse-transition="false"
-      @open="handleOpen"
-      @close="handleClose"
       background-color="#ebf1f5"
       text-color="#606266"
       active-text-color="#2F74FF"
-      class="menu"
       router
-  >
+      class="h-full w-48 fixed top-10 left-0 overflow-y-auto overflow-x-hidden hidden  sm:block  "
+      >
     <el-sub-menu index="1">
       <template #title>
         <span>舞萌DX</span>
@@ -20,19 +15,3 @@
     </el-sub-menu>
   </el-menu>
 </template>
-
-<script lang="ts" setup>
-const props = defineProps(['isCollapse'])
-const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
-const handleClose = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
-</script>
-
-<style>
-  .menu{
-    min-height: calc(100vh - 50px);
-  }
-</style>

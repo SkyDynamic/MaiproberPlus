@@ -65,7 +65,7 @@ data class ConfigStorage(
     var localConfig: LocalConfig = LocalConfig(),
     var userInfo: UserInfo = UserInfo(),
     var scoreDisplayType: ScoreDisplayType = ScoreDisplayType.Small,
-    var scoreStyleType: ScoreStyleType = ScoreStyleType.ColorOverlay
+    var scoreStyleType: ScoreStyleType = ScoreStyleType.ColorOverlay,
 )
 
 @Serializable

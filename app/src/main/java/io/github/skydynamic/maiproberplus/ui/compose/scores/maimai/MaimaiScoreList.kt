@@ -56,6 +56,7 @@ fun MaimaiScoreList(
     coroutineScope: CoroutineScope
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var openSortByDialog by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
     var loadedItemCount by remember { mutableIntStateOf(30) }
     val scoreDisplayType = application.configManager.config.scoreDisplayType
@@ -82,6 +83,14 @@ fun MaimaiScoreList(
     }
 
     when {
+        openSortByDialog -> {
+            MaimaiSortByDialog(
+                onDismissRequest = {
+                    openSortByDialog =  false
+                    refreshMaimaiScore()
+                }
+            )
+        }
         openDeleteConfirmDialog -> {
             ConfirmDialog(
                 info = "你确定要删除所有成绩吗？\n该操纵不可逆!",
@@ -128,6 +137,7 @@ fun MaimaiScoreList(
         ) {
             Spacer(Modifier.height(64.dp))
         }
+        // Top Spacer
 
         item(
             span = {
@@ -141,27 +151,38 @@ fun MaimaiScoreList(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+
                 OutlinedTextField(
                     value = ScoreManagerViewModel.maimaiSearchText.value,
                     onValueChange = {
                         ScoreManagerViewModel.maimaiSearchText.value = it
-                        ScoreManagerViewModel.searchMaimaiScore(it)
+                        ScoreManagerViewModel.searchMaimaiScore()
                     },
-                    modifier = Modifier
-                        .weight(1f),
+                    singleLine = true,
                     label = { Text("搜索曲目或者曲目别名", fontSize = 12.sp) },
+                    leadingIcon = {
+                        IconButton(
+                            onClick = {
+                                openSortByDialog = true
+                            },
+                        ) {
+                            Icon(painterResource(R.drawable.sort_24dp), "sort")
+                        }
+                    },
                     trailingIcon = {
                         if (ScoreManagerViewModel.maimaiSearchText.value.isNotEmpty()) {
                             IconButton(
                                 onClick = {
                                     ScoreManagerViewModel.maimaiSearchText.value = ""
-                                    ScoreManagerViewModel.searchMaimaiScore("")
+                                    ScoreManagerViewModel.searchMaimaiScore()
                                 }
                             ) {
                                 Icon(Icons.Default.Clear, null)
                             }
                         }
                     },
+                    modifier = Modifier
+                        .weight(1f),
                 )
 
                 Button(
@@ -178,6 +199,7 @@ fun MaimaiScoreList(
                 }
             }
         }
+        // Sort & Search & Refresh
 
         item(
             span = {
@@ -213,6 +235,7 @@ fun MaimaiScoreList(
                 }
             }
         }
+        // Add & Del All
 
         items(
             if (ScoreManagerViewModel.maimaiSearchText.value.isNotEmpty()) {

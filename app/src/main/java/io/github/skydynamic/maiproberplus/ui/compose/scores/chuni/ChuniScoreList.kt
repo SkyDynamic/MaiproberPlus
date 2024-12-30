@@ -56,6 +56,7 @@ fun ChuniScoreList(
     coroutineScope: CoroutineScope
 ) {
     var openDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var openSortByDialog by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
     var loadedItemCount by remember { mutableIntStateOf(30) }
     val scoreDisplayType = application.configManager.config.scoreDisplayType
@@ -82,6 +83,14 @@ fun ChuniScoreList(
     }
 
     when {
+        openSortByDialog -> {
+            ChuniScoreSortByDialog(
+                onDismissRequest = {
+                    openSortByDialog = false
+                    refreshChuniScore(false)
+                }
+            )
+        }
         openDeleteConfirmDialog -> {
             ConfirmDialog(
                 info = "你确定要删除所有成绩吗？\n该操纵不可逆!",
@@ -128,6 +137,8 @@ fun ChuniScoreList(
         ) {
             Spacer(Modifier.height(64.dp))
         }
+        // Top Spacer
+
         item(
             span = {
                 GridItemSpan(maxLineSpan)
@@ -144,23 +155,37 @@ fun ChuniScoreList(
                     value = ScoreManagerViewModel.chuniSearchText.value,
                     onValueChange = {
                         ScoreManagerViewModel.chuniSearchText.value = it
-                        ScoreManagerViewModel.searchChuniScore(it)
+                        ScoreManagerViewModel.searchChuniScore()
                     },
-                    modifier = Modifier
-                        .weight(1f),
+                    singleLine = true,
                     label = { Text("搜索曲目或者曲目别名", fontSize = 12.sp) },
+                    leadingIcon = {
+                        IconButton(
+                            onClick = {
+                                openSortByDialog = true
+                            },
+                        ) {
+                            Icon(
+                                painterResource(R.drawable.sort_24dp),
+                                "sort"
+                            )
+                        }
+
+                    },
                     trailingIcon = {
                         if (ScoreManagerViewModel.chuniSearchText.value.isNotEmpty()) {
                             IconButton(
                                 onClick = {
                                     ScoreManagerViewModel.chuniSearchText.value = ""
-                                    ScoreManagerViewModel.searchChuniScore("")
+                                    ScoreManagerViewModel.searchChuniScore()
                                 }
                             ) {
                                 Icon(Icons.Default.Clear, null)
                             }
                         }
                     },
+                    modifier = Modifier
+                        .weight(1f),
                 )
 
                 Button(
@@ -170,13 +195,13 @@ fun ChuniScoreList(
                         ScoreManagerViewModel.chuniLoadedScores.clear()
                         ScoreManagerViewModel.chuniSearchScores.clear()
                         refreshChuniScore()
-
                     }
                 ) {
                     Text("刷新列表")
                 }
             }
         }
+        // Sort & Search & Refresh
 
         item(
             span = {
@@ -212,6 +237,7 @@ fun ChuniScoreList(
                 }
             }
         }
+        // Add & Del All
 
         items(
             if (ScoreManagerViewModel.chuniSearchText.value.isNotEmpty()) {

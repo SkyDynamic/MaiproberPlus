@@ -525,6 +525,20 @@ fun SettingCompose() {
                     showSelectShougouColorDialog = true
                 }
             )
+
+            TextButtonItem(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                title = "打开资源ID对照表",
+                description = "点击后将跳转到本APP使用的资源ID对照页面"
+            ) {
+                val uri = Uri.parse("https://rif.skydynamic.top")
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                application.startActivity(intent)
+            }
         }
 
         SettingItemGroup(
@@ -577,6 +591,20 @@ fun SettingCompose() {
                 description = "项目的GitHub仓库"
             ) {
                 val uri = Uri.parse("https://github.com/SkyDynamic/MaiproberPlus")
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                application.startActivity(intent)
+            }
+
+            TextButtonItem(
+                modifier = Modifier
+                    .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                title = "反馈问题",
+                description = "跳转到Github Issues界面进行问题反馈"
+            ) {
+                val uri = Uri.parse("https://github.com/SkyDynamic/MaiproberPlus/issues")
                 val intent = Intent(Intent.ACTION_VIEW, uri)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 application.startActivity(intent)

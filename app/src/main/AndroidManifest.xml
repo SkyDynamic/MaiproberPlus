@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.MaiProberplus"
-        tools:targetApi="q"
+        tools:targetApi="28"
         android:name=".Application">
         <activity
             android:name=".MainActivity"

@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: set up JDK 11
+    - name: set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
@@ -24,3 +24,10 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+    - name: Upload apk
+      if: startsWith(github.ref, 'refs/heads/')
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-build
+        path: app/build/outputs/apk/release/*
+        retention-days: 1

@@ -2,8 +2,13 @@ package io.github.skydynamic.maiproberplus.ui.compose.scores.maimai
 
 import android.icu.text.DecimalFormat
 import android.util.Log
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +16,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -32,11 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -62,7 +70,7 @@ fun MaimaiScoreDetailDialog(
     val title = scoreDetail.title
     val dxScore = scoreDetail.dxScore
     val noteTotal = MaimaiData.getNoteTotal(title, scoreDetail.diff, scoreDetail.type)
-    val dxSatrs = MaimaiData.getDxStar(noteTotal, dxScore)
+    val dxStars = MaimaiData.getDxStar(noteTotal, dxScore)
 
     when {
         openDeleteConfirmDialog -> {
@@ -84,7 +92,10 @@ fun MaimaiScoreDetailDialog(
 
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = Modifier.fillMaxWidth().height(350.dp).padding(start = 16.dp, end = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(350.dp)
+            .padding(start = 16.dp, end = 16.dp),
     ) {
         Card(
             modifier = Modifier.fillMaxSize(),
@@ -94,7 +105,10 @@ fun MaimaiScoreDetailDialog(
                 modifier = Modifier.fillMaxSize()
             ) {
                 Row(
-                    modifier = Modifier.padding(12.dp).fillMaxWidth().height(30.dp)
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth()
+                        .height(30.dp)
 
                 ) {
                     Box(
@@ -131,15 +145,22 @@ fun MaimaiScoreDetailDialog(
                         onError = { error ->
                             Log.e("Image", "Error loading image", error.result.throwable)
                         },
-                        modifier = Modifier.height(95.dp).width(95.dp).clip(RoundedCornerShape(8.dp)),
+                        modifier = Modifier
+                            .height(95.dp)
+                            .width(95.dp)
+                            .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop
                     )
 
                     Column(
-                        modifier = Modifier.weight(0.7f).padding(start = 12.dp)
+                        modifier = Modifier
+                            .weight(0.7f)
+                            .padding(start = 12.dp)
                     ) {
                         Box(
-                            modifier = Modifier.fillMaxWidth().height(25.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(25.dp)
                         ) {
                             MaimaiSongTypeIco(
                                 type = scoreDetail.type,
@@ -147,13 +168,68 @@ fun MaimaiScoreDetailDialog(
                             )
                         }
 
-                        Text(
-                            text = title,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W700,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        val scoreTitleScrollState = rememberScrollState()
+                        Box(
+                            Modifier
+                                .height(IntrinsicSize.Min)
+                                .fillMaxWidth()
+                        ) {
+                            SelectionContainer(
+                                Modifier
+                                    .wrapContentHeight()
+                                    .fillMaxWidth()
+                                    .horizontalScroll(scoreTitleScrollState)
+                            ) {
+                                Text(
+                                    text = title,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.W700,
+                                    maxLines = 1
+                                )
+                            }
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = scoreTitleScrollState.canScrollBackward,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                            ) {
+                                Box(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .width(16.dp)
+                                        .background(
+                                            brush = Brush.horizontalGradient(
+                                                listOf(
+                                                    getCardColor(),
+                                                    Color.Transparent,
+                                                )
+                                            )
+                                        )
+                                )
+                            }
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = scoreTitleScrollState.canScrollForward,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                            ) {
+                                Box(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .width(16.dp)
+                                        .background(
+                                            brush = Brush.horizontalGradient(
+                                                listOf(
+                                                    Color.Transparent,
+                                                    getCardColor(),
+                                                )
+                                            )
+                                        )
+                                )
+                            }
+                        }
 
                         Text(
                             text = "曲目 ID: ${MaimaiData.getSongIdFromTitle(title)}",
@@ -165,19 +241,25 @@ fun MaimaiScoreDetailDialog(
                             AsyncImage(
                                 model = scoreDetail.fullComboType.imageId,
                                 contentDescription = null,
-                                modifier = Modifier.height(25.dp).width(25.dp),
+                                modifier = Modifier
+                                    .height(25.dp)
+                                    .width(25.dp),
                             )
 
                             AsyncImage(
                                 model = scoreDetail.syncType.imageId,
                                 contentDescription = null,
-                                modifier = Modifier.height(25.dp).width(25.dp),
+                                modifier = Modifier
+                                    .height(25.dp)
+                                    .width(25.dp),
                             )
                         }
                     }
 
                     Box(
-                        modifier = Modifier.fillMaxHeight().weight(0.3f)
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(0.3f)
                     ) {
                         ColorLevelBox(
                             level = MaimaiData.getLevelValue(title, scoreDetail.diff, scoreDetail.type),
@@ -189,16 +271,23 @@ fun MaimaiScoreDetailDialog(
 
                 // achievement
                 Row(
-                    modifier = Modifier.padding(start = 12.dp).fillMaxWidth().height(60.dp)
+                    modifier = Modifier
+                        .padding(start = 12.dp)
+                        .fillMaxWidth()
+                        .height(60.dp)
                 ) {
                     AsyncImage(
                         model = scoreDetail.rankType.imageId,
                         contentDescription = null,
-                        modifier = Modifier.align(Alignment.CenterVertically).weight(0.3f)
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .weight(0.3f)
                     )
 
                     Column(
-                        modifier = Modifier.weight(0.7f).padding(start = 12.dp)
+                        modifier = Modifier
+                            .weight(0.7f)
+                            .padding(start = 12.dp)
                     ) {
                         Text(
                             text = "达成率",
@@ -221,10 +310,14 @@ fun MaimaiScoreDetailDialog(
                         .height(50.dp)
                 ) {
                     Card(
-                        modifier = Modifier.weight(0.5f).padding(end = 4.dp)
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .padding(end = 4.dp)
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxSize().padding(start = 8.dp)
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(start = 8.dp)
                         ) {
                             Text(
                                 text = "DX Rating",
@@ -240,10 +333,14 @@ fun MaimaiScoreDetailDialog(
                     }
 
                     Card(
-                        modifier = Modifier.weight(0.5f).padding(start = 4.dp)
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .padding(start = 4.dp)
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxSize().padding(start = 8.dp)
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(start = 8.dp)
                         ) {
                             Row {
                                 Text(
@@ -253,9 +350,9 @@ fun MaimaiScoreDetailDialog(
                                     fontWeight = FontWeight.Light,
                                 )
 
-                                if (dxSatrs > 0) {
+                                if (dxStars > 0) {
                                     AsyncImage(
-                                        model = MaimaiData.getDxStarBitmap(dxSatrs)!!,
+                                        model = MaimaiData.getDxStarBitmap(dxStars)!!,
                                         contentDescription = null,
                                         modifier = Modifier
                                             .height(24.dp)
@@ -277,7 +374,9 @@ fun MaimaiScoreDetailDialog(
                         .fillMaxWidth()
                 ) {
                     Button(
-                        modifier = Modifier.padding(4.dp).weight(1f),
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .weight(1f),
                         onClick = {
                             openDeleteConfirmDialog = true
                         },

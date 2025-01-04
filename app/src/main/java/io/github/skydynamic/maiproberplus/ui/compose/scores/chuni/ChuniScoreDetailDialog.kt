@@ -2,8 +2,13 @@ package io.github.skydynamic.maiproberplus.ui.compose.scores.chuni
 
 import android.icu.math.BigDecimal
 import android.util.Log
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +16,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -32,11 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -140,13 +148,68 @@ fun ChuniScoreDetailDialog(
                     Column(
                         modifier = Modifier.weight(0.7f).padding(start = 12.dp)
                     ) {
-                        Text(
-                            text = title,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W700,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        val scoreTitleScrollState = rememberScrollState()
+                        Box(
+                            Modifier
+                                .height(IntrinsicSize.Min)
+                                .fillMaxWidth()
+                        ) {
+                            SelectionContainer(
+                                Modifier
+                                    .wrapContentHeight()
+                                    .fillMaxWidth()
+                                    .horizontalScroll(scoreTitleScrollState)
+                            ) {
+                                Text(
+                                    text = title,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.W700,
+                                    maxLines = 1
+                                )
+                            }
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = scoreTitleScrollState.canScrollBackward,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                            ) {
+                                Box(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .width(16.dp)
+                                        .background(
+                                            brush = Brush.horizontalGradient(
+                                                listOf(
+                                                    getCardColor(),
+                                                    Color.Transparent,
+                                                )
+                                            )
+                                        )
+                                )
+                            }
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = scoreTitleScrollState.canScrollForward,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                            ) {
+                                Box(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .width(16.dp)
+                                        .background(
+                                            brush = Brush.horizontalGradient(
+                                                listOf(
+                                                    Color.Transparent,
+                                                    getCardColor(),
+                                                )
+                                            )
+                                        )
+                                )
+                            }
+                        }
 
                         Text(
                             text = "曲目 ID: ${ChuniData.getSongIdFromTitle(title)}",

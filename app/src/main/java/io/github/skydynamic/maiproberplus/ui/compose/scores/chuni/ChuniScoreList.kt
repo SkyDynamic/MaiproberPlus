@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -158,7 +159,7 @@ fun ChuniScoreList(
                         ScoreManagerViewModel.searchChuniScore()
                     },
                     singleLine = true,
-                    label = { Text("搜索曲目或者曲目别名", fontSize = 12.sp) },
+                    label = { Text("搜索曲名或别名", fontSize = 12.sp) },
                     leadingIcon = {
                         IconButton(
                             onClick = {
@@ -167,7 +168,7 @@ fun ChuniScoreList(
                         ) {
                             Icon(
                                 painterResource(R.drawable.sort_24dp),
-                                "sort"
+                                "排序"
                             )
                         }
 
@@ -180,7 +181,7 @@ fun ChuniScoreList(
                                     ScoreManagerViewModel.searchChuniScore()
                                 }
                             ) {
-                                Icon(Icons.Default.Clear, null)
+                                Icon(Icons.Default.Clear, "清除搜索")
                             }
                         }
                     },
@@ -188,16 +189,16 @@ fun ChuniScoreList(
                         .weight(1f),
                 )
 
-                Button(
-                    modifier = Modifier
-                        .padding(top = 6.dp),
+                FloatingActionButton(
                     onClick = {
                         ScoreManagerViewModel.chuniLoadedScores.clear()
                         ScoreManagerViewModel.chuniSearchScores.clear()
                         refreshChuniScore()
-                    }
+                    },
+                    modifier = Modifier
+                        .padding(top = 6.dp)
                 ) {
-                    Text("刷新列表")
+                    Icon(Icons.Filled.Refresh, "刷新")
                 }
             }
         }

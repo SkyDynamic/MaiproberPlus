@@ -124,3 +124,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor3)
 }
+
+tasks.register("getCurrentAppVersion") {
+    doLast {
+        File("appVersion.txt").writeText(appVersion)
+    }
+}

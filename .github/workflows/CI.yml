@@ -1,0 +1,73 @@
+name: CI
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '.github/workflows/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '.github/workflows/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android environment
+        uses: android-actions/setup-android@v3
+
+      - name: Decode Keystore
+        uses: timheuer/base64-to-file@v1
+        id: android_keystore
+        with:
+          fileName: "android_keystore.jks"
+          encodedString: ${{ secrets.SIGNING_KEY }}
+
+      - name: Build APK with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleSnapshot -Pandroid.injected.signing.store.file=${{ steps.android_keystore.outputs.filePath }} -Pandroid.injected.signing.store.password=${{ secrets.KEY_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        if: ${{ success() }}
+        with:
+          name: app-snapshot
+          path: ${{ github.workspace }}/app/build/outputs/apk/snapshot/*.apk
+
+      - name: Get short SHA
+        id: short_sha
+        run: echo "::set-output name=short_sha::${GITHUB_SHA:0:7}"
+
+      - name: Get app version
+        id: app_version
+        run: |
+          ./gradlew app:getCurrentAppVersion
+          echo "::set-output name=app_version::$(cat appVersion.txt)"
+
+      - name: Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: ${{ github.workspace }}/app/build/outputs/apk/snapshot/*.apk
+          tag: v${{ steps.app_version.outputs.app_version }}-${{ steps.short_sha.outputs.short_sha }}
+          prerelease: true
+          file_glob: true

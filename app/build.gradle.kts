@@ -28,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId = "io.github.skydynamic.maiproberplus"
-        minSdk = 31
+        minSdk = 28
         targetSdk = 34
         versionName = appVersion
         versionCode = (appVersion + appVersionCode).replace(".", "").toInt()

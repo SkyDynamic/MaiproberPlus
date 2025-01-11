@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.VpnService
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -176,7 +178,10 @@ fun SyncCompose() {
     fun partA(
         modifier: Modifier = Modifier
     ) {
-        Column(modifier) {
+        Column(
+            modifier,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
@@ -298,7 +303,10 @@ fun SyncCompose() {
     fun partB(
         modifier: Modifier = Modifier
     ) {
-        Column(modifier) {
+        Column(
+            modifier,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Button(
                 modifier = Modifier
                     .padding(15.dp)
@@ -336,6 +344,28 @@ fun SyncCompose() {
                 enabled = globalViewModel.proberPlatform != ProberPlatform.LOCAL
             ) {
                 Text("从选定的查分器获取 ${globalViewModel.gameType.displayName} 个人信息")
+            }
+
+            AnimatedVisibility(
+                GlobalViewModel.maimaiHooking
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("正在获取 舞萌DX 成绩")
+                    LinearProgressIndicator()
+                }
+            }
+
+            AnimatedVisibility(
+                GlobalViewModel.chuniHooking
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("正在获取 中二节奏 成绩")
+                    LinearProgressIndicator()
+                }
             }
 
         }

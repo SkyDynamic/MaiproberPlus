@@ -18,9 +18,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.github.skydynamic.maiproberplus.ui.compose.DownloadDialog
-import io.github.skydynamic.maiproberplus.ui.compose.GameType
-import io.github.skydynamic.maiproberplus.ui.compose.checkResourceComplete
+import io.github.skydynamic.maiproberplus.core.data.GameType
+import io.github.skydynamic.maiproberplus.core.utils.checkResourceComplete
+import io.github.skydynamic.maiproberplus.ui.component.DownloadDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.chuni.ChuniScoreList
 import io.github.skydynamic.maiproberplus.ui.compose.scores.maimai.MaimaiScoreList
 

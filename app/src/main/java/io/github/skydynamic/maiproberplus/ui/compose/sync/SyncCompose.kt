@@ -9,20 +9,24 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,15 +39,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
+import io.github.skydynamic.maiproberplus.core.data.GameType
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.writeChuniScoreCache
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.writeMaimaiScoreCache
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServer
-import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
-import io.github.skydynamic.maiproberplus.ui.compose.DownloadDialog
-import io.github.skydynamic.maiproberplus.ui.compose.GameType
-import io.github.skydynamic.maiproberplus.ui.compose.InfoDialog
+import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
+import io.github.skydynamic.maiproberplus.ui.component.DownloadDialog
+import io.github.skydynamic.maiproberplus.ui.component.InfoDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.refreshScore
 import io.github.skydynamic.maiproberplus.ui.compose.scores.resources
 import io.github.skydynamic.maiproberplus.ui.compose.setting.PasswordTextFiled
@@ -52,7 +56,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun SyncCompose() {
     val context = LocalContext.current
     val viewModel = remember { SyncViewModel }
@@ -169,158 +172,201 @@ fun SyncCompose() {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+    @Composable
+    fun partA(
+        modifier: Modifier = Modifier
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
+        Column(modifier) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Button(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    onClick = {
+                        if (!checkResourceComplate(context)) {
+                            SyncViewModel.openInitDialog = true
+                        } else {
+                            if (!globalViewModel.isVpnServiceRunning) {
+                                val intent = VpnService.prepare(context)
+                                if (intent != null) {
+                                    vpnRequestLauncher.launch(intent)
+                                } else {
+                                    startVpnService(context as Activity)
+                                }
+                                application.startHttpServer()
+                            } else {
+                                stopVpnService(context as Activity)
+                                application.stopHttpServer()
+                            }
+                        }
+                    },
+                    enabled = !GlobalViewModel.maimaiHooking || !GlobalViewModel.chuniHooking
+                ) {
+                    if (!globalViewModel.isVpnServiceRunning)
+                        Text("开启劫持")
+                    else Text("结束劫持")
+                }
+
+                Button(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    onClick = { application.startWechat() }
+                ) {
+                    Text("启动微信")
+                }
+            }
+
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 16.dp)
+                    .fillMaxWidth()
+            ) {
+                ProberPlatform.entries.forEach {
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = it.ordinal,
+                            count = ProberPlatform.entries.size,
+                        ),
+                        onClick = { globalViewModel.proberPlatform = it },
+                        selected = it == globalViewModel.proberPlatform
+                    ) {
+                        Text(it.proberName)
+                    }
+                }
+            }
+
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 8.dp, bottom = 16.dp)
+                    .fillMaxWidth()
+            ) {
+                GameType.entries.forEach {
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = it.ordinal, count = GameType.entries.size
+                        ),
+                        selected = globalViewModel.gameType == it,
+                        onClick = {
+                            globalViewModel.gameType = it
+                            refreshScore(it)
+                        },
+                    ) {
+                        Text(it.displayName)
+                    }
+                }
+            }
+
+            PasswordTextFiled(
+                modifier = Modifier
+                    .padding(15.dp)
+                    .fillMaxWidth()
+                    .height(75.dp),
+                label = { Text("查分器Token") },
+                icon = { Icon(Icons.Filled.Lock, null) },
+                hidden = SyncViewModel.tokenHidden,
+                value = when (globalViewModel.proberPlatform) {
+                    ProberPlatform.DIVING_FISH -> divingfishToken
+                    ProberPlatform.LXNS -> lxnsToken
+                    ProberPlatform.LOCAL -> ""
+                },
+                onTrailingIconClick = { SyncViewModel.tokenHidden = !SyncViewModel.tokenHidden },
+                onValueChange = {
+                    when (globalViewModel.proberPlatform) {
+                        ProberPlatform.DIVING_FISH -> {
+                            divingfishToken = it
+                            application.configManager.config.divingfishToken = it
+                        }
+
+                        else -> {
+                            lxnsToken = it
+                            application.configManager.config.lxnsToken = it
+                        }
+                    }
+                    application.configManager.save()
+                },
+                enable = globalViewModel.proberPlatform != ProberPlatform.LOCAL,
+                horizontalDivider = false,
+            )
+        }
+    }
+
+    @Composable
+    fun partB(
+        modifier: Modifier = Modifier
+    ) {
+        Column(modifier) {
             Button(
                 modifier = Modifier
-                    .padding(16.dp),
+                    .padding(15.dp)
+                    .size(300.dp, 50.dp),
+                onClick = {
+                    application.copyTextToClipboard("http://127.0.0.2:${HttpServer.Port}/${globalViewModel.gameType.ordinal}")
+                }
+            ) {
+                Text("复制${globalViewModel.gameType.displayName} Hook链接(长期有效)")
+            }
+
+            Button(
+                modifier = Modifier
+                    .padding(15.dp)
+                    .size(300.dp, 50.dp),
                 onClick = {
                     if (!checkResourceComplate(context)) {
                         SyncViewModel.openInitDialog = true
                     } else {
-                        if (!globalViewModel.isVpnServiceRunning) {
-                            val intent = VpnService.prepare(context)
-                            if (intent != null) {
-                                vpnRequestLauncher.launch(intent)
-                            } else {
-                                startVpnService(context as Activity)
-                            }
-                            application.startHttpServer()
-                        } else {
-                            stopVpnService(context as Activity)
-                            application.stopHttpServer()
-                        }
+                        openAskIsOverwriteScoresDialog = true
                     }
                 },
-                enabled = !GlobalViewModel.maimaiHooking || !GlobalViewModel.chuniHooking
+                enabled = globalViewModel.proberPlatform != ProberPlatform.LOCAL
             ) {
-                if (!globalViewModel.isVpnServiceRunning)
-                    Text("开启劫持")
-                else Text("结束劫持")
+                Text("从选定的查分器获取 ${globalViewModel.gameType.displayName} 成绩")
             }
 
             Button(
                 modifier = Modifier
-                    .padding(16.dp),
-                onClick = { application.startWechat() }
+                    .padding(15.dp)
+                    .size(300.dp, 50.dp),
+                onClick = {
+                    openAskOverwriteUserInfo = true
+                },
+                enabled = globalViewModel.proberPlatform != ProberPlatform.LOCAL
             ) {
-                Text("启动微信")
+                Text("从选定的查分器获取 ${globalViewModel.gameType.displayName} 个人信息")
             }
-        }
 
-        SingleChoiceSegmentedButtonRow(
+        }
+    }
+
+    if (application.isLandscape) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
+                .fillMaxSize()
                 .padding(16.dp)
-                .fillMaxWidth()
         ) {
-            ProberPlatform.entries.forEach {
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = it.ordinal,
-                        count = ProberPlatform.entries.size,
-                    ),
-                    onClick = { globalViewModel.proberPlatform = it },
-                    selected = it == globalViewModel.proberPlatform
-                ) {
-                    Text(it.proberName)
-                }
-            }
+            partA(Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+            )
+            VerticalDivider(Modifier.fillMaxHeight())
+            partB(Modifier.weight(1f))
         }
-
-        SingleChoiceSegmentedButtonRow(
+    } else {
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp)
-                .fillMaxWidth()
         ) {
-            GameType.entries.forEach {
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = it.ordinal, count = GameType.entries.size
-                    ),
-                    selected = globalViewModel.gameType == it,
-                    onClick = {
-                        globalViewModel.gameType = it
-                        refreshScore(it)
-                    },
-                ) {
-                    Text(it.displayName)
-                }
-            }
-        }
-
-        PasswordTextFiled(
-            modifier = Modifier.padding(15.dp).fillMaxWidth().height(75.dp),
-            label = { Text("查分器Token") },
-            icon = { Icon(Icons.Filled.Lock, null) },
-            hidden = SyncViewModel.tokenHidden,
-            value = when (globalViewModel.proberPlatform) {
-                ProberPlatform.DIVING_FISH -> divingfishToken
-                ProberPlatform.LXNS -> lxnsToken
-                ProberPlatform.LOCAL -> ""
-            },
-            onTrailingIconClick = { SyncViewModel.tokenHidden = !SyncViewModel.tokenHidden },
-            onValueChange = {
-                when (globalViewModel.proberPlatform) {
-                    ProberPlatform.DIVING_FISH -> {
-                        divingfishToken = it
-                        application.configManager.config.divingfishToken = it
-                    }
-                    else -> {
-                        lxnsToken = it
-                        application.configManager.config.lxnsToken = it
-                    }
-                }
-                application.configManager.save()
-            },
-            enable = globalViewModel.proberPlatform != ProberPlatform.LOCAL
-        )
-
-        Button(
-            modifier = Modifier
-                .padding(15.dp)
-                .size(300.dp, 50.dp),
-            onClick = {
-                application.copyTextToClipboard("http://127.0.0.2:${HttpServer.Port}/${globalViewModel.gameType.ordinal}")
-            }
-        ) {
-            Text("复制${globalViewModel.gameType.displayName} Hook链接(长期有效)")
-        }
-
-        Button(
-            modifier = Modifier
-                .padding(15.dp)
-                .size(300.dp, 50.dp),
-            onClick = {
-                if (!checkResourceComplate(context)) {
-                    SyncViewModel.openInitDialog = true
-                } else {
-                    openAskIsOverwriteScoresDialog = true
-                }
-            },
-            enabled = globalViewModel.proberPlatform != ProberPlatform.LOCAL
-        ) {
-            Text("从选定的查分器获取 ${globalViewModel.gameType.displayName} 成绩")
-        }
-
-        Button(
-            modifier = Modifier
-                .padding(15.dp)
-                .size(300.dp, 50.dp),
-            onClick = {
-                openAskOverwriteUserInfo = true
-            },
-            enabled = globalViewModel.proberPlatform != ProberPlatform.LOCAL
-        ) {
-            Text("从选定的查分器获取 ${globalViewModel.gameType.displayName} 个人信息")
+            partA()
+            HorizontalDivider()
+            partB()
         }
     }
 }

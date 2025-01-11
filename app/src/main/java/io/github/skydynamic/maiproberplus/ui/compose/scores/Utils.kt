@@ -1,6 +1,6 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores
 
-import io.github.skydynamic.maiproberplus.ui.compose.GameType
+import io.github.skydynamic.maiproberplus.core.data.GameType
 import io.github.skydynamic.maiproberplus.ui.compose.scores.chuni.refreshChuniScore
 import io.github.skydynamic.maiproberplus.ui.compose.scores.maimai.refreshMaimaiScore
 import io.github.skydynamic.maiproberplus.ui.compose.sync.FileDownloadMeta

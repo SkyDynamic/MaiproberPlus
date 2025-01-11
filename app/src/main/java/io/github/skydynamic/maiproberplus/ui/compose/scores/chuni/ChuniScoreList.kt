@@ -46,7 +46,7 @@ import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.R
 import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.deleteAllScore
-import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
+import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -62,10 +62,11 @@ fun ChuniScoreList(
     var loadedItemCount by remember { mutableIntStateOf(30) }
     val scoreDisplayType = application.configManager.config.scoreDisplayType
     val scoreColorOverlayType = application.configManager.config.scoreStyleType
-    val gridColumnsNumber = when (scoreDisplayType) {
-        ScoreDisplayType.Large -> 1
-        else -> 2
-    }
+    val gridColumnsNumber =
+        when (scoreDisplayType) {
+            ScoreDisplayType.Large -> 1
+            else -> 2
+        } * if (application.isLandscape) 2 else 1
 
     LaunchedEffect(gridState) {
         snapshotFlow { gridState.firstVisibleItemIndex * gridColumnsNumber }

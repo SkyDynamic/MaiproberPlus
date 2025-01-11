@@ -1,4 +1,4 @@
-package io.github.skydynamic.maiproberplus.ui.compose
+package io.github.skydynamic.maiproberplus.core.data
 
 enum class GameType(
     val displayName: String

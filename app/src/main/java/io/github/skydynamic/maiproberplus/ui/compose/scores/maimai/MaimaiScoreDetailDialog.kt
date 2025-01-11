@@ -54,7 +54,7 @@ import coil3.request.crossfade
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiData
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.deleteScore
 import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
-import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
+import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 import io.github.skydynamic.maiproberplus.ui.compose.scores.common.ColorLevelBox
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
@@ -95,7 +95,7 @@ fun MaimaiScoreDetailDialog(
         modifier = Modifier
             .fillMaxWidth()
             .height(350.dp)
-            .padding(start = 16.dp, end = 16.dp),
+            .padding(horizontal = 16.dp),
     ) {
         Card(
             modifier = Modifier.fillMaxSize(),

@@ -5,7 +5,7 @@ import io.github.skydynamic.maiproberplus.R
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-class MaimaiEnums {
+object MaimaiEnums {
     @Serializable
     enum class SongType(val type: String, val type2: String) {
         @SerialName("standard") STANDARD("standard", "SD"),

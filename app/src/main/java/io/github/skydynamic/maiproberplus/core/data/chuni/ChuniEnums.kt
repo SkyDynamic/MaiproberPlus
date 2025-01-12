@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import io.github.skydynamic.maiproberplus.R
 import kotlinx.serialization.Serializable
 
-class ChuniEnums {
+object ChuniEnums {
     @Serializable
     enum class Difficulty(
         val diffName: String,

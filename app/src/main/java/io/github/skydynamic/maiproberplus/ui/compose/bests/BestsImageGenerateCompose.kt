@@ -30,12 +30,12 @@ import androidx.lifecycle.viewModelScope
 import coil3.compose.AsyncImage
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
+import io.github.skydynamic.maiproberplus.R
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.getMaimaiScoreCache
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
 import io.github.skydynamic.maiproberplus.core.utils.MaimaiB50GenerateUtil
-import io.github.skydynamic.maiproberplus.ui.compose.ImagePreview
-import io.github.skydynamic.maiproberplus.R
+import io.github.skydynamic.maiproberplus.ui.component.ImagePreview
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

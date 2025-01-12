@@ -26,7 +26,7 @@ fun SettingItemGroup(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        modifier = modifier.padding(8.dp),
+        modifier = Modifier.padding(8.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = getCardColor())
     ) {

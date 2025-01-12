@@ -1,4 +1,4 @@
-package io.github.skydynamic.maiproberplus.ui.compose
+package io.github.skydynamic.maiproberplus.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

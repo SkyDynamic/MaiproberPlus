@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.HorizontalDivider
@@ -45,6 +46,7 @@ import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.component.DiffChooseDialog
 import io.github.skydynamic.maiproberplus.ui.component.DownloadDialog
 import io.github.skydynamic.maiproberplus.ui.component.MultiObjectSelectDialog
+import io.github.skydynamic.maiproberplus.ui.component.WindowInsetsSpacer
 import io.github.skydynamic.maiproberplus.ui.compose.scores.resources
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleLarge
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleMiddle
@@ -146,6 +148,11 @@ fun SettingCompose() {
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(if (application.isLandscape) 2 else 1)
     ) {
+        item(
+            span = StaggeredGridItemSpan.FullLine
+        ) {
+            WindowInsetsSpacer.TopPaddingSpacer()
+        }
         item {
             SettingItemGroup(
                 modifier = Modifier
@@ -627,6 +634,13 @@ fun SettingCompose() {
                     modifier = Modifier
                         .padding(15.dp, top = 0.dp, bottom = 0.dp)
                 )
+            }
+        }
+        item(
+            span = StaggeredGridItemSpan.FullLine
+        ) {
+            if (application.isLandscape) {
+                WindowInsetsSpacer.BottomPaddingSpacer()
             }
         }
     }

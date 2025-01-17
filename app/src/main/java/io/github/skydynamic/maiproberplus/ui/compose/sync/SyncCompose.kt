@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -50,6 +51,7 @@ import io.github.skydynamic.maiproberplus.core.proxy.HttpServer
 import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.component.DownloadDialog
 import io.github.skydynamic.maiproberplus.ui.component.InfoDialog
+import io.github.skydynamic.maiproberplus.ui.component.WindowInsetsSpacer
 import io.github.skydynamic.maiproberplus.ui.compose.scores.refreshScore
 import io.github.skydynamic.maiproberplus.ui.compose.scores.resources
 import io.github.skydynamic.maiproberplus.ui.compose.setting.PasswordTextFiled
@@ -57,6 +59,7 @@ import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SyncCompose() {
     val context = LocalContext.current
@@ -372,31 +375,46 @@ fun SyncCompose() {
     }
 
     if (application.isLandscape) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            partA(Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-            )
-            VerticalDivider(Modifier.fillMaxHeight())
-            partB(Modifier.weight(1f))
+            WindowInsetsSpacer.TopPaddingSpacer()
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                partA(
+                    Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                )
+                VerticalDivider(Modifier.fillMaxHeight())
+                partB(Modifier.weight(1f))
+            }
+            WindowInsetsSpacer.BottomPaddingSpacer()
         }
     } else {
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
+        Row(
+            Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
         ) {
-            partA()
-            HorizontalDivider()
-            partB()
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
+            ) {
+                WindowInsetsSpacer.TopPaddingSpacer()
+                partA()
+                HorizontalDivider()
+                partB()
+            }
         }
     }
 }

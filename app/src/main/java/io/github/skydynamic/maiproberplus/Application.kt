@@ -21,12 +21,15 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -48,6 +51,8 @@ import java.io.FileOutputStream
 import java.io.InputStream
 
 object GlobalViewModel : ViewModel() {
+    var windowInsetsPadding by mutableStateOf(PaddingValues(0.dp))
+
     var isVpnServiceRunning by mutableStateOf(LocalVpnService.IsRunning)
     var showMessageDialog by mutableStateOf(false)
     var proberPlatform by mutableStateOf(ProberPlatform.DIVING_FISH)
@@ -68,9 +73,18 @@ class Application : Application() {
     lateinit var configManager: ConfigManager
     lateinit var proberContext: ProberContext
     lateinit var db: AppDatabase
+
     val isLandscape: Boolean
         @Composable get() =
             LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    val layoutDirection: LayoutDirection
+        @Composable get() =
+            if (LocalConfiguration.current.layoutDirection == Configuration.SCREENLAYOUT_LAYOUTDIR_RTL) {
+                LayoutDirection.Rtl
+            } else {
+                LayoutDirection.Ltr
+            }
 
     override fun onCreate() {
         super.onCreate()

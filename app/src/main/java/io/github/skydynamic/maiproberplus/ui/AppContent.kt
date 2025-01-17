@@ -5,6 +5,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -31,11 +32,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.utils.checkResourceComplete
 import io.github.skydynamic.maiproberplus.ui.component.DownloadDialog
 import io.github.skydynamic.maiproberplus.ui.component.InfoDialog
+import io.github.skydynamic.maiproberplus.ui.component.WindowInsetsSpacer
 import io.github.skydynamic.maiproberplus.ui.compose.bests.BestsImageGenerateCompose
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerCompose
 import io.github.skydynamic.maiproberplus.ui.compose.setting.SettingCompose
@@ -72,72 +75,92 @@ fun AppContent() {
         openInitDownloadDialog = true
     }
 
-    if (application.isLandscape) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
+    Scaffold(
+        Modifier.fillMaxSize()
+    ) { insetsPadding ->
+        GlobalViewModel.windowInsetsPadding = insetsPadding
+
+        Box(
+            Modifier
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            NavigationRail(
-                containerColor = NavigationBarDefaults.containerColor,
-            ) {
-                items.forEachIndexed { index, item ->
-                    NavigationRailItem(
-                        icon = {
-                            Icon(
-                                if (GlobalViewModel.currentTab == index) selectedIcons[index] else unselectedIcons[index],
-                                contentDescription = item
+            if (application.isLandscape) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    NavigationRail(
+                        containerColor = NavigationBarDefaults.containerColor,
+                        modifier = Modifier
+                            .padding(start = WindowInsetsSpacer.startPadding)
+                    ) {
+                        items.forEachIndexed { index, item ->
+                            NavigationRailItem(
+                                icon = {
+                                    Icon(
+                                        if (GlobalViewModel.currentTab == index) selectedIcons[index] else unselectedIcons[index],
+                                        contentDescription = item
+                                    )
+                                },
+                                label = { Text(item) },
+                                selected = GlobalViewModel.currentTab == index,
+                                onClick = { GlobalViewModel.currentTab = index },
+                                modifier = Modifier
+                                    .weight(1f)
                             )
-                        },
-                        label = { Text(item) },
-                        selected = GlobalViewModel.currentTab == index,
-                        onClick = { GlobalViewModel.currentTab = index },
+                        }
+                    }
+
+                    Crossfade(
+                        targetState = GlobalViewModel.currentTab,
+                        animationSpec = tween(durationMillis = 500),
+                        label = "pageCross",
                         modifier = Modifier
                             .weight(1f)
-                    )
-                }
-            }
-
-            Crossfade(
-                targetState = GlobalViewModel.currentTab,
-                animationSpec = tween(durationMillis = 500),
-                label = "pageCross"
-            ) { targetState ->
-                composeList[targetState]()
-            }
-        }
-    } else {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            bottomBar = {
-                NavigationBar {
-                    items.forEachIndexed { index, item ->
-                        NavigationBarItem(
-                            icon = {
-                                Icon(
-                                    if (GlobalViewModel.currentTab == index) selectedIcons[index] else unselectedIcons[index],
-                                    contentDescription = item
-                                )
-                            },
-                            label = { Text(item) },
-                            selected = GlobalViewModel.currentTab == index,
-                            onClick = { GlobalViewModel.currentTab = index }
-                        )
+                            .padding(
+                                start = if (application.isLandscape) 0.dp else WindowInsetsSpacer.startPadding,
+                                end = WindowInsetsSpacer.endPadding
+                            )
+                    ) { targetState ->
+                        composeList[targetState]()
                     }
                 }
-            }
-        ) { padding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                Crossfade(
-                    targetState = GlobalViewModel.currentTab,
-                    animationSpec = tween(durationMillis = 500),
-                    label = "pageCross"
-                ) { targetState ->
-                    composeList[targetState]()
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Crossfade(
+                        targetState = GlobalViewModel.currentTab,
+                        animationSpec = tween(durationMillis = 500),
+                        label = "pageCross",
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(
+                                start = if (application.isLandscape) 0.dp else WindowInsetsSpacer.startPadding,
+                                end = WindowInsetsSpacer.endPadding
+                            )
+                    ) { targetState ->
+                        composeList[targetState]()
+                    }
+                    NavigationBar(
+                        modifier = Modifier
+                            .padding(bottom = WindowInsetsSpacer.bottomPadding)
+                    ) {
+                        items.forEachIndexed { index, item ->
+                            NavigationBarItem(
+                                icon = {
+                                    Icon(
+                                        if (GlobalViewModel.currentTab == index) selectedIcons[index] else unselectedIcons[index],
+                                        contentDescription = item
+                                    )
+                                },
+                                label = { Text(item) },
+                                selected = GlobalViewModel.currentTab == index,
+                                onClick = { GlobalViewModel.currentTab = index }
+                            )
+                        }
+                    }
                 }
             }
         }

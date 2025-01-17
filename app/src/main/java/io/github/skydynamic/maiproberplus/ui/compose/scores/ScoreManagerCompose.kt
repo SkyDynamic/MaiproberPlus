@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import io.github.skydynamic.maiproberplus.core.data.GameType
 import io.github.skydynamic.maiproberplus.core.utils.checkResourceComplete
 import io.github.skydynamic.maiproberplus.ui.component.DownloadDialog
+import io.github.skydynamic.maiproberplus.ui.component.WindowInsetsSpacer
 import io.github.skydynamic.maiproberplus.ui.compose.scores.chuni.ChuniScoreList
 import io.github.skydynamic.maiproberplus.ui.compose.scores.maimai.MaimaiScoreList
 
@@ -62,6 +63,7 @@ fun ScoreManagerCompose() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp, vertical = 16.dp)
+                .padding(top = WindowInsetsSpacer.topPadding)
         ) {
             GameType.entries.forEach {
                 SegmentedButton(

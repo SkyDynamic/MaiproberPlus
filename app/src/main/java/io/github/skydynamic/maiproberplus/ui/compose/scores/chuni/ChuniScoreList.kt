@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,6 +48,7 @@ import io.github.skydynamic.maiproberplus.R
 import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.deleteAllScore
 import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
+import io.github.skydynamic.maiproberplus.ui.component.WindowInsetsSpacer
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -133,11 +135,12 @@ fun ChuniScoreList(
         state = gridState
     ) {
         item(
-            span = {
-                GridItemSpan(maxLineSpan)
-            }
+            span = { GridItemSpan(maxLineSpan) }
         ) {
-            Spacer(Modifier.height(64.dp))
+            Column {
+                WindowInsetsSpacer.TopPaddingSpacer()
+                Spacer(Modifier.height(64.dp))
+            }
         }
         // Top Spacer
 
@@ -260,6 +263,35 @@ fun ChuniScoreList(
                 }
             )
         }
+
+        item(
+            span = { GridItemSpan(maxCurrentLineSpan) }
+        ) {
+            Box(
+                Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                if (
+                    loadedItemCount >=
+                        if (ScoreManagerViewModel.chuniSearchText.value.isNotEmpty())
+                            ScoreManagerViewModel.chuniSearchScores.size
+                        else ScoreManagerViewModel.chuniLoadedScores.size
+                ) {
+                    Text("到底了...")
+                } else {
+                    Text("加载中...")
+                }
+            }
+        }
+
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
+            if (application.isLandscape) {
+                WindowInsetsSpacer.BottomPaddingSpacer()
+            }
+        }
     }
 
     AnimatedVisibility(
@@ -280,6 +312,14 @@ fun ChuniScoreList(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
+                    .padding(
+                        bottom = if (application.isLandscape) {
+                            WindowInsetsSpacer.bottomPadding
+                        } else {
+                            0.dp
+                        },
+                        end =WindowInsetsSpacer.endPadding,
+                    )
             ) {
                 Icon(
                     painterResource(R.drawable.arrow_upward_24px),

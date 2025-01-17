@@ -12,6 +12,7 @@ import android.content.ComponentName
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -20,9 +21,12 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -34,10 +38,10 @@ import androidx.room.Room
 import io.github.skydynamic.maiproberplus.core.ProberContext
 import io.github.skydynamic.maiproberplus.core.config.ConfigManager
 import io.github.skydynamic.maiproberplus.core.config.ConfigStorage
+import io.github.skydynamic.maiproberplus.core.data.GameType
 import io.github.skydynamic.maiproberplus.core.database.AppDatabase
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServerService
-import io.github.skydynamic.maiproberplus.ui.compose.GameType
 import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService
 import java.io.File
 import java.io.FileOutputStream
@@ -51,6 +55,8 @@ object GlobalViewModel : ViewModel() {
     var maimaiHooking by mutableStateOf(false)
     var chuniHooking by mutableStateOf(false)
 
+    var currentTab by mutableIntStateOf(0)
+
     private val _localMessage = MutableLiveData<String>()
     val localMessage: LiveData<String> get() = _localMessage
     fun sendAndShowMessage(message: String) {
@@ -62,6 +68,9 @@ class Application : Application() {
     lateinit var configManager: ConfigManager
     lateinit var proberContext: ProberContext
     lateinit var db: AppDatabase
+    val isLandscape: Boolean
+        @Composable get() =
+            LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     override fun onCreate() {
         super.onCreate()

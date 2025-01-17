@@ -11,14 +11,6 @@ on:
       - '*.gradle.kts'
       - 'gradle.properties'
 
-  pull_request:
-    paths:
-      - 'app/**'
-      - 'gradle/**'
-      - '.github/workflows/**'
-      - '*.gradle.kts'
-      - 'gradle.properties'
-
 jobs:
   build:
     runs-on: ubuntu-latest

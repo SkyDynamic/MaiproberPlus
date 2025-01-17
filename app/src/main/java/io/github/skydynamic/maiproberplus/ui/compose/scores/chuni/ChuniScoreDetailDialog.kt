@@ -56,7 +56,7 @@ import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniData
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniScoreManager.deleteScore
 import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
-import io.github.skydynamic.maiproberplus.ui.compose.ConfirmDialog
+import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerViewModel
 import io.github.skydynamic.maiproberplus.ui.compose.scores.common.ColorLevelBox
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
@@ -92,7 +92,10 @@ fun ChuniScoreDetailDialog(
 
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = Modifier.fillMaxWidth().height(350.dp).padding(start = 16.dp, end = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(350.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Card(
             modifier = Modifier.fillMaxSize(),

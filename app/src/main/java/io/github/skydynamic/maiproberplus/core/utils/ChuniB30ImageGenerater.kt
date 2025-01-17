@@ -22,8 +22,8 @@ import kotlinx.coroutines.runBlocking
 import java.text.NumberFormat
 
 object ChuniB30ImageGenerater {
-    private val decimalFormat = DecimalFormat("#.##").apply {
-        roundingMode = BigDecimal.ROUND_UP
+    private val decimalFormat = DecimalFormat("0.00").apply {
+        roundingMode = BigDecimal.ROUND_DOWN
     }
 
     private val ratingNumXPosList = listOf<Float>(
@@ -31,7 +31,9 @@ object ChuniB30ImageGenerater {
     ).reversed()
 
     private fun getPlayerRating(b30: List<ChuniScoreEntity>, r10: List<ChuniScoreEntity>): Double {
-        return (b30.sumOf { it.rating.toDouble() } + r10.sumOf { it.rating.toDouble() }) / 40
+        return (b30.sumOf { decimalFormat.format(it.rating).toDouble() }
+                + r10.sumOf { decimalFormat.format(it.rating).toDouble() }
+                ) / 40
     }
 
     private fun getRatingColor(rating: Double): String = when {
@@ -83,11 +85,8 @@ object ChuniB30ImageGenerater {
 
     private fun getRatingNumIcoList(rating: Double, color: String): List<Bitmap> {
         val ratingList = mutableListOf<Bitmap>()
-        val decimalFormat = DecimalFormat("#.##").apply {
-            roundingMode = BigDecimal.ROUND_DOWN
-        }
-        val rating = decimalFormat.format(rating).toDouble()
-        val raString = if (rating < 10) {
+        val rating = decimalFormat.format(rating)
+        val raString = if (rating.toDouble() < 10) {
             " $rating"
         } else rating.toString()
         for (string in raString.toString()) {
@@ -263,7 +262,7 @@ object ChuniB30ImageGenerater {
             font = R.font.fot_b
         )
         canvas.drawText(
-            config.userInfo.name,
+            config.userInfo.name.toHalfWidth(),
             32f, 256f, 157f, 220,
             font = R.font.source_han_sans_37,
             overflow = TextOverflow.SCALE_DOWN_TEXT
@@ -276,14 +275,14 @@ object ChuniB30ImageGenerater {
         }
         canvas.drawText(
             "${decimalFormat.format(b30Score.sumOf { it.rating.toDouble() } / 30)}",
-            24f, 835f, 95f,
+            24f, 835f, 97f,
             font = R.font.fot_b,
             align = TextAlign.Center,
             color = Color.rgb(30, 54, 99)
         )
         canvas.drawText(
             "${decimalFormat.format(r10Score.sumOf { it.rating.toDouble() / 10})}",
-            24f, 835f, 135f,
+            24f, 835f, 137f,
             font = R.font.fot_b,
             align = TextAlign.Center,
             color = Color.rgb(30, 54, 99)
@@ -292,7 +291,7 @@ object ChuniB30ImageGenerater {
             "${decimalFormat.format(
                 ((r10Score.first().rating * 10) + b30Score.sumOf { it.rating.toDouble() }) / 40
             )}",
-            24f, 835f, 175f,
+            24f, 835f, 177f,
             font = R.font.fot_b,
             align = TextAlign.Center,
             color = Color.rgb(30, 54, 99)
@@ -338,7 +337,7 @@ object ChuniB30ImageGenerater {
             drawJobs.joinAll()
         }
 
-        resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
         outputStream.close()
 
         val endTime = System.currentTimeMillis()

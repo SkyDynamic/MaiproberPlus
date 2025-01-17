@@ -590,7 +590,7 @@ object MaimaiB50GenerateUtil {
             drawJobs.joinAll()
         }
 
-        resultBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        resultBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
 
         outputStream.close()
         val endTime = System.currentTimeMillis()

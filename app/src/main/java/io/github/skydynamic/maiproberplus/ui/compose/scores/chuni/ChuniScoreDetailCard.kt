@@ -1,6 +1,7 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores.chuni
 
 import android.icu.math.BigDecimal
+import android.icu.text.DecimalFormat
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -138,7 +139,9 @@ fun ChuniScoreDetailCard(
                     )
                     Text(
                         text = "Rating: ${
-                            BigDecimal(rating.toDouble()).setScale(2, BigDecimal.ROUND_UP).toDouble()
+                            DecimalFormat("0.00").apply { 
+                                roundingMode = BigDecimal.ROUND_UP
+                            }.format(rating)
                         }",
                         style = MaterialTheme.typography.labelSmall.copy(
                             shadow = when (scoreStyleType) {

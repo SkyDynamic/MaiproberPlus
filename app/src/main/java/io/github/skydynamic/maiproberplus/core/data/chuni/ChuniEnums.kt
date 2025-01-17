@@ -22,22 +22,13 @@ object ChuniEnums {
         companion object {
             @JvmStatic
             fun getDifficultyWithName(diffName: String): Difficulty {
-                for (difficulty in entries) {
-                    if (difficulty.diffName.lowercase() == diffName.lowercase()) {
-                        return difficulty
-                    }
-                }
-                throw IllegalArgumentException("No such difficulty")
+                return entries.filter { it.diffName.lowercase() == diffName.lowercase() }
+                    .getOrElse(0) { BASIC }
             }
 
             @JvmStatic
             fun getDifficultyWithIndex(diffIndex: Int): Difficulty {
-                for (difficulty in entries) {
-                    if (difficulty.ordinal == diffIndex) {
-                        return difficulty
-                    }
-                }
-                throw IllegalArgumentException("No such difficulty")
+                return entries.filter { it.diffIndex == diffIndex }.getOrElse(0) { BASIC }
             }
         }
     }
@@ -54,12 +45,8 @@ object ChuniEnums {
         companion object {
             @JvmStatic
             fun getClearTypeWithName(typeName: String): ClearType {
-                for (type in ClearType.entries) {
-                    if (type.type.lowercase() == typeName.lowercase()) {
-                        return type
-                    }
-                }
-                return FAILED
+                return entries.filter { it.type.lowercase() == typeName.lowercase() }
+                    .getOrElse(0) { CLEAR }
             }
         }
     }
@@ -74,12 +61,8 @@ object ChuniEnums {
         companion object {
             @JvmStatic
             fun getFullComboTypeWithName(typeName: String): FullComboType {
-                for (type in FullComboType.entries) {
-                    if (type.typeName.lowercase() == typeName.lowercase()) {
-                        return type
-                    }
-                }
-                return NULL
+                return entries.filter { it.typeName.lowercase() == typeName.lowercase() }
+                    .getOrElse(0) { NULL }
             }
         }
     }
@@ -93,12 +76,8 @@ object ChuniEnums {
         companion object {
             @JvmStatic
             fun getFullChainTypeWithName(typeName: String): FullChainType {
-                for (type in FullChainType.entries) {
-                    if (type.typeName.lowercase() == typeName.lowercase()) {
-                        return type
-                    }
-                }
-                return NULL
+                return entries.filter { it.typeName.lowercase() == typeName.lowercase() }
+                    .getOrElse(0) { NULL }
             }
         }
     }
@@ -127,13 +106,7 @@ object ChuniEnums {
         companion object {
             @JvmStatic
             fun getRankTypeByScore(score: Int): RankType {
-                var returnValue = D
-                for (rank in entries) {
-                    if (score in rank.intRange) {
-                        returnValue = rank
-                    }
-                }
-                return returnValue
+                return entries.filter { score in it.intRange }.getOrElse(0) { D }
             }
         }
     }

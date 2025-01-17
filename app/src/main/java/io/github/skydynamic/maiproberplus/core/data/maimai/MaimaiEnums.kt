@@ -15,12 +15,7 @@ object MaimaiEnums {
         companion object {
             @JvmStatic
             fun getSongTypeByName(typeName: String): SongType {
-                for (songType in SongType.entries) {
-                    if (typeName == songType.type || typeName == songType.type2) {
-                        return songType
-                    }
-                }
-                return STANDARD
+                return entries.filter { it.type == typeName }.getOrElse(0) { STANDARD }
             }
         }
     }
@@ -36,12 +31,7 @@ object MaimaiEnums {
         companion object {
             @JvmStatic
             fun getDifficultyWithIndex(diffIndex: Int): Difficulty {
-                for (difficulty in entries) {
-                    if (difficulty.diffIndex == diffIndex) {
-                        return difficulty
-                    }
-                }
-                throw IllegalArgumentException("No such difficulty")
+                return entries.filter { it.diffIndex == diffIndex }.getOrElse(0) { BASIC }
             }
         }
     }
@@ -70,13 +60,7 @@ object MaimaiEnums {
         companion object {
             @JvmStatic
             fun getRankTypeByScore(score: Float): RankType {
-                var returnValue = D
-                for (rank in entries) {
-                    if (score in rank.scoreRange) {
-                        returnValue = rank
-                    }
-                }
-                return returnValue
+                return entries.filter { score in it.scoreRange }.getOrElse(0) { D }
             }
         }
     }
@@ -97,12 +81,7 @@ object MaimaiEnums {
         companion object {
             @JvmStatic
             fun getFullComboTypeByName(typeName: String): FullComboType {
-                for (fullComboType in FullComboType.entries) {
-                    if (typeName == fullComboType.typeName) {
-                        return fullComboType
-                    }
-                }
-                return NULL
+                return entries.filter { it.typeName == typeName }.getOrElse(0) { NULL }
             }
         }
     }
@@ -124,12 +103,7 @@ object MaimaiEnums {
         companion object {
             @JvmStatic
             fun getSyncTypeByName(syncName: String): SyncType {
-                for (syncType in SyncType.entries) {
-                    if (syncName == syncType.syncName) {
-                        return syncType
-                    }
-                }
-                return NULL
+                return entries.filter { it.syncName == syncName }.getOrElse(0) { NULL }
             }
         }
     }

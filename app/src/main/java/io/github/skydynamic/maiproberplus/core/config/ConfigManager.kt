@@ -82,11 +82,12 @@ data class LocalConfig(
 
 @Serializable
 data class UserInfo(
-    var name: String = "maimaiDX",
+    var name: String = "MaiProberPlus",
     var maimaiDan: Int = 0,
     var maimaiIcon: Int = 1,
     var maimaiPlate: Int = 1,
     var maimaiClass: Int = 0,
-    var shougou: String = "Welcome to maimaiDX",
-    var shougouColor: String = "normal"
+    val chuniCharacter: Int = 0,
+    var shougou: String = "Generate by MaiProberPlus",
+    var shougouColor: String = "normal",
 )

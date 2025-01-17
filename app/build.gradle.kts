@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.symbol.processing)
+    id("androidx.room")
 }
 
 val appVersion: String = "1.2.1"
@@ -123,6 +124,10 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor3)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 tasks.register("getCurrentAppVersion") {

@@ -58,6 +58,17 @@ class LxnsProberUtil : IProberUtil {
     ) : LxnsResponse()
 
     @Serializable
+    data class LxnsGetChuniScoreBestsResponse(
+        val data: LxnsChuniBestsBody
+    ) : LxnsResponse() {
+        @Serializable
+        data class LxnsChuniBestsBody(
+            val bests: List<LxnsChuniScoreBody>,
+            val recents: List<LxnsChuniScoreBody>
+        )
+    }
+
+    @Serializable
     data class LxnsGetChuniScoreResponse(
         val data: List<LxnsChuniScoreBody>
     ) : LxnsResponse()
@@ -71,7 +82,7 @@ class LxnsProberUtil : IProberUtil {
         val score: Int,
         val rating: Float = 0.0F,
         @SerialName("over_power") val overPower: Float = 0.0F,
-        val clear: String,
+        val clear: String = "failed",
         @SerialName("full_combo") val fullCombo: String? = "",
         @SerialName("full_chain") val fullChain: String? = "",
         val rank: String = "",
@@ -337,32 +348,71 @@ class LxnsProberUtil : IProberUtil {
                 header("X-User-Token", importToken)
             }
             val body = response.body<LxnsGetChuniScoreResponse>()
-            val parseList = arrayListOf<ChuniScoreEntity>()
-            body.data.forEach {
-                val diff = ChuniEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
-                val levelValue = ChuniData.getLevelValue(it.songName, diff)
-                val version = ChuniData.getChartVersion(it.songName, diff)
-                parseList.add(
-                    ChuniScoreEntity(
-                        songId = it.id,
-                        title = it.songName,
-                        level = levelValue,
-                        score = it.score,
-                        rating = it.rating,
-                        version = version,
-                        diff = diff,
-                        rankType = ChuniEnums.RankType.getRankTypeByScore(it.score),
-                        fullComboType = ChuniEnums.FullComboType.getFullComboTypeWithName(it.fullCombo ?: ""),
-                        clearType = ChuniEnums.ClearType.getClearTypeWithName(it.clear),
-                        fullChainType = ChuniEnums.FullChainType.getFullChainTypeWithName(it.fullChain ?: "")
-                    )
-                )
-            }
+            var parseList = addChuniScoreDataToList(
+                scores = body.data,
+                list = arrayListOf(),
+                recent = false
+            )
             return parseList
         } catch (e: Exception) {
             Log.d("LxnsProberUtil", "获取中二成绩失败: $e", e)
             sendMessageToUi("获取中二成绩失败: ${e.message}")
             return emptyList()
         }
+    }
+
+    override suspend fun getChuniScoreBests(importToken: String): List<ChuniScoreEntity> {
+        try {
+            val response = client.get("$baseApiUrl/api/v0/user/chunithm/player/bests") {
+                header("X-User-Token", importToken)
+            }
+            val body = response.body<LxnsGetChuniScoreBestsResponse>()
+            var parseList = addChuniScoreDataToList(
+                scores = body.data.bests,
+                list = arrayListOf(),
+                recent = false
+            )
+            parseList = addChuniScoreDataToList(
+                scores = body.data.recents,
+                list = parseList,
+                recent = true
+            )
+            return parseList
+        } catch (e: Exception) {
+            Log.d("LxnsProberUtil", "获取中二成绩失败: $e", e)
+            sendMessageToUi("获取中二成绩失败: ${e.message}")
+            return emptyList()
+        }
+    }
+
+    fun addChuniScoreDataToList(
+        scores: List<LxnsChuniScoreBody>,
+        list:  ArrayList<ChuniScoreEntity>,
+        recent: Boolean = false
+    ): ArrayList<ChuniScoreEntity> {
+        scores.forEach {
+            val diff = ChuniEnums.Difficulty.getDifficultyWithIndex(it.levelIndex)
+            val levelValue = ChuniData.getLevelValue(it.songName, diff)
+            val version = ChuniData.getChartVersion(it.songName, diff)
+            list.add(
+                ChuniScoreEntity(
+                    songId = it.id,
+                    title = it.songName,
+                    level = levelValue,
+                    score = it.score,
+                    rating = it.rating,
+                    version = version,
+                    diff = diff,
+                    rankType = ChuniEnums.RankType.getRankTypeByScore(it.score),
+                    fullComboType =
+                        ChuniEnums.FullComboType.getFullComboTypeWithName(it.fullCombo ?: ""),
+                    clearType = ChuniEnums.ClearType.getClearTypeWithName(it.clear),
+                    fullChainType =
+                        ChuniEnums.FullChainType.getFullChainTypeWithName(it.fullChain ?: ""),
+                    recent = recent
+                )
+            )
+        }
+        return list
     }
 }

@@ -19,5 +19,6 @@ data class ChuniScoreEntity(
     val diff: ChuniEnums.Difficulty,
     val fullComboType: ChuniEnums.FullComboType,
     val clearType: ChuniEnums.ClearType,
-    val fullChainType: ChuniEnums.FullChainType
+    val fullChainType: ChuniEnums.FullChainType,
+    val recent: Boolean = false
 )

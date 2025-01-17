@@ -12,8 +12,7 @@ import io.github.skydynamic.maiproberplus.core.database.inteface.MaimaiScoreDao
         MaimaiScoreEntity::class,
         ChuniScoreEntity::class
     ],
-    version = 1,
-    exportSchema = false
+    version = 2
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun maimaiScoreDao() : MaimaiScoreDao

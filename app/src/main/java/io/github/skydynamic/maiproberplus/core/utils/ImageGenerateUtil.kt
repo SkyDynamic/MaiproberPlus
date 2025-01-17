@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.Typeface
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 
@@ -21,6 +20,11 @@ class TextOutline(
 
 fun Canvas.drawImage(bitmap: Bitmap, x: Float, y: Float) {
     this.drawBitmap(bitmap, x, y, null)
+}
+
+enum class TextOverflow {
+    TRUNCATE_WITH_ELLIPSIS,
+    SCALE_DOWN_TEXT
 }
 
 private fun truncateTextToFitWidth(text: String, maxWidth: Float, paint: Paint): String {
@@ -46,7 +50,6 @@ private fun truncateTextToFitWidth(text: String, maxWidth: Float, paint: Paint):
     return truncatedText
 }
 
-
 fun Canvas.drawText(
     text: String,
     textSize: Float,
@@ -56,7 +59,8 @@ fun Canvas.drawText(
     font: Int? = null,
     color: Int? = null,
     outline: TextOutline? = null,
-    align: TextAlign = TextAlign.Left
+    align: TextAlign = TextAlign.Left,
+    overflow: TextOverflow = TextOverflow.TRUNCATE_WITH_ELLIPSIS
 ) {
     val paint = Paint()
 
@@ -69,7 +73,33 @@ fun Canvas.drawText(
         Typeface.DEFAULT_BOLD
     }
 
-    val truncatedText = truncateTextToFitWidth(text, maxText.toFloat(), paint)
+    var finalText = text
+    var finalTextSize = textSize
+
+    when (overflow) {
+        TextOverflow.TRUNCATE_WITH_ELLIPSIS -> {
+            finalText = truncateTextToFitWidth(text, maxText.toFloat(), paint)
+        }
+        TextOverflow.SCALE_DOWN_TEXT -> {
+            var currentTextSize = textSize
+            var currentTextWidth = paint.measureText(text)
+
+            while (currentTextWidth > maxText.toFloat() && currentTextSize > textSize - 25) {
+                currentTextSize -= 1
+                paint.textSize = currentTextSize
+                currentTextWidth = paint.measureText(text)
+            }
+
+            if (currentTextWidth > maxText.toFloat()) {
+                finalText = truncateTextToFitWidth(text, maxText.toFloat(), paint)
+            } else {
+                finalText = text
+                finalTextSize = currentTextSize
+            }
+        }
+    }
+
+    paint.textSize = finalTextSize
 
     outline?.let {
         val outlinePaint = Paint(paint)
@@ -77,22 +107,14 @@ fun Canvas.drawText(
         outlinePaint.strokeWidth = it.weight
         outlinePaint.color = it.color
 
-        this.drawText(truncatedText, x, y, outlinePaint)
+        this.drawText(finalText, x, y, outlinePaint)
     }
 
-    this.drawText(truncatedText, x, y, paint)
+    this.drawText(finalText, x, y, paint)
 }
 
 fun createScaledBitmapHighQuality(src: Bitmap, dstWidth: Int, dstHeight: Int): Bitmap {
-    val dst = Bitmap.createBitmap(dstWidth, dstHeight, src.config)
-    val canvas = Canvas(dst)
-    val paint = Paint()
-    paint.isAntiAlias = true
-    paint.isFilterBitmap = true
-    paint.isDither = true
-    canvas.drawBitmap(src,
-        Rect(0, 0, src.width, src.height), Rect(0, 0, dstWidth, dstHeight), paint)
-    return dst
+    return Bitmap.createScaledBitmap(src, dstWidth, dstHeight, true)
 }
 
 fun String.toHalfWidth(): String {

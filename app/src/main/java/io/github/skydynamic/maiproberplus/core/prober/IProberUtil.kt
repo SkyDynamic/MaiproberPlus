@@ -13,5 +13,8 @@ interface IProberUtil {
     suspend fun getChuniProberData(importToken: String): List<ChuniScoreEntity> {
         return emptyList()
     }
+    suspend fun getChuniScoreBests(importToken: String): List<ChuniScoreEntity> {
+        return emptyList()
+    }
 }
 

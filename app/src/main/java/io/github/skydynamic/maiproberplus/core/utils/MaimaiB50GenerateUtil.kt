@@ -42,7 +42,7 @@ object MaimaiB50GenerateUtil {
     private fun getDanImage(dan: Int): Bitmap =
         createScaledBitmapHighQuality(
             application.getImageFromAssets("maimai/dan/$dan.png")
-                ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8), 104, 48
+                ?: Bitmap.createBitmap(104, 48, Bitmap.Config.ALPHA_8), 104, 48
         )
 
     private fun getRatingFrame(rating: Int): Bitmap {
@@ -62,7 +62,7 @@ object MaimaiB50GenerateUtil {
         }
         return createScaledBitmapHighQuality(
             application.getImageFromAssets("maimai/rating/$index.png")
-                ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8),
+                ?: Bitmap.createBitmap(225, 44, Bitmap.Config.ALPHA_8),
             225, 44
         )
     }
@@ -80,7 +80,7 @@ object MaimaiB50GenerateUtil {
             MaimaiEnums.Difficulty.REMASTER ->
                 application.getBitmapFromDrawable(R.drawable.ic_maimai_frame_remaster)
         }
-        return createScaledBitmapHighQuality(bitmap, 282, 120)
+        return createScaledBitmapHighQuality(bitmap, 282, 121)
     }
 
     private fun getShougouBitmap(color: String): Bitmap {
@@ -102,7 +102,7 @@ object MaimaiB50GenerateUtil {
         val ratingList = mutableListOf<Bitmap>()
         for (string in rating.toString()) {
             ratingList += createScaledBitmapHighQuality(application.getImageFromAssets("maimai/num/${string}.png")
-                ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8), 19, 22)
+                ?: Bitmap.createBitmap(19,22, Bitmap.Config.ALPHA_8), 19, 22)
         }
         return ratingList.reversed()
     }
@@ -146,7 +146,7 @@ object MaimaiB50GenerateUtil {
     }
 
 
-    fun generateSingleSongBestCard(
+    private fun generateSingleSongBestCard(
         index: Int,
         score: MaimaiScoreEntity
     ): Bitmap {
@@ -185,7 +185,7 @@ object MaimaiB50GenerateUtil {
                     application.getBitmapFromDrawable(R.drawable.ic_maimai_sd)
                 MaimaiEnums.SongType.DX ->
                     application.getBitmapFromDrawable(R.drawable.ic_maimai_dx)
-                else -> Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8)
+                else -> Bitmap.createBitmap(19, 9, Bitmap.Config.ALPHA_8)
             }, 19, 9)
         }
 
@@ -330,7 +330,7 @@ object MaimaiB50GenerateUtil {
         val classBitmap = runBlocking {
             createScaledBitmapHighQuality(
                 application.getImageFromAssets("maimai/class/${config.userInfo.maimaiClass}.png")
-                    ?: Bitmap.createBitmap(0, 0, Bitmap.Config.ALPHA_8),
+                    ?: Bitmap.createBitmap(120, 72, Bitmap.Config.ALPHA_8),
                 120, 72
             )
         }

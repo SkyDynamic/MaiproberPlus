@@ -83,6 +83,9 @@ object ChuniB30ImageGenerater {
 
     private fun getRatingNumIcoList(rating: Double, color: String): List<Bitmap> {
         val ratingList = mutableListOf<Bitmap>()
+        val decimalFormat = DecimalFormat("#.##").apply {
+            roundingMode = BigDecimal.ROUND_DOWN
+        }
         val rating = decimalFormat.format(rating).toDouble()
         val raString = if (rating < 10) {
             " $rating"

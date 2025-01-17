@@ -32,12 +32,15 @@ import coil3.compose.AsyncImage
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.R
+import io.github.skydynamic.maiproberplus.core.config.ConfigStorage
+import io.github.skydynamic.maiproberplus.core.data.GameType
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.getMaimaiScoreCache
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
 import io.github.skydynamic.maiproberplus.core.utils.ChuniB30ImageGenerater
 import io.github.skydynamic.maiproberplus.core.utils.MaimaiB50GenerateUtil
 import io.github.skydynamic.maiproberplus.ui.component.ImagePreview
+import io.github.skydynamic.maiproberplus.ui.compose.scores.refreshScore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

@@ -1,7 +1,6 @@
-name: CI
+name: Pull Request Check
 on:
-  workflow_dispatch:
-  push:
+  pull_request:
     branches:
       - master
     paths:
@@ -45,21 +44,3 @@ jobs:
         with:
           name: app-snapshot
           path: ${{ github.workspace }}/app/build/outputs/apk/snapshot/
-
-      - name: Get short SHA
-        id: short_sha
-        run: echo "::set-output name=short_sha::${GITHUB_SHA:0:7}"
-
-      - name: Get app version
-        id: app_version
-        run: |
-          ./gradlew app:getCurrentAppVersion
-          echo "::set-output name=app_version::$(cat appVersion.txt)"
-
-      - name: Release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          file: ${{ github.workspace }}/app/build/outputs/apk/snapshot/*.apk
-          tag: v${{ steps.app_version.outputs.app_version }}-${{ steps.short_sha.outputs.short_sha }}
-          prerelease: true
-          file_glob: true

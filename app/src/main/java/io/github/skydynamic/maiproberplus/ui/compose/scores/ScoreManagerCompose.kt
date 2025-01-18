@@ -1,10 +1,13 @@
 package io.github.skydynamic.maiproberplus.ui.compose.scores
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -16,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.skydynamic.maiproberplus.core.data.GameType
@@ -58,6 +62,14 @@ fun ScoreManagerCompose() {
                 GameType.Chunithm -> ChuniScoreList(coroutineScope)
             }
         }
+
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(WindowInsetsSpacer.topPadding)
+                .align(Alignment.TopCenter)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+        )
         
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier

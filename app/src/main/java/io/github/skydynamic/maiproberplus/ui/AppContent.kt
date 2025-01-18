@@ -91,8 +91,6 @@ fun AppContent() {
                 ) {
                     NavigationRail(
                         containerColor = NavigationBarDefaults.containerColor,
-                        modifier = Modifier
-                            .padding(start = WindowInsetsSpacer.startPadding)
                     ) {
                         items.forEachIndexed { index, item ->
                             NavigationRailItem(
@@ -143,10 +141,7 @@ fun AppContent() {
                     ) { targetState ->
                         composeList[targetState]()
                     }
-                    NavigationBar(
-                        modifier = Modifier
-                            .padding(bottom = WindowInsetsSpacer.bottomPadding)
-                    ) {
+                    NavigationBar {
                         items.forEachIndexed { index, item ->
                             NavigationBarItem(
                                 icon = {

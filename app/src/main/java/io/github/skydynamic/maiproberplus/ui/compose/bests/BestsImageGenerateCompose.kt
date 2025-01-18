@@ -40,6 +40,7 @@ import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
 import io.github.skydynamic.maiproberplus.core.utils.ChuniB30ImageGenerater
 import io.github.skydynamic.maiproberplus.core.utils.MaimaiB50GenerateUtil
 import io.github.skydynamic.maiproberplus.ui.component.ImagePreview
+import io.github.skydynamic.maiproberplus.ui.component.WindowInsetsSpacer
 import io.github.skydynamic.maiproberplus.ui.compose.scores.refreshScore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -78,6 +79,8 @@ fun BestsImageGenerateCompose() {
             .wrapContentHeight()
             .verticalScroll(rememberScrollState())
     ) {
+        WindowInsetsSpacer.TopPaddingSpacer()
+
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier
                 .padding(16.dp)
@@ -157,6 +160,10 @@ fun BestsImageGenerateCompose() {
                     Text("保存图片到相册")
                 }
             }
+        }
+
+        if (application.isLandscape) {
+            WindowInsetsSpacer.BottomPaddingSpacer()
         }
     }
 }

@@ -26,21 +26,7 @@ jobs:
       - name: Setup Android environment
         uses: android-actions/setup-android@v3
 
-      - name: Decode Keystore
-        uses: timheuer/base64-to-file@v1
-        id: android_keystore
-        with:
-          fileName: "android_keystore.jks"
-          encodedString: ${{ secrets.SIGNING_KEY }}
-
       - name: Build APK with Gradle
         run: |
           chmod +x gradlew
-          ./gradlew assembleSnapshot -Pandroid.injected.signing.store.file=${{ steps.android_keystore.outputs.filePath }} -Pandroid.injected.signing.store.password=${{ secrets.KEY_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        if: ${{ success() }}
-        with:
-          name: app-snapshot
-          path: ${{ github.workspace }}/app/build/outputs/apk/snapshot/
+          ./gradlew assembleSnapshot

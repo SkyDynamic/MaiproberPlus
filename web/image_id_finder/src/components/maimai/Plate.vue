@@ -81,7 +81,7 @@ const plateList = ref<{ id: number, name: string, description: string, genre: st
       </div>
     </div>
 
-  <div class="h-48 w-full" />
+  <div class="h-50 w-full" />
 </template>
 
 <style scoped>

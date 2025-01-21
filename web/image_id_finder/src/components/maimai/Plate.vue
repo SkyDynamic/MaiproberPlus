@@ -71,7 +71,7 @@ const plateList = ref<{ id: number, name: string, description: string, genre: st
     </div>
   </div>
 
-  <div class="flex flex-wrap justify-center gap-4 mt-24 mb-24">
+  <div class="flex flex-wrap justify-center gap-4 mt-24">
     <div v-for="plate in resultVal" :key="plate.id" >
       <PlateSets
           :name="plate.name"
@@ -81,6 +81,7 @@ const plateList = ref<{ id: number, name: string, description: string, genre: st
       </div>
     </div>
 
+  <div class="h-24 w-full" />
 </template>
 
 <style scoped>

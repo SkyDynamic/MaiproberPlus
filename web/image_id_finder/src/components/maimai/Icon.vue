@@ -47,7 +47,8 @@ const resultVal = computed(() => {
       </el-card>
     </div>
   </div>
-  <div class="flex flex-wrap justify-center gap-4 mb-24 mt-4">
+
+  <div class="flex flex-wrap justify-center gap-4 mt-4">
     <div v-for="icon in resultVal" :key="icon.id">
 
       <ImageContent
@@ -57,5 +58,7 @@ const resultVal = computed(() => {
       />
     </div>
   </div>
+
+  <div class="h-24 w-full" />
 </template>
 

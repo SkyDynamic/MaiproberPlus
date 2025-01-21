@@ -59,6 +59,6 @@ const resultVal = computed(() => {
     </div>
   </div>
 
-  <div class="h-50 w-full" />
+  <div class="h-24" />
 </template>
 

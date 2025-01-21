@@ -10,7 +10,7 @@ import TopBar from "@/components/TopBar.vue";
   <el-scrollbar
     class="fixed z-1 bottom-0 right-0 w-full h-100vh md:pl-48"
   >
-    <div class="h-16" />
+    <div class="h-16 block">&nbsp;</div>
     <router-view />
   </el-scrollbar>
 </template>

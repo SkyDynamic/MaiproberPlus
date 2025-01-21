@@ -5,6 +5,7 @@ import {ElMessage} from "element-plus";
 interface Props {
   src: string
   id: string
+  name:string
 }
 
 const props = defineProps<Props>()
@@ -17,28 +18,34 @@ function copyId() {
 </script>
 
 <template>
-  <el-card>
+  <el-card class="mx-4">
     <el-image
-        class="w-24 pb-4"
+        class="w-full"
         :src="src"
-        :fit="'fill'"
+        fit="fill"
         :lazy="true"
         :preview-src-list="[src]"
-
     >
       <template #error>
-        <div class="w-24 h-24">
-          <el-icon size=64><icon-picture /></el-icon>
+        <div class="image-slot">
+          <el-icon size=86><icon-picture /></el-icon>
         </div>
       </template>
     </el-image>
 
+    <div class="w-fit mx-a">
+      <el-text size="large">{{name}}</el-text>
+    </div>
+
     <div class="w-full">
       <el-text>ID: {{id}}</el-text>
-      <el-icon class="float-right pt-1" @click="copyId">
+
+      <el-icon
+          class="cursor-pointer float-right hover:text-blue-500 mt-1"
+          @click="copyId"
+      >
         <CopyDocument />
       </el-icon>
     </div>
-
   </el-card>
 </template>

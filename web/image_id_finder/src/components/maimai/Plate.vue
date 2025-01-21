@@ -1,9 +1,9 @@
 <script setup lang="ts">
-  import PlateSets from "@/components/Plate-sets.vue";
-  import {onMounted, ref, computed} from "vue";
-  import {ElMessage} from "element-plus";
+import PlateSets from "@/components/PlateSets.vue";
+import {computed, onMounted, ref} from "vue";
+import {ElMessage} from "element-plus";
 
-  const plateList = ref<{ id: number, name: string, description: string, genre: string }[]>([]);
+const plateList = ref<{ id: number, name: string, description: string, genre: string }[]>([]);
   const searchQuery = ref('')
   const filteredPlateList = ref<{ id: number, name: string, description: string, genre: string }[]>([])
   const pages = ref(1)
@@ -50,28 +50,28 @@
 </script>
 
 <template>
-
-
-  <div class="sets-container">
-      <div class="w-full mb-4 flex justify-center">
-
-        <el-pagination size="small" layout="prev, pager, next" :total="filteredPlateList.length" @current-change="handlePageChange" />
+  <div class="fixed z-10 top-18 w-full">
+    <div class="md:mr-48">
+      <div class="w-50% mx-a my-4 p-2 radius-10 b-solid b-1 b-[var(--el-border-color)] bg-[var(--el-bg-color)]">
+        <el-input
+          v-model="searchQuery"
+          placeholder="请输入查询内容"
+          clearable
+          @input="handleSearch"
+        />
       </div>
-      <div class="w-full mb-4 flex justify-center">
-      <el-input
-        class="w-2/4"
-        v-model="searchQuery"
-        placeholder="请输入查询内容"
-        clearable
-        @input="handleSearch"
-      />
+    </div>
   </div>
 
-
-
-    
+  <div class="fixed z-10 bottom-4 w-full">
+    <div class="md:mr-48">
+      <el-card class="w-fit mx-a">
+        <el-pagination size="small" layout="prev, pager, next" :total="filteredPlateList.length" @current-change="handlePageChange" />
+      </el-card>
     </div>
-  <div class="img-sets flex flex-wrap justify-center gap-4">
+  </div>
+
+  <div class="flex flex-wrap justify-center gap-4 mt-24">
     <div v-for="plate in resultVal" :key="plate.id" >
       <PlateSets
           :name="plate.name"
@@ -81,4 +81,11 @@
       </div>
     </div>
 
+  <div class="h-24" />
 </template>
+
+<style scoped>
+.radius-10 {
+  border-radius: 10px;
+}
+</style>

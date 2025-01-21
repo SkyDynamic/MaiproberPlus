@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import type { RouteRecordRaw } from 'vue-router'
+import type {RouteRecordRaw} from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 
 import AppLayout from "@/layout/AppLayout.vue";
 import MaimaiIcon from "@/components/maimai/Icon.vue"
@@ -12,18 +12,26 @@ const routes: RouteRecordRaw[] = [
         children: [
             {
                 path: '',
-                redirect: '/maimai-icon'
+                redirect: '/maimai',
+                children: [
+                    {
+                        path: 'maimai',
+                        redirect: '/maimai/icon',
+                        children: [
+                            {
+                                path: 'icon',
+                                component: MaimaiIcon
+                            },
+                            {
+                                path: "plate",
+                                component: MaimaiPlate
+                            }
+                        ]
+                    }
+                ]
             },
-        {
-            path: '/maimai-icon',
-            component: MaimaiIcon
-        },
-        {
-            path: "/maimai-plate",
-            component: MaimaiPlate
-        }
-    ]
-}
+        ]
+    }
 ]
 
 const router = createRouter({

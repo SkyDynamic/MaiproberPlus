@@ -1,0 +1,25 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+a, a:hover, a:focus, a:active {
+    text-decoration: none;
+}
+
+::-webkit-scrollbar {
+    width: 0.3em;
+    height: 0.3em;
+    background: transparent;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 0.3em;
+    background: #aaac;
+}

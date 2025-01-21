@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ImageContent from "@/components/ImageContent.vue";
-import {onMounted, ref, computed} from "vue";
+import {computed, onMounted, ref} from "vue";
 
 const iconList = ref<{ id: number, name: string, description: string, genre: string }[]>([]);
 const pages = ref(1)
@@ -32,11 +32,23 @@ const resultVal = computed(() => {
 </script>
 
 <template>
-      <div class="w-full mb-4 flex justify-center">
-        <el-pagination size="small" layout="prev, pager, next" :total="iconList.length" :default-page-size="50" @current-change="handlePageChange" />
-      </div>
-  <div class="img-sets flex flex-wrap justify-center gap-4">
+  <div
+    class="fixed z-10 bottom-4 w-full"
+  >
+    <div class="md:mr-48">
+      <el-card class="w-fit mx-a">
+        <el-pagination
+            size="small"
+            layout="prev, pager, next"
+            :total="iconList.length"
+            :default-page-size="50"
+            @current-change="handlePageChange"
+        />
+      </el-card>
+    </div>
+  </div>
 
+  <div class="flex flex-wrap justify-center gap-4 mt-4">
     <div v-for="icon in resultVal" :key="icon.id">
 
       <ImageContent
@@ -46,5 +58,7 @@ const resultVal = computed(() => {
       />
     </div>
   </div>
+
+  <div class="h-24" />
 </template>
 

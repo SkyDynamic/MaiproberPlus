@@ -8,15 +8,23 @@ import TopBar from "@/components/TopBar.vue";
   <AppMenu class="fixed w-48 h-full mt-16 hidden md:block" />
 
   <el-scrollbar
-    class="fixed z-1 bottom-0 right-0 w-full h-100vh md:pl-48"
+    class="fixed z-1 bottom-0 right-0 w-full md:pl-48 FIX"
   >
     <div class="h-16 block">&nbsp;</div>
     <router-view />
   </el-scrollbar>
 </template>
 
+<style scoped>
+.FIX {
+  height: calc(100vh - 4rem);
+}
+</style>
+
 <style>
-.el-image-viewer__close {
-  top: calc(40px + 4rem);
+.FIX {
+  .el-image-viewer__close {
+    top: calc(40px + 4rem);
+  }
 }
 </style>

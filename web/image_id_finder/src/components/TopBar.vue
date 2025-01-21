@@ -9,7 +9,7 @@ const isDark = useDark()
 <template>
   <el-page-header
     icon=""
-    class="of-hidden backdrop-blur-lg"
+    class="of-hidden"
   >
     <template #title>
       <img src="@/assets/logo.png" alt="logo" class="w-16 p-2">

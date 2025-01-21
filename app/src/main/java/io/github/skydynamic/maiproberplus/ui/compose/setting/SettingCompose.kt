@@ -511,7 +511,8 @@ fun SettingCompose() {
                         config.userInfo.shougou = it
                         maimaiShougouText = it
                         application.configManager.save()
-                    }
+                    },
+                    label = { Text("称号框内容", fontSize = 12.sp) },
                 )
 
                 HorizontalDivider(

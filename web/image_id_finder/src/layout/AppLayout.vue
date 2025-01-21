@@ -10,16 +10,10 @@ import TopBar from "@/components/TopBar.vue";
   <el-scrollbar
     class="fixed z-1 bottom-0 right-0 w-full md:pl-48 FIX"
   >
-    <div class="h-16 block">&nbsp;</div>
+    <div class="h-32 block">&nbsp;</div>
     <router-view />
   </el-scrollbar>
 </template>
-
-<style scoped>
-.FIX {
-  height: calc(100vh - 4rem);
-}
-</style>
 
 <style>
 .FIX {

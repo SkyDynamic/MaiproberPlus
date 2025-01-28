@@ -107,7 +107,7 @@ suspend fun fetchMaimaiScorePage(
             with(client) {
                 val scoreResp = get(
                     "https://maimai.wahlap.com/maimai-mobile/record/" +
-                            "musicGenre/search/?genre=99&diff=${diff}"
+                            "musicSort/search/?search=V&sort=1&playCheck=on&diff=${diff}"
                 )
                 val body = scoreResp.bodyAsText()
 

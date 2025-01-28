@@ -10,7 +10,7 @@ plugins {
 }
 
 val appVersion: String = "1.2.1"
-val appVersionCode: String = "019"
+val appVersionCode: String = "020"
 
 val gitCommitId: String = try {
     val stdout = ByteArrayOutputStream()

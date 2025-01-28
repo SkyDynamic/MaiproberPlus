@@ -80,7 +80,7 @@ object ParseScorePageUtil {
 
         val document = Jsoup.parse(html)
         document.outputSettings().prettyPrint(false)
-        val musicCards = document.getElementsByClass("w_450 m_15 p_r f_0")
+        val musicCards = document.select("form[action=\"https://maimai.wahlap.com/maimai-mobile/record/musicDetail/\"]")
 
         for (musicCard in musicCards) {
             val musicName = Entities.unescape(musicCard

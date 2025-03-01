@@ -82,12 +82,12 @@ class LxnsProberUtil : IProberUtil {
         val score: Int,
         val rating: Float = 0.0F,
         @SerialName("over_power") val overPower: Float = 0.0F,
-        val clear: String = "failed",
-        @SerialName("full_combo") val fullCombo: String = "",
-        @SerialName("full_chain") val fullChain: String = "",
+        val clear: String? = "failed",
+        @SerialName("full_combo") val fullCombo: String? = "",
+        @SerialName("full_chain") val fullChain: String? = "",
         val rank: String = "",
-        @SerialName("play_time") val playTime: String = "",
-        @SerialName("upload_time") val uploadTime: String = ""
+        @SerialName("play_time") val playTime: String? = "",
+        @SerialName("upload_time") val uploadTime: String? = ""
     )
 
     @Serializable
@@ -405,10 +405,10 @@ class LxnsProberUtil : IProberUtil {
                     diff = diff,
                     rankType = ChuniEnums.RankType.getRankTypeByScore(it.score),
                     fullComboType =
-                        ChuniEnums.FullComboType.getFullComboTypeWithName(it.fullCombo),
-                    clearType = ChuniEnums.ClearType.getClearTypeWithName(it.clear),
+                        ChuniEnums.FullComboType.getFullComboTypeWithName(it.fullCombo ?: ""),
+                    clearType = ChuniEnums.ClearType.getClearTypeWithName(it.clear ?: ""),
                     fullChainType =
-                        ChuniEnums.FullChainType.getFullChainTypeWithName(it.fullChain),
+                        ChuniEnums.FullChainType.getFullChainTypeWithName(it.fullChain ?: ""),
                     recent = recent
                 )
             )

@@ -288,9 +288,11 @@ object ChuniB30ImageGenerater {
             color = Color.rgb(30, 54, 99)
         )
         canvas.drawText(
-            "${decimalFormat.format(
-                ((r10Score.first().rating * 10) + b30Score.sumOf { it.rating.toDouble() }) / 40
-            )}",
+            "${
+                if (r10Score.isNotEmpty()) decimalFormat.format(
+                    ((r10Score.first().rating * 10) + b30Score.sumOf { it.rating.toDouble() }) / 40)
+                else decimalFormat.format(0.0)
+            }",
             24f, 835f, 177f,
             font = R.font.fot_b,
             align = TextAlign.Center,

@@ -25,5 +25,9 @@ class MainActivity : ComponentActivity() {
         GlobalViewModel.localMessage.observe(this) { message ->
             GlobalViewModel.showMessageDialog = true
         }
+
+        GlobalViewModel.needUpdate.observe(this) { needUpdate ->
+            GlobalViewModel.showUpdateDialog = true
+        }
     }
 }

@@ -2,6 +2,7 @@ package io.github.skydynamic.maiproberplus.ui.compose.setting
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Environment
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,14 +38,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.viewModelScope
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.BuildConfig
+import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.config.ScoreDisplayType
 import io.github.skydynamic.maiproberplus.core.config.ScoreStyleType
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
+import io.github.skydynamic.maiproberplus.core.utils.checkUpdate
 import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.component.DiffChooseDialog
 import io.github.skydynamic.maiproberplus.ui.component.DownloadDialog
@@ -56,6 +61,9 @@ import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDis
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.ScoreDisplayExampleSmall
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.SettingScoreStyleExampleColorOverlay
 import io.github.skydynamic.maiproberplus.ui.compose.setting.components.SettingScoreStyleExampleTextShadow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SettingCompose() {
@@ -418,6 +426,16 @@ fun SettingCompose() {
                         .wrapContentSize(),
                     title = "本地设置"
                 ) {
+                    SwitchSettingItem(
+                        title = "自动检测更新",
+                        description = "自动检测更新，发现新版本后自动下载",
+                        checked = config.localConfig.checkUpdate,
+                        onCheckedChange = {
+                            config.localConfig.checkUpdate = it
+                            application.configManager.save()
+                        }
+                    )
+
                     TextButtonItem(
                         modifier = Modifier
                             .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
@@ -601,6 +619,48 @@ fun SettingCompose() {
                         color = Color.LightGray,
                         thickness = 1.dp
                     )
+
+                    TextButtonItem(
+                        modifier = Modifier
+                            .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        title = "检查更新",
+                        description = "检测Github Release是否存在更新"
+                    ) {
+                        GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
+                            try {
+                                val release = checkUpdate()
+                                withContext(Dispatchers.Main) {
+                                    if (release != null) {
+                                        val downloadFile =
+                                            Environment.getExternalStoragePublicDirectory(
+                                                Environment.DIRECTORY_DOWNLOADS
+                                            )
+                                        val newVersionFile =
+                                            downloadFile.resolve(release.assets.first().name)
+                                        if (newVersionFile.exists()) {
+                                            GlobalViewModel.newVersionApkUri =
+                                                FileProvider.getUriForFile(
+                                                    application,
+                                                    application.packageName + ".fileprovider",
+                                                    newVersionFile
+                                                )
+                                            GlobalViewModel.showInstallApkDialog = true
+                                        } else {
+                                            GlobalViewModel.setLatestReleaseAndShowDialog(release)
+                                        }
+                                    } else {
+                                        GlobalViewModel.setLatestReleaseAndShowDialog(release)
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                withContext(Dispatchers.Main) {
+                                    GlobalViewModel.sendAndShowMessage("检查更新失败: ${e.message}")
+                                }
+                            }
+                        }
+                    }
 
                     TextButtonItem(
                         modifier = Modifier

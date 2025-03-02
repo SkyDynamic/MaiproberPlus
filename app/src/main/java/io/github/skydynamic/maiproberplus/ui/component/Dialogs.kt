@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.github.skydynamic.maiproberplus.Application.Companion.application
+import io.github.skydynamic.maiproberplus.core.utils.Release
 import io.github.skydynamic.maiproberplus.ui.compose.setting.TextButtonItem
 import io.github.skydynamic.maiproberplus.ui.compose.sync.FileDownloadMeta
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
@@ -46,6 +47,9 @@ import io.ktor.client.statement.readRawBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 val httpClient = HttpClient(CIO) {
     install(HttpTimeout) {
@@ -326,6 +330,69 @@ fun <T> MultiObjectSelectDialog(
                             onDismiss()
                         }
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun CheckUpdateDialog(
+    release: Release?,
+    onRequest: () -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    Dialog(onDismissRequest = { onRequest() }) {
+        Card(
+            modifier = Modifier
+                .sizeIn(maxWidth = 300.dp, minHeight = 200.dp)
+                .wrapContentSize()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(getCardColor())
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    if (release != null) """
+                        检测到新版本(${release.tagName}), 是否下载并安装?
+                        新版本发布时间: ${
+                            OffsetDateTime.parse(release.createdAt)
+                                .atZoneSameInstant(ZoneId.systemDefault())
+                                .toLocalDateTime()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                        }
+                        更新内容大小: ${release.assets.first().size / 1024 / 1024} MB
+                        ${if ((release.body.isNotEmpty())) "更新内容: ${release.body}" else ""}
+                        """.trimIndent() else "已经是最新版本",
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    if (release != null) {
+                        TextButton(
+                            onClick = { onDismissRequest() },
+                            modifier = Modifier.padding(8.dp),
+                        ) {
+                            Text("取消")
+                        }
+                    }
+                    TextButton(
+                        onClick = { if (release != null) onRequest() else onDismissRequest() },
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        Text("确认")
+                    }
                 }
             }
         }

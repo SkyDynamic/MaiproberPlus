@@ -7,6 +7,7 @@ import coil3.Bitmap
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.cache.HttpCache
@@ -15,7 +16,6 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.readRawBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import io.github.skydynamic.maiproberplus.Application.Companion.application
 
 object NetworkImageRequestUtil {
     private val client = HttpClient {

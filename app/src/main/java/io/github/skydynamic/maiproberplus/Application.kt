@@ -2,6 +2,8 @@ package io.github.skydynamic.maiproberplus
 
 import android.Manifest.permission.POST_NOTIFICATIONS
 import android.app.Application
+import android.app.DownloadManager
+import android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -11,14 +13,17 @@ import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.ContentValues
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -45,6 +51,8 @@ import io.github.skydynamic.maiproberplus.core.data.GameType
 import io.github.skydynamic.maiproberplus.core.database.AppDatabase
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServerService
+import io.github.skydynamic.maiproberplus.core.utils.Release
+import io.github.skydynamic.maiproberplus.receiver.InstallApkReceiver
 import io.github.skydynamic.maiproberplus.vpn.core.LocalVpnService
 import java.io.File
 import java.io.FileOutputStream
@@ -55,6 +63,8 @@ object GlobalViewModel : ViewModel() {
 
     var isVpnServiceRunning by mutableStateOf(LocalVpnService.IsRunning)
     var showMessageDialog by mutableStateOf(false)
+    var showUpdateDialog by mutableStateOf(false)
+    var showInstallApkDialog by mutableStateOf(false)
     var proberPlatform by mutableStateOf(ProberPlatform.DIVING_FISH)
     var gameType by mutableStateOf(GameType.MaimaiDX)
     var maimaiHooking by mutableStateOf(false)
@@ -62,10 +72,20 @@ object GlobalViewModel : ViewModel() {
 
     var currentTab by mutableIntStateOf(0)
 
+    var latestRelease: Release? by mutableStateOf(null)
+    var newVersionApkUri: Uri by mutableStateOf(Uri.EMPTY)
+
     private val _localMessage = MutableLiveData<String>()
     val localMessage: LiveData<String> get() = _localMessage
     fun sendAndShowMessage(message: String) {
         _localMessage.value = message
+    }
+
+    private val _needUpdate = MutableLiveData<Boolean>()
+    val needUpdate: LiveData<Boolean> get() = _needUpdate
+    fun setLatestReleaseAndShowDialog(release: Release?) {
+        latestRelease = release
+        _needUpdate.value = true
     }
 }
 
@@ -295,6 +315,59 @@ class Application : Application() {
         resolver.openOutputStream(uri!!).use {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it!!)
             Toast.makeText(this, "已保存到相册", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun createDownloadTask(url: String, fileName: String) {
+        val request = DownloadManager.Request(
+            Uri.parse(url)
+        )
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+        request.setTitle("下载MaiProberPlus更新")
+        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE)
+        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
+        request.setNotificationVisibility(
+            DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+        )
+
+        val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+        val downloadId = downloadManager.enqueue(request)
+
+        val downloadCompleteReceiver = InstallApkReceiver(this, downloadManager, downloadId)
+        val filter = IntentFilter(ACTION_DOWNLOAD_COMPLETE)
+        // Android 12
+        ContextCompat.registerReceiver(
+            this, downloadCompleteReceiver, filter, ContextCompat.RECEIVER_EXPORTED
+        )
+    }
+
+    fun checkInstallPermission(): Boolean {
+        return packageManager.canRequestPackageInstalls()
+    }
+
+    fun startInstallPermissionSettingActivity() {
+        val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+        intent.data = Uri.parse("package:$packageName")
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        try {
+            startActivity(intent)
+        } catch (_: ActivityNotFoundException) {
+            val fallbackIntent = Intent(Settings.ACTION_SECURITY_SETTINGS)
+            fallbackIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(fallbackIntent)
+        }
+        Toast.makeText(this, "请允许安装未知来源应用", Toast.LENGTH_SHORT).show()
+    }
+
+    fun installApk(uri: Uri) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            intent.setData(uri)
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Log.e("App", "${e.message}")
         }
     }
 

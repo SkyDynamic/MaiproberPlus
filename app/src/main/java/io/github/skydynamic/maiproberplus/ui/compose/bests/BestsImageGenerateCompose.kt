@@ -1,10 +1,14 @@
 package io.github.skydynamic.maiproberplus.ui.compose.bests
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -24,8 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil3.compose.AsyncImage
@@ -63,15 +71,6 @@ fun checkEnable(platform: ProberPlatform): Boolean {
 fun BestsImageGenerateCompose() {
     val config = application.configManager.config
     var showImagePreview by remember { mutableStateOf(false) }
-
-    when {
-        showImagePreview -> {
-            ImagePreview(
-                BestsImageGenerateViewModel.imageBitmap!!,
-                onDismiss = { showImagePreview = false }
-            )
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -164,6 +163,30 @@ fun BestsImageGenerateCompose() {
 
         if (application.isLandscape) {
             WindowInsetsSpacer.BottomPaddingSpacer()
+        }
+    }
+
+    if (showImagePreview) {
+        Popup(
+            onDismissRequest = { showImagePreview = false },
+            properties = PopupProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = { showImagePreview = false }) // 点击外部关闭
+                    }
+            ) {
+                ImagePreview(
+                    image = BestsImageGenerateViewModel.imageBitmap!!,
+                    onDismiss = { showImagePreview = false }
+                )
+            }
         }
     }
 }

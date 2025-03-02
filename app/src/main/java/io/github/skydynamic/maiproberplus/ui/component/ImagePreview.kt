@@ -1,24 +1,14 @@
 package io.github.skydynamic.maiproberplus.ui.component
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -27,145 +17,112 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import coil3.Bitmap
-import io.github.skydynamic.maiproberplus.Application.Companion.application
-import io.github.skydynamic.maiproberplus.R
+import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
+import coil3.compose.AsyncImage
 import kotlin.math.max
 import kotlin.math.min
 
-// TODO: 完善它，现在是能用就行
 @Composable
-@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 fun ImagePreview(
     image: Bitmap,
     onDismiss: () -> Unit
 ) {
-    BasicAlertDialog(
+    var imageInitialSize by remember { mutableStateOf(IntSize.Zero) }
+    var boxSize by remember { mutableStateOf(IntSize.Zero) }
+
+    var maxScale by remember { mutableFloatStateOf(1f) }
+    var scale by remember { mutableFloatStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.Black.copy(alpha = 0.75f)),
-        onDismissRequest = onDismiss,
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Column {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                    ) {
-                        IconButton(
-                            onClick = {
-                                application.saveImageToGallery(
-                                    image,
-                                    "${System.currentTimeMillis()}.jpg"
-                                )
+            .background(Color.Black)
+            .fillMaxSize()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                translationX = offset.x
+                translationY = offset.y
+            }
+            .pointerInput(Unit) {
+                forEachGesture {
+                    awaitPointerEventScope {
+                        do {
+                            val event = awaitPointerEvent()
+                            val zoomChange = event.calculateZoom()
+                            scale *= zoomChange
+
+                            var panChange = event.calculatePan()
+                            panChange *= scale
+
+                            val tempScale = scale.coerceIn(1f, maxScale)
+                            var x = offset.x
+                            if (tempScale * imageInitialSize.width > boxSize.width) {
+                                val delta =
+                                    tempScale * imageInitialSize.width - boxSize.width
+                                x = (offset.x + panChange.x).coerceIn(-delta / 2, delta / 2)
                             }
-                        ) {
-                            Icon(painterResource(R.drawable.save_24px), null)
-                        }
+                            var y = offset.y
+                            if (tempScale * imageInitialSize.height > boxSize.height) {
+                                val delta =
+                                    tempScale * imageInitialSize.height - boxSize.height
+                                y = (offset.y + panChange.y).coerceIn(-delta / 2, delta / 2)
+                            }
 
-                        IconButton(
-                            onClick = onDismiss
-                        ) {
-                            Icon(Icons.Default.Close, null)
-                        }
-                    }
-                }
+                            if (x != offset.x || y != offset.y) {
+                                offset = Offset(x, y)
+                            }
 
-                var scale by remember { mutableFloatStateOf(1f) }
-                var offset by remember { mutableStateOf(Offset.Zero) }
-
-                BoxWithConstraints(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    val maxWidth = constraints.maxWidth.toFloat()
-                    val maxHeight = constraints.maxHeight.toFloat()
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RectangleShape)
-                    ) {
-                        Image(
-                            bitmap = image.asImageBitmap(),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.Center)
-                                .graphicsLayer(
-                                    scaleX = scale,
-                                    scaleY = scale,
-                                    translationX = offset.x,
-                                    translationY = offset.y
-                                )
-                                .pointerInput(Unit) {
-                                    detectTransformGestures { _, pan, zoom, _ ->
-                                        scale *= zoom
-                                        scale = scale.coerceIn(1f, 4f)
-
-                                        val maxX = (maxWidth * (scale - 1)) / 2
-                                        val maxY = (maxHeight * (scale - 1)) / 2
-
-                                        val newOffsetX = min(max(offset.x + pan.x, -maxX), maxX)
-                                        val newOffsetY = min(max(offset.y + pan.y, -maxY), maxY)
-
-                                        offset = Offset(newOffsetX, newOffsetY)
-                                    }
-                                    detectTapGestures(
-                                        onTap = {
-                                            onDismiss()
-                                        },
-                                        onDoubleTap = {
-                                            scale = if (scale < 2f) {
-                                                2f
-                                            } else {
-                                                1f
-                                            }
-                                            val imageWidth = maxWidth * scale
-                                            val imageHeight = maxHeight * scale
-                                            val centerX = (maxWidth - imageWidth) / 2
-                                            val centerY = (maxHeight - imageHeight) / 2
-                                            offset = Offset(centerX, centerY)
-                                        }
-                                    )
-                                    detectDragGestures { change, dragAmount ->
-                                        change.consume()
-
-                                        val scaledDragAmount = Offset(dragAmount.x * scale, dragAmount.y * scale)
-
-                                        val maxX = (maxWidth * (scale - 1)) / 2
-                                        val maxY = (maxHeight * (scale - 1)) / 2
-
-                                        offset = Offset(
-                                            x = min(max(offset.x + scaledDragAmount.x, -maxX), maxX),
-                                            y = min(max(offset.y + scaledDragAmount.y, -maxY), maxY)
-                                        )
-                                    }
+                            event.changes.forEach {
+                                if (it.positionChanged()) {
+                                    it.consume()
                                 }
-                        )
+                            }
+                        } while (event.changes.any { it.pressed })
+
+                        scale = scale.coerceIn(1f, maxScale)
+                        if (scale == 1f) {
+                            offset = Offset.Zero
+                        }
                     }
                 }
             }
-        }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        offset = Offset.Zero
+                        scale = if (scale != 1.0f) {
+                            1.0f
+                        } else {
+                            min(2f, min(maxScale, 5f))
+                        }
+                    }, onTap = {
+                        onDismiss()
+                    }
+                )
+            }
+            .onSizeChanged {
+                boxSize = it
+                val xRatio = it.width.toFloat() / imageInitialSize.width
+                val yRatio = it.height.toFloat() / imageInitialSize.height
+                maxScale = min(5f, max(2f, max(xRatio, yRatio)))
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        AsyncImage(
+            model = image,
+            contentDescription = null,
+            modifier = Modifier
+                .onSizeChanged {
+                    imageInitialSize = it
+                }
+        )
     }
 }
-

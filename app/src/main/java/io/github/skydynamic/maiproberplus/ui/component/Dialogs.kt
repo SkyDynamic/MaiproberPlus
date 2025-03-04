@@ -1,9 +1,12 @@
 package io.github.skydynamic.maiproberplus.ui.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -11,6 +14,8 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
@@ -37,6 +42,7 @@ import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.core.utils.Release
 import io.github.skydynamic.maiproberplus.ui.compose.setting.TextButtonItem
 import io.github.skydynamic.maiproberplus.ui.compose.sync.FileDownloadMeta
+import io.github.skydynamic.maiproberplus.ui.theme.darken
 import io.github.skydynamic.maiproberplus.ui.theme.getCardColor
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -369,10 +375,32 @@ fun CheckUpdateDialog(
                                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                         }
                         更新内容大小: ${release.assets.first().size / 1024 / 1024} MB
-                        ${if ((release.body.isNotEmpty())) "更新内容: ${release.body}" else ""}
                         """.trimIndent() else "已经是最新版本",
                     modifier = Modifier.padding(16.dp)
                 )
+
+                if (release != null && release.body.isNotEmpty()) {
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .padding(16.dp)
+                            .background(getCardColor().darken(0.8f)),
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth()
+                                .fillMaxHeight(),
+                        ) {
+                            items(release.body.trimIndent().lines()) { line ->
+                                Text(text = line)
+                            }
+                        }
+                    }
+                }
 
                 Row(
                     modifier = Modifier

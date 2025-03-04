@@ -9,8 +9,8 @@ plugins {
     id("androidx.room")
 }
 
-val appVersion: String = "1.2.1"
-val appVersionCode: String = "024"
+val appVersion: String = "1.2.2"
+val appVersionCode: String = "001"
 
 val gitCommitId: String = try {
     val stdout = ByteArrayOutputStream()

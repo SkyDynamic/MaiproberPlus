@@ -322,3 +322,10 @@ fun getButtonSelectedColor(selected: Boolean) : Color {
         }
     }
 }
+
+fun Color.darken(factor: Float): Color {
+    val red = (red * factor).coerceIn(0f, 1f)
+    val green = (green * factor).coerceIn(0f, 1f)
+    val blue = (blue * factor).coerceIn(0f, 1f)
+    return Color(red, green, blue, alpha)
+}

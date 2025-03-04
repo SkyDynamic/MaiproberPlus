@@ -70,7 +70,7 @@ private fun formatVersionName(versionName: String): VersionBody {
         val patch = matcher.group(4)?.toInt()
         val gitHash = matcher.group(5)
 
-        return VersionBody(major!!, minor!!, patch!!, gitHash!!)
+        return VersionBody(major!!, minor!!, patch!!, gitHash ?: "")
     } else {
         throw IllegalArgumentException("Invalid version name format: $versionName")
     }

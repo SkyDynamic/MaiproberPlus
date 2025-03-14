@@ -108,7 +108,9 @@ private suspend fun getLatestReleaseFromGitHub(): Release? {
         val response: HttpResponse =
             client.get("https://api.github.com/repos/SkyDynamic/MaiproberPlus/releases")
         val tags: List<Release> = response.body()
-        return tags.firstOrNull()
+        return tags.sortedByDescending {
+            parseDateToTimestamp(it.createdAt)
+        }.firstOrNull()
     } catch (e: Exception) {
         Log.e("CheckUpdateUtils", "Failed to fetch tags: ${e.message}")
     } finally {

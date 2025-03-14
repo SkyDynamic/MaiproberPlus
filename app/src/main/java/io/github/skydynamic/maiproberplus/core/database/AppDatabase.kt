@@ -30,25 +30,26 @@ object DatabaseMigration {
 
                 database.execSQL("""
                     CREATE TABLE new_chuni_score_entity (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                    title TEXT,
-                    difficulty TEXT,
-                    score INTEGER,
-                    rating REAL,
-                    over_power REAL,
-                    clear TEXT,
-                    full_combo TEXT,
-                    full_chain TEXT,
-                    rank TEXT,
-                    play_time TEXT,
-                    upload_time TEXT,
-                    recent INTEGER NOT NULL DEFAULT 0
-                )
+                        scoreId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        song_id INTEGER NOT NULL DEFAULT -1,
+                        title TEXT NOT NULL,
+                        level REAL NOT NULL,
+                        score INTEGER NOT NULL,
+                        rating REAL NOT NULL,
+                        version INTEGER NOT NULL,
+                        playTime TEXT NOT NULL DEFAULT '',
+                        rankType TEXT NOT NULL,
+                        diff TEXT NOT NULL,
+                        fullComboType TEXT NOT NULL,
+                        clearType TEXT NOT NULL,
+                        fullChainType TEXT NOT NULL,
+                        recent INTEGER NOT NULL DEFAULT 0
+                    )
                 """.trimIndent())
 
                 database.execSQL("""
-                    INSERT INTO new_chuni_score_entity (id, title, difficulty, score, rating, over_power, clear, full_combo, full_chain, rank, play_time, upload_time, recent)
-                    SELECT id, title, difficulty, score, rating, over_power, clear, full_combo, full_chain, rank, play_time, upload_time, recent
+                    INSERT INTO new_chuni_score_entity (scoreId, song_id, title, level, score, rating, version, playTime, rankType, diff, fullComboType, clearType, fullChainType, recent)
+                    SELECT scoreId, song_id, title, level, score, rating, version, playTime, rankType, diff, fullComboType, clearType, fullChainType, recent
                     FROM chuni_score_entity
                 """.trimIndent())
 
@@ -62,5 +63,4 @@ object DatabaseMigration {
             }
         }
     }
-
 }

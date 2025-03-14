@@ -49,6 +49,7 @@ import io.github.skydynamic.maiproberplus.core.config.ConfigManager
 import io.github.skydynamic.maiproberplus.core.config.ConfigStorage
 import io.github.skydynamic.maiproberplus.core.data.GameType
 import io.github.skydynamic.maiproberplus.core.database.AppDatabase
+import io.github.skydynamic.maiproberplus.core.database.DatabaseMigration
 import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.proxy.HttpServerService
 import io.github.skydynamic.maiproberplus.core.utils.Release
@@ -111,7 +112,9 @@ class Application : Application() {
         createNotificationChannel()
         application = this
         configManager = ConfigManager(this)
-        db = Room.databaseBuilder(this, AppDatabase::class.java, "maiproberplus").build()
+        db = Room.databaseBuilder(this, AppDatabase::class.java, "maiproberplus")
+            .addMigrations(DatabaseMigration.MIGRATION_1_2)
+            .build()
         this.initProberContext()
     }
 

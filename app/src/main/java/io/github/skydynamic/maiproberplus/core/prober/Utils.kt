@@ -13,6 +13,7 @@ import io.github.skydynamic.maiproberplus.core.utils.ParseScorePageUtil
 import io.github.skydynamic.maiproberplus.core.utils.WechatRequestUtil.WX_WINDOWS_UA
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
@@ -47,6 +48,12 @@ val client = HttpClient(CIO) {
     }
     install(HttpCookies) {
         storage = AcceptAllCookiesStorage()
+    }
+    expectSuccess = false
+    HttpResponseValidator {
+        handleResponseException { cause, _ ->
+            Log.e("ProberUtil", "请求失败: ${cause.message}")
+        }
     }
 }
 

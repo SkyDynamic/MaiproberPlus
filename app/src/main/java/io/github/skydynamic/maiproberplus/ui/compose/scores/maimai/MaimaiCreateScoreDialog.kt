@@ -66,6 +66,18 @@ import io.github.skydynamic.maiproberplus.ui.theme.getTitleFontColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+fun checkAchievementValidity(input: String): Boolean {
+    return if (input.isEmpty()) {
+        false
+    } else if (input.toDoubleOrNull() == null) {
+        false
+    } else if (input.toDouble() < 0 || input.toDouble() > 101) {
+        false
+    } else {
+        true
+    }
+}
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun MaimaiCreateScoreDialog(
@@ -325,7 +337,8 @@ fun MaimaiCreateScoreDialog(
                                     isOutOfRange = true
                                 }
                                 if (parsedValue != null && parsedValue >= 0.0 && parsedValue <= 101.0) {
-                                    val decimalPlaces = filteredValue.split(".").getOrNull(1)?.length ?: 0
+                                    val decimalPlaces =
+                                        filteredValue.split(".").getOrNull(1)?.length ?: 0
                                     if (decimalPlaces <= 4) {
                                         achievement = filteredValue
                                         isOutOfRange = false
@@ -501,26 +514,35 @@ fun MaimaiCreateScoreDialog(
                                 fullComboType != null &&
                                 fullSyncType != null
                             ) {
-                                GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
-                                    createMaimaiScore(
-                                        MaimaiScoreEntity(
-                                            songId = songInfo!!.id,
-                                            title = title,
-                                            level = difficulties[selectionDiff!!.diffIndex].levelValue,
-                                            achievement = achievement.toFloat(),
-                                            dxScore = if (dxScore.isNotEmpty()) dxScore.toInt() else 0,
-                                            rating = calcMaimaiRating(achievement, difficulties[selectionDiff!!.diffIndex].levelValue),
-                                            version = difficulties[selectionDiff!!.diffIndex].version,
-                                            type = type!!,
-                                            diff = selectionDiff!!,
-                                            rankType = MaimaiEnums.RankType.getRankTypeByScore(achievement.toFloat()),
-                                            syncType = fullSyncType!!,
-                                            fullComboType = fullComboType!!
+                                if (checkAchievementValidity(achievement)) {
+                                    GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
+                                        createMaimaiScore(
+                                            MaimaiScoreEntity(
+                                                songId = songInfo!!.id,
+                                                title = title,
+                                                level = difficulties[selectionDiff!!.diffIndex].levelValue,
+                                                achievement = achievement.toFloat(),
+                                                dxScore = if (dxScore.isNotEmpty()) dxScore.toInt() else 0,
+                                                rating = calcMaimaiRating(
+                                                    achievement,
+                                                    difficulties[selectionDiff!!.diffIndex].levelValue
+                                                ),
+                                                version = difficulties[selectionDiff!!.diffIndex].version,
+                                                type = type!!,
+                                                diff = selectionDiff!!,
+                                                rankType = MaimaiEnums.RankType.getRankTypeByScore(
+                                                    achievement.toFloat()
+                                                ),
+                                                syncType = fullSyncType!!,
+                                                fullComboType = fullComboType!!
+                                            )
                                         )
-                                    )
+                                    }
+                                    sendMessageToUi("成绩添加成功")
+                                    onDismissRequest()
+                                } else {
+                                    isOutOfRange = true
                                 }
-                                sendMessageToUi("成绩添加成功")
-                                onDismissRequest()
                             } else {
                                 sendMessageToUi("请检查完整信息是否完整")
                             }

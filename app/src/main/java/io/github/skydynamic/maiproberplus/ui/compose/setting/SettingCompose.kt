@@ -219,6 +219,16 @@ fun SettingCompose() {
                         .wrapContentSize(),
                     title = "成绩抓取设置"
                 ) {
+                    SwitchSettingItem(
+                        title = "增量抓取舞萌成绩",
+                        description = "每次爬取时使用的爬取方式，增量爬取依赖最近游玩记录，适合已经完整爬取后频繁爬取，更加稳定",
+                        checked = config.syncConfig.maimaiIncrementalFetchScore,
+                        onCheckedChange = {
+                            config.syncConfig.maimaiIncrementalFetchScore = it
+                            application.configManager.save()
+                        }
+                    )
+
                     TextButtonItem(
                         modifier = Modifier
                             .padding(start = 15.dp, top = 5.dp, end = 15.dp, bottom = 5.dp)

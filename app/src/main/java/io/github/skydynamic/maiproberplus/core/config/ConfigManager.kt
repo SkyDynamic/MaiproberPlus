@@ -70,6 +70,7 @@ data class ConfigStorage(
 
 @Serializable
 data class SyncConfig(
+    var maimaiIncrementalFetchScore: Boolean = true,
     var maimaiSyncDifficulty: List<Int> = MaimaiEnums.Difficulty.entries.map { it.diffIndex },
     var chuniSyncDifficulty: List<Int> = ChuniEnums.Difficulty.entries.map { it.diffIndex }
 )

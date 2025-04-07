@@ -36,6 +36,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
+val config = application.configManager.config
+
 val client = HttpClient(CIO) {
     install(ContentNegotiation) {
         json(Json {
@@ -78,7 +80,7 @@ suspend fun getMaimaiScoreData(authUrl: String) : List<MaimaiScoreEntity> {
     fetchMaimaiScorePage(authUrl) { diff, body ->
         scores.addAll(ParseScorePageUtil.parseMaimai(body, diff))
     }
-    if (application.configManager.config.localConfig.cacheScore) {
+    if (config.localConfig.cacheScore) {
         writeMaimaiScoreCache(scores)
     }
     return scores
@@ -100,21 +102,27 @@ suspend fun fetchMaimaiScorePage(
         return
     }
 
-    if (application.configManager.config.localConfig.parseMaimaiUserInfo) {
+    if (config.localConfig.parseMaimaiUserInfo) {
         val userInfo = ParseScorePageUtil.parseMaimaiHomePage(homeBody)
-        application.configManager.config.userInfo = userInfo
+        config.userInfo = userInfo
         application.configManager.save()
     }
 
-    for (diff in application.configManager.config.syncConfig.maimaiSyncDifficulty) {
+    for (diff in config.syncConfig.maimaiSyncDifficulty) {
         val difficulty = MaimaiEnums.Difficulty.getDifficultyWithIndex(diff)
+
+        val fetchUrl = if (config.syncConfig.maimaiIncrementalFetchScore) {
+            "https://maimai.wahlap.com/maimai-mobile/record/" +
+                    "musicSort/search/?search=V&sort=1&playCheck=on&diff="
+        } else {
+            "https://maimai.wahlap.com/maimai-mobile/record/musicGenre/search/?genre=99&diff="
+        }
 
         Log.i("ProberUtil", "开始抓取${difficulty.diffName}成绩")
         try {
             with(client) {
                 val scoreResp = get(
-                    "https://maimai.wahlap.com/maimai-mobile/record/" +
-                            "musicSort/search/?search=V&sort=1&playCheck=on&diff=${diff}"
+                    fetchUrl + difficulty.diffName
                 )
                 val body = scoreResp.bodyAsText()
 
@@ -134,7 +142,7 @@ suspend fun getChuniScoreData(authUrl: String) : List<ChuniScoreEntity> {
     fetchChuniScores(authUrl) { diff, body ->
         scores.addAll(ParseScorePageUtil.parseChuni(body, diff))
     }
-    if (application.configManager.config.localConfig.cacheScore) {
+    if (config.localConfig.cacheScore) {
         writeChuniScoreCache(scores)
     }
     return scores
@@ -156,7 +164,7 @@ suspend fun fetchChuniScores(
 
     val token = result.setCookie()["_t"]?.value
 
-    for (diff in application.configManager.config.syncConfig.chuniSyncDifficulty) {
+    for (diff in config.syncConfig.chuniSyncDifficulty) {
         val difficulty = ChuniEnums.Difficulty.getDifficultyWithIndex(diff)
         val url = chuniUrls[diff]
 

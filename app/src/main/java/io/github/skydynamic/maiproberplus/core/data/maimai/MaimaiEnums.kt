@@ -15,7 +15,8 @@ object MaimaiEnums {
         companion object {
             @JvmStatic
             fun getSongTypeByName(typeName: String): SongType {
-                return entries.filter { it.type == typeName }.getOrElse(0) { STANDARD }
+                return entries.filter { it.type == typeName || it.type2 == typeName }
+                    .getOrElse(0) { STANDARD }
             }
         }
     }

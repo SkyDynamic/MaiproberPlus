@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -53,9 +52,14 @@ import io.github.skydynamic.maiproberplus.ui.compose.scores.refreshScore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+data class BestsImage(
+    val gameType: GameType,
+    val image: Bitmap,
+)
+
 object BestsImageGenerateViewModel : ViewModel() {
     var canGenerate by mutableStateOf(true)
-    var imageBitmap: Bitmap? by mutableStateOf(null)
+    var bestsImage: BestsImage? by mutableStateOf(null)
 }
 
 fun checkEnable(platform: ProberPlatform): Boolean {
@@ -67,7 +71,6 @@ fun checkEnable(platform: ProberPlatform): Boolean {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun BestsImageGenerateCompose() {
     val config = application.configManager.config
     var showImagePreview by remember { mutableStateOf(false) }
@@ -122,21 +125,30 @@ fun BestsImageGenerateCompose() {
         }
 
         if (GlobalViewModel.gameType == GameType.MaimaiDX) {
-            MaiContent(config = config) {
-                BestsImageGenerateViewModel.imageBitmap = it
+            MaiContent(config = config) { bitmap ->
+                BestsImageGenerateViewModel.bestsImage = BestsImage(
+                    GameType.MaimaiDX,
+                    bitmap
+                )
                 BestsImageGenerateViewModel.canGenerate = true
             }
         } else if (GlobalViewModel.gameType == GameType.Chunithm) {
-            ChuniContent(config = config) {
-                BestsImageGenerateViewModel.imageBitmap = it
+            ChuniContent(config = config) { bitmap ->
+                BestsImageGenerateViewModel.bestsImage = BestsImage(
+                    GameType.Chunithm,
+                    bitmap
+                )
                 BestsImageGenerateViewModel.canGenerate = true
             }
         }
 
-        if (BestsImageGenerateViewModel.imageBitmap != null) {
+        if (BestsImageGenerateViewModel.bestsImage != null) {
             AsyncImage(
-                model = BestsImageGenerateViewModel.imageBitmap,
-                contentDescription = "B50",
+                model = BestsImageGenerateViewModel.bestsImage!!.image,
+                contentDescription = when (BestsImageGenerateViewModel.bestsImage!!.gameType) {
+                    GameType.MaimaiDX -> "b50"
+                    GameType.Chunithm -> "b30"
+                },
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
@@ -148,8 +160,11 @@ fun BestsImageGenerateCompose() {
             Button(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 onClick = {
-                    val bitmap = BestsImageGenerateViewModel.imageBitmap!!
-                    val fileName = "B50_${System.currentTimeMillis()}.png"
+                    val bitmap = BestsImageGenerateViewModel.bestsImage!!.image
+                    val fileName = when (BestsImageGenerateViewModel.bestsImage!!.gameType) {
+                        GameType.MaimaiDX -> "B50"
+                        GameType.Chunithm -> "B30"
+                    } + "_${System.currentTimeMillis()}"
                     application.saveImageToGallery(bitmap, fileName)
                 }
             ) {
@@ -183,7 +198,7 @@ fun BestsImageGenerateCompose() {
                     }
             ) {
                 ImagePreview(
-                    image = BestsImageGenerateViewModel.imageBitmap!!,
+                    image = BestsImageGenerateViewModel.bestsImage!!.image,
                     onDismiss = { showImagePreview = false }
                 )
             }

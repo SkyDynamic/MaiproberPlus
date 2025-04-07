@@ -102,12 +102,12 @@ class MaimaiData {
             ).aliases
         }
 
-        fun getSongIdFromTitle(title: String): Int {
+        fun getSongIdFromTitle(title: String?): Int {
             return MAIMAI_SONG_LIST.find { it.title == title }?.id ?: -1
         }
 
         fun getLevelValue(
-            title: String,
+            title: String?,
             diffculty: MaimaiEnums.Difficulty,
             type: MaimaiEnums.SongType
         ): Float {
@@ -122,7 +122,7 @@ class MaimaiData {
         }
 
         fun getChartVersion(
-            title: String,
+            title: String?,
             diffculty: MaimaiEnums.Difficulty,
             type: MaimaiEnums.SongType
         ): Int {

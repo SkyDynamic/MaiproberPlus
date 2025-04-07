@@ -110,18 +110,18 @@ class LxnsProberUtil : IProberUtil {
     @Serializable
     data class LxnsMaimaiScoreBody(
         val id: Int,
-        @SerialName("song_name") val songName: String = "",
-        val level: String = "",
+        @SerialName("song_name") val songName: String? = null,
+        val level: String? = null,
         @SerialName("level_index") val levelIndex: Int,
         val achievements: Float,
         val fc: String? = "",
         val fs: String? = "",
         @SerialName("dx_score") val dxScore: Int,
-        @SerialName("dx_rating") val dxRating: Float = 0.0F,
-        val rate: String = "",
+        @SerialName("dx_rating") val dxRating: Float? = null,
+        val rate: String? = null,
         val type: String,
         @SerialName("play_time") val playTime: String = "",
-        @SerialName("upload_time") val uploadTime: String = ""
+        @SerialName("upload_time") val uploadTime: String? = null
     )
 
     @Serializable
@@ -320,11 +320,11 @@ class LxnsProberUtil : IProberUtil {
                 parseList.add(
                     MaimaiScoreEntity(
                         songId = MaimaiData.getSongIdFromTitle(it.songName),
-                        title = it.songName,
+                        title = it.songName ?: "",
                         level = levelValue,
                         achievement = it.achievements,
                         dxScore = it.dxScore,
-                        rating = floor(it.dxRating).toInt(),
+                        rating = floor(it.dxRating ?: 0F).toInt(),
                         version = version,
                         type = type,
                         diff = diff,

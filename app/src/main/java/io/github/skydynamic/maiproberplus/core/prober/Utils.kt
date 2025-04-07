@@ -42,6 +42,7 @@ val client = HttpClient(CIO) {
     install(ContentNegotiation) {
         json(Json {
             ignoreUnknownKeys = true
+            explicitNulls = false
         })
     }
     install(HttpTimeout) {

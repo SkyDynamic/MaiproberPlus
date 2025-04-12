@@ -104,19 +104,17 @@ private suspend fun getLatestReleaseFromGitHub(): Release? {
         }
     }
 
-    try {
+    return try {
         val response: HttpResponse =
             client.get("https://api.github.com/repos/SkyDynamic/MaiproberPlus/releases")
         val tags: List<Release> = response.body()
-        return tags.sortedByDescending {
-            parseDateToTimestamp(it.createdAt)
-        }.firstOrNull()
+        tags.sortedByDescending { parseDateToTimestamp(it.createdAt) }.firstOrNull()
     } catch (e: Exception) {
         Log.e("CheckUpdateUtils", "Failed to fetch tags: ${e.message}")
+        null
     } finally {
         client.close()
     }
-    return null
 }
 
 private suspend fun getCommitsFromGitHub(): List<Commit>? {
@@ -128,17 +126,16 @@ private suspend fun getCommitsFromGitHub(): List<Commit>? {
         }
     }
 
-    try {
+    return try {
         val response: HttpResponse =
             client.get("https://api.github.com/repos/SkyDynamic/MaiproberPlus/commits")
-        val commits: List<Commit> = response.body()
-        return commits
+        response.body()
     } catch (e: Exception) {
         Log.e("CheckUpdateUtils", "Failed to fetch commits: ${e.message}")
+        null
     } finally {
         client.close()
     }
-    return null
 }
 
 private fun parseDateToTimestamp(dateString: String): Long {
@@ -151,41 +148,60 @@ private fun parseDateToTimestamp(dateString: String): Long {
     }
 }
 
-suspend fun checkUpdate(versionName: String = BuildConfig.VERSION_NAME): Release? {
+suspend fun checkFullUpdate(versionName: String = BuildConfig.VERSION_NAME): Release? {
     val localVersionBody = formatVersionName(versionName)
 
-    val latestRelease = getLatestReleaseFromGitHub()
-    if (latestRelease == null) return null
+    val latestRelease = getLatestReleaseFromGitHub() ?: return null
     val latestVersionBody = formatVersionName(latestRelease.tagName)
 
     return when(compareVersion(localVersionBody, latestVersionBody)) {
         0 -> {
-            val commits = getCommitsFromGitHub()
-            if (commits != null && commits.isNotEmpty()) {
-                val remoteCommit = commits.find { it.sha.contains(localVersionBody.gitHash) }
-                remoteCommit?.let {
-                    val remoteCommitDate = parseDateToTimestamp(it.commit.committer.date)
-                    val latestTagCommit = commits.find { it.sha.contains(latestVersionBody.gitHash) }
-                    latestTagCommit?.let {
-                        val latestCommitDate = parseDateToTimestamp(it.commit.committer.date)
-                        return if (remoteCommitDate < latestCommitDate) latestRelease else null
-                    }
-                    return null
-                }
-                return null
-            }
-            return null
+            val commits = getCommitsFromGitHub() ?: return null
+            val remoteCommit = commits.find {
+                it.sha.contains(localVersionBody.gitHash)
+            } ?: return null
+            val latestTagCommit = commits.find {
+                it.sha.contains(latestVersionBody.gitHash)
+            } ?: return null
+
+            val remoteCommitDate = parseDateToTimestamp(remoteCommit.commit.committer.date)
+            val latestCommitDate = parseDateToTimestamp(latestTagCommit.commit.committer.date)
+
+            if (remoteCommitDate < latestCommitDate) latestRelease else null
         }
         1 -> null
-        2 -> {
-            val buildType = BuildConfig.BUILD_TYPE
-            return if (!latestRelease.prerelease) {
-                if (buildType != "release") return latestRelease
-                else null
-            } else {
-                null
-            }
-        }
+        2 -> if (!latestRelease.prerelease && BuildConfig.BUILD_TYPE != "release")
+            latestRelease else null
         else -> latestRelease
+    }
+}
+
+suspend fun checkReleaseUpdate(versionName: String = BuildConfig.VERSION_NAME): Release? {
+    val localVersionBody = formatVersionName(versionName)
+    val client = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(Json {
+                ignoreUnknownKeys = true
+            })
+        }
+    }
+
+    return try {
+        val response: HttpResponse =
+            client.get("https://api.github.com/repos/SkyDynamic/MaiproberPlus/releases/latest")
+        val release: Release = response.body()
+        val latestVersionBody = formatVersionName(release.tagName)
+
+        when (compareVersion(localVersionBody, latestVersionBody)) {
+            0 -> null
+            1 -> null
+            2 -> if (!release.prerelease && BuildConfig.BUILD_TYPE != "release") release else null
+            else -> release
+        }
+    } catch (e: Exception) {
+        Log.e("CheckUpdateUtils", "Failed to fetch latest release: ${e.message}")
+        null
+    } finally {
+        client.close()
     }
 }

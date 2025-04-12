@@ -49,7 +49,8 @@ import io.github.skydynamic.maiproberplus.core.config.ScoreStyleType
 import io.github.skydynamic.maiproberplus.core.data.chuni.ChuniEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.prober.sendMessageToUi
-import io.github.skydynamic.maiproberplus.core.utils.checkUpdate
+import io.github.skydynamic.maiproberplus.core.utils.checkFullUpdate
+import io.github.skydynamic.maiproberplus.core.utils.checkReleaseUpdate
 import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.component.DiffChooseDialog
 import io.github.skydynamic.maiproberplus.ui.component.DownloadDialog
@@ -438,10 +439,20 @@ fun SettingCompose() {
                 ) {
                     SwitchSettingItem(
                         title = "自动检测更新",
-                        description = "自动检测更新，发现新版本后自动下载",
+                        description = "自动检测更新，发现新版本后将会在启动时提醒",
                         checked = config.localConfig.checkUpdate,
                         onCheckedChange = {
                             config.localConfig.checkUpdate = it
+                            application.configManager.save()
+                        }
+                    )
+
+                    SwitchSettingItem(
+                        title = "检测Snapshot更新",
+                        description = "开启后将会检测Snapshot的更新，若关闭则只会检测Release更新",
+                        checked = config.localConfig.checkSnapshotUpdate,
+                        onCheckedChange = {
+                            config.localConfig.checkSnapshotUpdate = it
                             application.configManager.save()
                         }
                     )
@@ -640,7 +651,11 @@ fun SettingCompose() {
                     ) {
                         GlobalViewModel.viewModelScope.launch(Dispatchers.IO) {
                             try {
-                                val release = checkUpdate()
+                                val release = if (config.localConfig.checkSnapshotUpdate) {
+                                    checkFullUpdate()
+                                } else {
+                                    checkReleaseUpdate()
+                                }
                                 withContext(Dispatchers.Main) {
                                     if (release != null) {
                                         val downloadFile =

@@ -40,7 +40,8 @@ import androidx.core.content.FileProvider
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
 import io.github.skydynamic.maiproberplus.core.utils.checkResourceComplete
-import io.github.skydynamic.maiproberplus.core.utils.checkUpdate
+import io.github.skydynamic.maiproberplus.core.utils.checkFullUpdate
+import io.github.skydynamic.maiproberplus.core.utils.checkReleaseUpdate
 import io.github.skydynamic.maiproberplus.ui.component.CheckUpdateDialog
 import io.github.skydynamic.maiproberplus.ui.component.ConfirmDialog
 import io.github.skydynamic.maiproberplus.ui.component.DownloadDialog
@@ -54,6 +55,8 @@ import io.github.skydynamic.maiproberplus.ui.compose.sync.SyncCompose
 @Composable
 @SuppressLint("NewApi")
 fun AppContent() {
+    val config = application.configManager.config
+
     var openInitDownloadDialog by remember { mutableStateOf(false) }
 
     val items = listOf("成绩同步", "成绩管理", "图片生成", "设置")
@@ -83,8 +86,13 @@ fun AppContent() {
     }
 
     LaunchedEffect(Unit) {
-        if (application.configManager.config.localConfig.checkUpdate) {
-            val release = checkUpdate()
+        if (config.localConfig.checkUpdate) {
+            val release = if (config.localConfig.checkSnapshotUpdate) {
+                checkFullUpdate()
+            } else {
+                checkReleaseUpdate()
+            }
+
             if (release != null) {
                 val downloadFile = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DOWNLOADS

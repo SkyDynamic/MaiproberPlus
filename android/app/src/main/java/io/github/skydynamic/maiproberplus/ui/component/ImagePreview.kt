@@ -29,7 +29,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun ImagePreview(
     image: Bitmap,
     onDismiss: () -> Unit

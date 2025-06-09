@@ -1,6 +1,7 @@
 package io.github.skydynamic.maiproberplus.ui.compose.bests
 
 import android.graphics.Bitmap
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -179,6 +180,10 @@ fun BestsImageGenerateCompose() {
         if (application.isLandscape) {
             WindowInsetsSpacer.BottomPaddingSpacer()
         }
+    }
+
+    BackHandler(showImagePreview) {
+        showImagePreview = false
     }
 
     if (showImagePreview) {

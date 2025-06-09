@@ -1,14 +1,14 @@
-name: Pull Request Check
+name: Android Pull Request Check
 on:
   pull_request:
     branches:
       - master
     paths:
-      - 'app/**'
-      - 'gradle/**'
+      - 'android/app/**'
+      - 'android/gradle/**'
       - '.github/workflows/**'
-      - '*.gradle.kts'
-      - 'gradle.properties'
+      - 'android/*.gradle.kts'
+      - 'android/gradle.properties'
 
 jobs:
   build:
@@ -28,5 +28,6 @@ jobs:
 
       - name: Build APK with Gradle
         run: |
+          cd android
           chmod +x gradlew
           ./gradlew assembleSnapshot

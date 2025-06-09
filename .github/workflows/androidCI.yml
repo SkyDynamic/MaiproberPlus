@@ -1,15 +1,15 @@
-name: CI
+name: AndroidCI
 on:
   workflow_dispatch:
   push:
     branches:
       - master
     paths:
-      - 'app/**'
-      - 'gradle/**'
+      - 'android/app/**'
+      - 'android/gradle/**'
       - '.github/workflows/**'
-      - '*.gradle.kts'
-      - 'gradle.properties'
+      - 'android/*.gradle.kts'
+      - 'android/gradle.properties'
 
 jobs:
   build:
@@ -36,6 +36,7 @@ jobs:
 
       - name: Build APK with Gradle
         run: |
+          cd android
           chmod +x gradlew
           ./gradlew assembleSnapshot -Pandroid.injected.signing.store.file=${{ steps.android_keystore.outputs.filePath }} -Pandroid.injected.signing.store.password=${{ secrets.KEY_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
 
@@ -44,7 +45,7 @@ jobs:
         if: ${{ success() }}
         with:
           name: app-snapshot
-          path: ${{ github.workspace }}/app/build/outputs/apk/snapshot/
+          path: ${{ github.workspace }}/android/app/build/outputs/apk/snapshot/
 
       - name: Get short SHA
         id: short_sha
@@ -59,7 +60,7 @@ jobs:
       - name: Release
         uses: svenstaro/upload-release-action@v2
         with:
-          file: ${{ github.workspace }}/app/build/outputs/apk/snapshot/*.apk
+          file: ${{ github.workspace }}/android/app/build/outputs/apk/snapshot/*.apk
           tag: v${{ steps.app_version.outputs.app_version }}-${{ steps.short_sha.outputs.short_sha }}
           prerelease: true
           file_glob: true

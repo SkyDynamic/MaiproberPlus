@@ -9,4 +9,5 @@ object SyncViewModel : ViewModel() {
     var openInitDialog by mutableStateOf(false)
     var openInitDownloadDialog by mutableStateOf(false)
     var tokenHidden by mutableStateOf(true)
+    var downloadComplateMethod by mutableStateOf({})
 }

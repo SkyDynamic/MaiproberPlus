@@ -11,6 +11,17 @@ import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiEnums
 import io.github.skydynamic.maiproberplus.core.data.maimai.MaimaiScoreManager.writeMaimaiScoreCache
 import io.github.skydynamic.maiproberplus.core.database.entity.ChuniScoreEntity
 import io.github.skydynamic.maiproberplus.core.database.entity.MaimaiScoreEntity
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsChuniRequestBody
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsChuniResponse
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsChuniScoreBody
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsGetChuniScoreBestsResponse
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsGetChuniScoreResponse
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsGetMaimaiScoreResponse
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsGetSiteConfigResponse
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsMaimaiRequestBody
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsMaimaiResponse
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsMaimaiScoreBody
+import io.github.skydynamic.maiproberplus.core.prober.models.lxns.LxnsUserInfoResponse
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.get
@@ -20,8 +31,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.math.floor
@@ -29,146 +38,6 @@ import kotlin.math.floor
 class LxnsProberUtil : IProberUtil {
 
     private val baseApiUrl = "https://maimai.lxns.net"
-
-    @Serializable
-    open class LxnsResponse(
-        val success: Boolean = false,
-        val code: Int = 0,
-        val message: String = ""
-    )
-
-    @Serializable
-    data class LxnsUserInfoResponse(
-        val data: LxnsUserInfoBody
-    ) : LxnsResponse()
-
-    @Serializable
-    data class LxnsMaimaiResponse(
-        val data: List<LxnsMaimaiUploadReturnScoreBody> = listOf()
-    ) : LxnsResponse()
-
-    @Serializable
-    data class LxnsChuniResponse(
-        val data: List<LxnsChuniUploadReturnScoreBody> = listOf()
-    ) : LxnsResponse()
-
-    @Serializable
-    data class LxnsGetMaimaiScoreResponse(
-        val data: List<LxnsMaimaiScoreBody>
-    ) : LxnsResponse()
-
-    @Serializable
-    data class LxnsGetChuniScoreBestsResponse(
-        val data: LxnsChuniBestsBody
-    ) : LxnsResponse() {
-        @Serializable
-        data class LxnsChuniBestsBody(
-            val bests: List<LxnsChuniScoreBody>,
-            val recents: List<LxnsChuniScoreBody>
-        )
-    }
-
-    @Serializable
-    data class LxnsGetChuniScoreResponse(
-        val data: List<LxnsChuniScoreBody>
-    ) : LxnsResponse()
-
-    @Serializable
-    data class LxnsChuniScoreBody(
-        val id: Int,
-        @SerialName("song_name") val songName: String = "",
-        val level: String = "",
-        @SerialName("level_index") val levelIndex: Int,
-        val score: Int,
-        val rating: Float = 0.0F,
-        @SerialName("over_power") val overPower: Float = 0.0F,
-        val clear: String? = "failed",
-        @SerialName("full_combo") val fullCombo: String? = "",
-        @SerialName("full_chain") val fullChain: String? = "",
-        val rank: String = "",
-        @SerialName("play_time") val playTime: String? = "",
-        @SerialName("upload_time") val uploadTime: String? = ""
-    )
-
-    @Serializable
-    data class LxnsChuniUploadReturnScoreBody(
-        val id: Int,
-        @SerialName("song_name") val songName: String = "",
-        val level: String = "",
-        @SerialName("level_index") val levelIndex: Int,
-        val score: LxnsUploadDiff<Int> = LxnsUploadDiff(),
-        val rating: LxnsUploadDiff<Float> = LxnsUploadDiff(),
-        @SerialName("over_power") val overPower: LxnsUploadDiff<Float> = LxnsUploadDiff(),
-        val clear: LxnsUploadDiff<String> = LxnsUploadDiff(),
-        @SerialName("full_combo") val fullCombo: LxnsUploadDiff<String> = LxnsUploadDiff(),
-        @SerialName("full_chain") val fullChain: LxnsUploadDiff<String> = LxnsUploadDiff(),
-        val rank: String = "",
-        @SerialName("play_time") val playTime: String = "",
-        @SerialName("upload_time") val uploadTime: String = ""
-    )
-
-    @Serializable
-    data class LxnsMaimaiScoreBody(
-        val id: Int,
-        @SerialName("song_name") val songName: String? = null,
-        val level: String? = null,
-        @SerialName("level_index") val levelIndex: Int,
-        val achievements: Float,
-        val fc: String? = "",
-        val fs: String? = "",
-        @SerialName("dx_score") val dxScore: Int,
-        @SerialName("dx_rating") val dxRating: Float? = null,
-        val rate: String? = null,
-        val type: String,
-        @SerialName("play_time") val playTime: String = "",
-        @SerialName("upload_time") val uploadTime: String? = null
-    )
-
-    @Serializable
-    data class LxnsMaimaiUploadReturnScoreBody(
-        val id: Int,
-        @SerialName("song_name") val songName: String = "",
-        val level: String = "",
-        @SerialName("level_index") val levelIndex: Int,
-        val achievements: LxnsUploadDiff<Float> = LxnsUploadDiff(),
-        val fc: LxnsUploadDiff<String> = LxnsUploadDiff(),
-        val fs: LxnsUploadDiff<String> = LxnsUploadDiff(),
-        @SerialName("dx_score") val dxScore: LxnsUploadDiff<Int>,
-        @SerialName("dx_rating") val dxRating: LxnsUploadDiff<Float> = LxnsUploadDiff(),
-        val rate: String = "",
-        val type: String,
-        @SerialName("play_time") val playTime: String = "",
-        @SerialName("upload_time") val uploadTime: String = ""
-    )
-
-    @Serializable
-    data class LxnsUploadDiff<T>(
-        val old: T? = null,
-        val new: T? = null
-    )
-
-    @Serializable
-    data class LxnsCollectionBody(
-        val id: Int = 0,
-        val name: String = "",
-        val color: String? = "",
-    )
-
-    @Serializable
-    data class LxnsUserInfoBody(
-        val name: String,
-        val trophy: LxnsCollectionBody,
-        val icon: LxnsCollectionBody,
-        @SerialName("name_plate") val namePlate: LxnsCollectionBody = LxnsCollectionBody(),
-        @SerialName("course_rank") val courseRank: Int,
-        @SerialName("class_rank") val classRank: Int
-    )
-
-    @Serializable
-    data class LxnsMaimaiRequestBody(val scores: List<LxnsMaimaiScoreBody>)
-
-    @Serializable
-    data class LxnsChuniRequestBody(val scores: List<LxnsChuniScoreBody>)
 
     override suspend fun updateUserInfo(importToken: String) {
         val resp = client.get("https://maimai.lxns.net/api/v0/user/maimai/player") {
@@ -184,7 +53,7 @@ class LxnsProberUtil : IProberUtil {
             info.maimaiPlate = data.namePlate.id
             info.maimaiDan = data.courseRank
             info.maimaiClass = data.classRank
-            application.configManager.save()
+            
         } else {
             sendMessageToUi("同步用户信息失败: ${resp.bodyAsText()}")
         }
@@ -211,7 +80,7 @@ class LxnsProberUtil : IProberUtil {
                 achievements = it.achievement,
                 fc = it.fullComboType.typeName,
                 fs = it.syncType.syncName,
-                dxScore = it.dxScore.toInt(),
+                dxScore = it.dxScore,
                 type = it.type.type
             )
         }
@@ -348,7 +217,7 @@ class LxnsProberUtil : IProberUtil {
                 header("X-User-Token", importToken)
             }
             val body = response.body<LxnsGetChuniScoreResponse>()
-            var parseList = addChuniScoreDataToList(
+            val parseList = addChuniScoreDataToList(
                 scores = body.data,
                 list = arrayListOf(),
                 recent = false
@@ -385,7 +254,7 @@ class LxnsProberUtil : IProberUtil {
         }
     }
 
-    fun addChuniScoreDataToList(
+    private fun addChuniScoreDataToList(
         scores: List<LxnsChuniScoreBody>,
         list:  ArrayList<ChuniScoreEntity>,
         recent: Boolean = false
@@ -414,5 +283,17 @@ class LxnsProberUtil : IProberUtil {
             )
         }
         return list
+    }
+
+    suspend fun getMaimaiResourceVersion() : Int {
+        return try {
+            val response = client.get("$baseApiUrl/api/v0/site/config")
+            val body = response.body<LxnsGetSiteConfigResponse>()
+            body.data.resourceVersion.maimai
+        } catch (e: Exception) {
+            Log.d("LxnsProberUtil", "获取舞萌资源版本失败: $e", e)
+            sendMessageToUi("获取舞萌资源版本失败: ${e.message}")
+            0
+        }
     }
 }

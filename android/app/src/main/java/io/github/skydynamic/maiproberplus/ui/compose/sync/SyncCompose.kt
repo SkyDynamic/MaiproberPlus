@@ -166,13 +166,16 @@ fun SyncCompose() {
             InfoDialog("首次启动需要下载资源文件，请耐心等待") {
                 SyncViewModel.openInitDialog = false
                 SyncViewModel.openInitDownloadDialog = true
+                SyncViewModel.downloadComplateMethod = {
+                    SyncViewModel.openInitDownloadDialog  = false
+                }
             }
         }
         SyncViewModel.openInitDownloadDialog -> {
             DownloadDialog(
                 resources
             ) {
-                SyncViewModel.openInitDownloadDialog = false
+                SyncViewModel.downloadComplateMethod()
             }
         }
     }
@@ -294,7 +297,7 @@ fun SyncCompose() {
                             application.configManager.config.lxnsToken = it
                         }
                     }
-                    application.configManager.save()
+                    
                 },
                 enable = globalViewModel.proberPlatform != ProberPlatform.LOCAL,
                 horizontalDivider = false,

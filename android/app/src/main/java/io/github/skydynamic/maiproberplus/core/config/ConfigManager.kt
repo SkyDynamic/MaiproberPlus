@@ -80,7 +80,8 @@ data class LocalConfig(
     var checkUpdate: Boolean = true,
     var checkSnapshotUpdate: Boolean = false,
     var cacheScore: Boolean = false,
-    var parseMaimaiUserInfo: Boolean = false
+    var parseMaimaiUserInfo: Boolean = false,
+    var currentMaimaiVersion: Int = 0
 )
 
 @Serializable

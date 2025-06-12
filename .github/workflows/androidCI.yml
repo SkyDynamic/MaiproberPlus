@@ -54,6 +54,7 @@ jobs:
       - name: Get app version
         id: app_version
         run: |
+          cd android
           ./gradlew app:getCurrentAppVersion
           echo "::set-output name=app_version::$(cat appVersion.txt)"
 

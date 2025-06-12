@@ -39,6 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import io.github.skydynamic.maiproberplus.Application.Companion.application
 import io.github.skydynamic.maiproberplus.GlobalViewModel
+import io.github.skydynamic.maiproberplus.core.config.ConfigStorage
+import io.github.skydynamic.maiproberplus.core.prober.LxnsProberUtil
+import io.github.skydynamic.maiproberplus.core.prober.ProberPlatform
 import io.github.skydynamic.maiproberplus.core.utils.checkResourceComplete
 import io.github.skydynamic.maiproberplus.core.utils.checkFullUpdate
 import io.github.skydynamic.maiproberplus.core.utils.checkReleaseUpdate
@@ -51,6 +54,7 @@ import io.github.skydynamic.maiproberplus.ui.compose.bests.BestsImageGenerateCom
 import io.github.skydynamic.maiproberplus.ui.compose.scores.ScoreManagerCompose
 import io.github.skydynamic.maiproberplus.ui.compose.setting.SettingCompose
 import io.github.skydynamic.maiproberplus.ui.compose.sync.SyncCompose
+import io.github.skydynamic.maiproberplus.ui.compose.sync.SyncViewModel
 
 @Composable
 @SuppressLint("NewApi")
@@ -108,7 +112,10 @@ fun AppContent() {
                 }
             } else {
                 Log.i("checkUpdate", "No new release found")
+                checkResourceUpdate(config)
             }
+        } else {
+            checkResourceUpdate(config)
         }
     }
 
@@ -233,6 +240,18 @@ fun AppContent() {
             DownloadDialog(checkResourceResult) {
                 openInitDownloadDialog = false
             }
+        }
+    }
+}
+
+suspend fun checkResourceUpdate(config: ConfigStorage) {
+    val resourceVersion = (ProberPlatform.LXNS.factory as LxnsProberUtil).getMaimaiResourceVersion()
+    if (resourceVersion > config.localConfig.currentMaimaiVersion) {
+        SyncViewModel.openInitDownloadDialog = true
+        SyncViewModel.downloadComplateMethod = {
+            config.localConfig.currentMaimaiVersion = resourceVersion
+            application.configManager.save()
+            SyncViewModel.openInitDownloadDialog  = false
         }
     }
 }

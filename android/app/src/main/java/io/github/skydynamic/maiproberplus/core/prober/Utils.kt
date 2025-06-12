@@ -106,7 +106,7 @@ suspend fun fetchMaimaiScorePage(
     if (config.localConfig.parseMaimaiUserInfo) {
         val userInfo = ParseScorePageUtil.parseMaimaiHomePage(homeBody)
         config.userInfo = userInfo
-        application.configManager.save()
+        
     }
 
     for (diff in config.syncConfig.maimaiSyncDifficulty) {

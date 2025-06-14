@@ -273,11 +273,11 @@ object MaimaiB50GenerateUtil {
 
         val config = application.configManager.config
 
-        val b35Score = scores.filter { it.version < Math.floorDiv(config.localConfig.currentMaimaiVersion, 1000) * 1000 }
+        val b35Score = scores.filter { it.version < 25000 }
             .sortedByDescending { it.rating }
             .take(35)
 
-        val b15Score = scores.filter { it.version >= Math.floorDiv(config.localConfig.currentMaimaiVersion, 1000) * 1000 }
+        val b15Score = scores.filter { it.version >= 25000 }
             .sortedByDescending { it.rating }
             .take(15)
 
